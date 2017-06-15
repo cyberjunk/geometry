@@ -25,10 +25,16 @@ void benchV2d(const char* name, void task(V2d* ARR))
    printf(name); printf("%010I64i | ", sp.count()); printf("%05.3f \n", s.x + s.y);
 }
 
-void benchV2dAdd(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
-void benchV2dSub(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
-void benchV2dMul(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
-void benchV2dDiv(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1];)        }
+void benchV2dAddV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
+void benchV2dSubV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
+void benchV2dMulV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
+void benchV2dDivV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1];)        }
+void benchV2dAddS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1].x;)      }
+void benchV2dSubS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1].x;)      }
+void benchV2dMulS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1].x;)      }
+void benchV2dDivS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1].x;)      }
+void benchV2dIsZero(V2d* ARR)    { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero();)      }
+void benchV2dIsZeroE(V2d* ARR)   { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero(0.01);)  }
 void benchV2dRotate(V2d* ARR)    { LOOP(LOOPS, ARR[i].rotate(M_PI_2);)                   }
 void benchV2dLength(V2d* ARR)    { LOOP(LOOPS, ARR[i].x = ARR[i].length();)              }
 void benchV2dLength2(V2d* ARR)   { LOOP(LOOPS, ARR[i].x = ARR[i].length2();)             }
@@ -43,10 +49,16 @@ void benchV2dCross(V2d* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i
 void bench()
 {
    PRINTHEADER // V2d
-   benchV2d("V2d | operator + v | ", &benchV2dAdd);
-   benchV2d("V2d | operator - v | ", &benchV2dSub);
-   benchV2d("V2d | operator * v | ", &benchV2dMul);
-   benchV2d("V2d | operator / v | ", &benchV2dDiv);
+   benchV2d("V2d | operator + v | ", &benchV2dAddV);
+   benchV2d("V2d | operator - v | ", &benchV2dSubV);
+   benchV2d("V2d | operator * v | ", &benchV2dMulV);
+   benchV2d("V2d | operator / v | ", &benchV2dDivV);
+   benchV2d("V2d | operator + s | ", &benchV2dAddS);
+   benchV2d("V2d | operator - s | ", &benchV2dSubS);
+   benchV2d("V2d | operator * s | ", &benchV2dMulS);
+   benchV2d("V2d | operator / s | ", &benchV2dDivS);
+   benchV2d("V2d | isZero()     | ", &benchV2dIsZero);
+   benchV2d("V2d | isZero(e)    | ", &benchV2dIsZeroE);
    benchV2d("V2d | rotate()     | ", &benchV2dRotate);
    benchV2d("V2d | length()     | ", &benchV2dLength);
    benchV2d("V2d | length2()    | ", &benchV2dLength2);
@@ -63,6 +75,7 @@ int main()
 {
    while (true)
    {
+      
       bench();
       getchar();
    }
