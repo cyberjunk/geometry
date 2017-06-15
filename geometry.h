@@ -96,7 +96,7 @@ namespace geometry
       inline void  normalise()                   { *this /= length();             }
 
       //------------------------------------------------------------------------------------------------------------------------//
-#if SID_V2_32_SSE2
+#if SIMD_V2_32_SSE2
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
 
