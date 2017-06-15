@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------------------------------------------------//
 
 #include <cmath>
+#include <algorithm>
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -92,8 +93,10 @@ namespace geometry
       inline float distance2(const V2f& v) const { return (*this - v).length2();  }
       inline float distance(const V2f& v)  const { return sqrtf(distance2(v));    }
       inline V2f   yx()                    const { return V2f(y, x);              }
-      inline void  yx()                          { float t = x; x = y; y = t;     }
+      inline void  yx()                          { std::swap(x, y);               }
       inline void  normalise()                   { *this /= length();             }
+      inline V2f   perp1()                       { return V2f( y,-x);             }
+      inline V2f   perp2()                       { return V2f(-y, x);             }
 
       //------------------------------------------------------------------------------------------------------------------------//
 #if SIMD_V2_32_SSE2
@@ -129,12 +132,14 @@ namespace geometry
       inline       V2f& operator /= (const float s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this; }
 
       //------------------------------------------------------------------------------------------------------------------------//
+
+      inline void  swap(V2f& v) { __m128 t = load(); store(v.load()); v.store(t); }
+
+      //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
       inline V2f(float* const values)   : x(values[0]), y(values[1])               { }
       inline V2f(const int values[2])   : x((float)values[0]), y((float)values[1]) { }
-
-      //------------------------------------------------------------------------------------------------------------------------//
 
       inline       V2f  operator +  (const V2f&  v) const { return V2f(x + v.x, y + v.y);     }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(x - v.x, y - v.y);     }
@@ -154,6 +159,12 @@ namespace geometry
       inline       V2f& operator -= (const float s)       { x -= s;   y -= s;   return *this; }
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
+
+      //------------------------------------------------------------------------------------------------------------------------//
+
+      inline void  swap(V2f& v) { std::swap(x, v.x); std::swap(y, v.y); }
+
+      //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
 
@@ -202,8 +213,10 @@ namespace geometry
       inline double distance2(const V2d& v) const { return (*this - v).length2(); }
       inline double distance(const V2d& v)  const { return sqrt(distance2(v));    }
       inline V2d    yx()                    const { return V2d(y, x);             }
-      inline void   yx()                          { double t = x; x = y; y = t;   }
+      inline void   yx()                          { std::swap(x, y);              }
       inline void   normalise()                   { *this /= length();            }
+      inline V2d    perp1()                       { return V2d(y, -x);            }
+      inline V2d    perp2()                       { return V2d(-y, x);            }
 
       //------------------------------------------------------------------------------------------------------------------------//
 #if SIMD_V2_64_SSE2
@@ -236,6 +249,10 @@ namespace geometry
       inline       V2d& operator /= (const double s)       { simd = _mm_div_pd(simd, _mm_set1_pd(s)); return *this; }
 
       //------------------------------------------------------------------------------------------------------------------------//
+
+      inline void swap(V2d& v) { __m128d t = simd; simd = v.simd; v.simd = t; }
+
+      //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2d(const double x, const double y) : x(x),         y(y)                         { }
       inline V2d(const double scalar)            : x(scalar),    y(scalar)                    { }
@@ -264,6 +281,11 @@ namespace geometry
       inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this; }
       inline       V2d& operator /= (const double s)       { x /= s;   y /= s;   return *this; }
 
+      //------------------------------------------------------------------------------------------------------------------------//
+
+      inline void  swap(V2d& v) { std::swap(x, v.x); std::swap(y, v.y); }
+
+      //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
 }
