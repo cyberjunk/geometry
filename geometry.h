@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <random>
 //------------------------------------------------------------------------------------------------------------------------//
 #define SIMD_V2_32_ALIGN
 #define SIMD_V2_64_ALIGN
@@ -29,7 +30,7 @@
 #  endif
 #endif
 //------------------------------------------------------------------------------------------------------------------------//
-namespace geometry
+namespace simd
 {
    /// <summary>
    /// Single Precision 2D Vector
@@ -43,6 +44,10 @@ namespace geometry
          struct { float x, y; };
          float vals[2];
       };
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2f ZERO()  { return V2f(0.0f, 0.0f); }
+      static inline V2f UNITX() { return V2f(1.0f, 0.0f); }
+      static inline V2f UNITY() { return V2f(0.0f, 1.0f); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f()                                                          { }
       inline V2f(const float x, const float y)   : x(x),        y(y)        { }
@@ -108,6 +113,9 @@ namespace geometry
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2f  random()                          { return V2f(std::rand(), std::rand());                   }
+      static inline void random(V2f* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2f::random(); }
+      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
@@ -116,6 +124,9 @@ namespace geometry
       inline V2f(float* const values)   { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2f(const int values[2])   { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
       inline V2f(const __m128 values)   { store(values);                                                       }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)            { return _aligned_malloc(sizeof(V2f), 8);        }
+      inline void* operator new[](size_t size)            { return _aligned_malloc(size * sizeof(V2f), 8); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V2f  operator +  (const V2f&  v) const { return V2f(_mm_add_ps(load(), v.load()));                }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(_mm_sub_ps(load(), v.load()));                }
@@ -142,6 +153,9 @@ namespace geometry
       inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
       inline V2f(float* const values)   : x(values[0]), y(values[1])               { }
       inline V2f(const int values[2])   : x((float)values[0]), y((float)values[1]) { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)            { return malloc(sizeof(V2f));        }
+      inline void* operator new[](size_t size)            { return malloc(size * sizeof(V2f)); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V2f  operator +  (const V2f&  v) const { return V2f(x + v.x, y + v.y);     }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(x - v.x, y - v.y);     }
@@ -181,12 +195,15 @@ namespace geometry
       {
          struct { double x, y; };
          double vals[2];
-
          #if defined(SIMD_V2_64_SSE2)
          __m128d simd;
          #endif
       };
-
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2d ZERO()  { return V2d(0.0, 0.0); }
+      static inline V2d UNITX() { return V2d(1.0, 0.0); }
+      static inline V2d UNITY() { return V2d(0.0, 1.0); }
+      //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double  operator [] (const size_t i) const { return vals[i];                }
@@ -233,6 +250,9 @@ namespace geometry
       inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2d  random()                          { return V2d(std::rand(), std::rand());                   }
+      static inline void random(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::random(); }
+      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
       inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fY, fX))                                 { }
       inline V2d(const float fX, const float fY)   : simd(_mm_set_pd((double)fY, (double)fX))                 { }
@@ -242,6 +262,9 @@ namespace geometry
       inline V2d(double* const values)             : simd(_mm_loadu_pd(values))                               { }
       inline V2d(const int values[2])              : simd(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))) { }
       inline V2d(const __m128d values)             : simd(values)                                             { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)             { return _aligned_malloc(sizeof(V2d), 16);       }
+      inline void* operator new[](size_t size)             { return _aligned_malloc(size* sizeof(V2d), 16); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V2d  operator +  (const V2d&   v) const { return V2d(_mm_add_pd(simd, v.simd));                  }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(_mm_sub_pd(simd, v.simd));                  }
@@ -294,6 +317,9 @@ namespace geometry
       inline V2d(const int values[2])            : x((double)values[0]), y((double)values[1]) { }
       inline V2d(const float x, const float y)   : x((double)x), y((double)y)                 { }
       inline V2d(const int x, const int y)       : x((double)x), y((double)y)                 { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)             { return malloc(sizeof(V2d));        }
+      inline void* operator new[](size_t size)             { return malloc(size * sizeof(V2d)); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);     }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);     }
