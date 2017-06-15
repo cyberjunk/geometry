@@ -11,7 +11,7 @@ int main()
 
    V2f s1 = ((a + b) * f1) / c;
 
-   int kg = 1;
+  int kg = 1;
 
    while (true)
    {
