@@ -1,54 +1,34 @@
 #pragma once
-
 //------------------------------------------------------------------------------------------------------------------------//
 #define _USE_MATH_DEFINES
-
 #include <cmath>
 #include <algorithm>
-
 //------------------------------------------------------------------------------------------------------------------------//
-
-#define SIMD_TYPES_SSE 1
-#define SIMD_TYPES_AVX 1
-
-// default alignments, possibly adjusted below
 #define SIMD_V2_32_ALIGN
 #define SIMD_V2_64_ALIGN
-
-// enabled sse variants
-#define SIMD_V2_32_SSE2   1
-#define SIMD_V2_32_SSE41  1
-#define SIMD_V2_64_SSE2   1
-#define SIMD_V2_64_SSE41  1
-
-//------------------------------------------------------------------------------------------------------------------------//
-
-// settings for SIMD instructions
-#if SIMD_TYPES_SSE == 1 || SIMD_TYPES_AVX == 1
+#if defined(SIMD_TYPES_SSE) || defined(SIMD_TYPES_AVX)
 #  define ALIGN8                          __declspec(align(8))
 #  define ALIGN16 __declspec(intrin_type) __declspec(align(16))
 #  define ALIGN32 __declspec(intrin_type) __declspec(align(32))
-#  if SIMD_TYPES_SSE == 1
+#  if defined(SIMD_TYPES_SSE)
 #    include <xmmintrin.h> // SSE
 #    include <emmintrin.h> // SSE 2
 #    include <pmmintrin.h> // SSE 3
 #    include <smmintrin.h> // SSE 4.1
-#    if SIMD_V2_32_SSE2
+#    if defined(SIMD_V2_32_SSE2)
 #      undef SIMD_V2_32_ALIGN
 #      define SIMD_V2_32_ALIGN ALIGN8
 #    endif
-#    if SIMD_V2_64_SSE2
+#    if defined(SIMD_V2_64_SSE2)
 #      undef SIMD_V2_64_ALIGN
 #      define SIMD_V2_64_ALIGN ALIGN16
 #    endif
 #  endif
-#  if SIMD_TYPES_AVX == 1
+#  if defined(SIMD_TYPES_AVX)
 #    include <immintrin.h> // AVX
 #  endif
 #endif
-
 //------------------------------------------------------------------------------------------------------------------------//
-
 namespace geometry
 {
    /// <summary>
@@ -64,18 +44,20 @@ namespace geometry
          float vals[2];
       };
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f()                                                    { }
-      inline V2f(const float x, const float y) : x(x), y(y)           { }
-      inline V2f(const float scalar)           : x(scalar), y(scalar) { }
+      inline V2f()                                                          { }
+      inline V2f(const float x, const float y)   : x(x),        y(y)        { }
+      inline V2f(const float s)                  : x(s),        y(s)        { }
+      inline V2f(const double x, const double y) : x((float)x), y((float)y) { }
+      inline V2f(const int x, const int y)       : x((float)x), y((float)y) { }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float  operator [] (const size_t idx)   const { return vals[idx];                      }
-      inline float& operator [] (const size_t idx)         { return vals[idx];                      }
-      inline bool   operator == (const V2f&   other) const { return (x == other.x && y == other.y); }
-      inline bool   operator != (const V2f&   other) const { return (x != other.x || y != other.y); }
-      inline bool   operator <  (const V2f&   other) const { return (x <  other.x && y <  other.y); }
-      inline bool   operator <= (const V2f&   other) const { return (x <= other.x && y <= other.y); }
-      inline bool   operator >  (const V2f&   other) const { return (x >  other.x && y >  other.y); }
-      inline bool   operator >= (const V2f&   other) const { return (x >= other.x && y >= other.y); }
+      inline float  operator [] (const size_t i) const { return vals[i];                }
+      inline float& operator [] (const size_t i)       { return vals[i];                }
+      inline bool   operator == (const V2f&   v) const { return (x == v.x && y == v.y); }
+      inline bool   operator != (const V2f&   v) const { return (x != v.x || y != v.y); }
+      inline bool   operator <  (const V2f&   v) const { return (x <  v.x && y <  v.y); }
+      inline bool   operator <= (const V2f&   v) const { return (x <= v.x && y <= v.y); }
+      inline bool   operator >  (const V2f&   v) const { return (x >  v.x && y >  v.y); }
+      inline bool   operator >= (const V2f&   v) const { return (x >= v.x && y >= v.y); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f  operator +  (const float v[2]) const { return *this + V2f(v);         }
       inline V2f  operator -  (const float v[2]) const { return *this - V2f(v);         }
@@ -126,7 +108,7 @@ namespace geometry
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-#if SIMD_V2_32_SSE2
+#if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -200,21 +182,21 @@ namespace geometry
          struct { double x, y; };
          double vals[2];
 
-         #if SIMD_V2_64_SSE2
+         #if defined(SIMD_V2_64_SSE2)
          __m128d simd;
          #endif
       };
 
       inline V2d() { }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double  operator [] (const size_t idx)   const { return vals[idx];                      }
-      inline double& operator [] (const size_t idx)         { return vals[idx];                      }
-      inline bool    operator == (const V2d&   other) const { return (x == other.x && y == other.y); }
-      inline bool    operator != (const V2d&   other) const { return (x != other.x || y != other.y); }
-      inline bool    operator <  (const V2d&   other) const { return (x <  other.x && y <  other.y); }
-      inline bool    operator <= (const V2d&   other) const { return (x <= other.x && y <= other.y); }
-      inline bool    operator >  (const V2d&   other) const { return (x >  other.x && y >  other.y); }
-      inline bool    operator >= (const V2d&   other) const { return (x >= other.x && y >= other.y); }
+      inline double  operator [] (const size_t i) const { return vals[i];                }
+      inline double& operator [] (const size_t i)       { return vals[i];                }
+      inline bool    operator == (const V2d&   v) const { return (x == v.x && y == v.y); }
+      inline bool    operator != (const V2d&   v) const { return (x != v.x || y != v.y); }
+      inline bool    operator <  (const V2d&   v) const { return (x <  v.x && y <  v.y); }
+      inline bool    operator <= (const V2d&   v) const { return (x <= v.x && y <= v.y); }
+      inline bool    operator >  (const V2d&   v) const { return (x >  v.x && y >  v.y); }
+      inline bool    operator >= (const V2d&   v) const { return (x >= v.x && y >= v.y); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d  operator +  (const double v[2]) const { return *this + V2d(v);         }
       inline V2d  operator -  (const double v[2]) const { return *this - V2d(v);         }
@@ -251,8 +233,10 @@ namespace geometry
       inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       //------------------------------------------------------------------------------------------------------------------------//
-#if SIMD_V2_64_SSE2
+#if defined(SIMD_V2_64_SSE2)
       inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fY, fX))                                 { }
+      inline V2d(const float fX, const float fY)   : simd(_mm_set_pd((double)fY, (double)fX))                 { }
+      inline V2d(const int fX, const int fY)       : simd(_mm_set_pd((double)fY, (double)fX))                 { }
       inline V2d(const double scalar)              : simd(_mm_set1_pd(scalar))                                { }
       inline V2d(const double values[2])           : simd(_mm_loadu_pd(values))                               { }
       inline V2d(double* const values)             : simd(_mm_loadu_pd(values))                               { }
@@ -279,7 +263,7 @@ namespace geometry
       inline       V2d& operator /= (const double s)       { simd = _mm_div_pd(simd, _mm_set1_pd(s)); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline void swap(V2d& v)  { __m128d t(simd); simd = v.simd; v.simd = t;       }
-#if SIMD_V2_64_SSE41
+#if defined(SIMD_V2_64_SSE41)
       inline V2d  round() const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));  }
       inline V2d  floor() const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR)); }
       inline V2d  ceil()  const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));  }
@@ -308,6 +292,8 @@ namespace geometry
       inline V2d(const double values[2])         : x(values[0]), y(values[1])                 { }
       inline V2d(double* const values)           : x(values[0]), y(values[1])                 { }
       inline V2d(const int values[2])            : x((double)values[0]), y((double)values[1]) { }
+      inline V2d(const float x, const float y)   : x((double)x), y((double)y)                 { }
+      inline V2d(const int x, const int y)       : x((double)x), y((double)y)                 { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);     }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);     }
