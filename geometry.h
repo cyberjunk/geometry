@@ -57,22 +57,16 @@ namespace geometry
    {
    public:
       //------------------------------------------------------------------------------------------------------------------------//
-
       union
       {
          struct { float x, y; };
-         struct { float u, v; };
          float vals[2];
       };
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline V2f()                                                    { }
       inline V2f(const float x, const float y) : x(x), y(y)           { }
       inline V2f(const float scalar)           : x(scalar), y(scalar) { }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline float  operator [] (const size_t idx)   const { return vals[idx];                      }
       inline float& operator [] (const size_t idx)         { return vals[idx];                      }
       inline bool   operator == (const V2f&   other) const { return (x == other.x && y == other.y); }
@@ -81,37 +75,38 @@ namespace geometry
       inline bool   operator <= (const V2f&   other) const { return (x <= other.x && y <= other.y); }
       inline bool   operator >  (const V2f&   other) const { return (x >  other.x && y >  other.y); }
       inline bool   operator >= (const V2f&   other) const { return (x >= other.x && y >= other.y); }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
-      inline bool  isZero()                const { return x == 0.0f && y == 0.0f; }
-      inline bool  isNaN()                 const { return isnan(x) || isnan(y);   }
-      inline float dot(const V2f& v)       const { return x * v.x + y * v.y;      }
-      inline float cross(const V2f& v)     const { return x * v.y - y * v.x;      }
-      inline float length2()               const { return dot(*this);             }
-      inline float length()                const { return sqrtf(length2());       }
-      inline float distance2(const V2f& v) const { return (*this - v).length2();  }
-      inline float distance(const V2f& v)  const { return sqrtf(distance2(v));    }
-      inline V2f   yx()                    const { return V2f(y, x);              }
-      inline void  yx()                          { std::swap(x, y);               }
-      inline void  normalise()                   { *this /= length();             }
-      inline V2f   perp1()                       { return V2f( y,-x);             }
-      inline V2f   perp2()                       { return V2f(-y, x);             }
-
+      inline bool  isZero()                const { return x == 0.0f && y == 0.0f;    }
+      inline bool  isNaN()                 const { return isnan(x) || isnan(y);      }
+      inline float dot(const V2f& v)       const { return x * v.x + y * v.y;         }
+      inline float cross(const V2f& v)     const { return x * v.y - y * v.x;         }
+      inline float length2()               const { return dot(*this);                }
+      inline float length()                const { return sqrtf(length2());          }
+      inline float distance2(const V2f& v) const { return (*this - v).length2();     }
+      inline float distance(const V2f& v)  const { return sqrtf(distance2(v));       }
+      inline V2f   yx()                    const { return V2f(y, x);                 }
+      inline void  yx()                          { std::swap(x, y);                  }
+      inline void  normalise()                   { *this /= length();                }
+      inline V2f   perp1()                       { return V2f( y,-x);                }
+      inline V2f   perp2()                       { return V2f(-y, x);                }
+      inline V2f   round()                 const { return V2f(roundf(x), roundf(y)); }
+      inline V2f   floor()                 const { return V2f(floorf(x), floorf(y)); }
+      inline V2f   ceil()                  const { return V2f(ceilf(x),  ceilf(y));  }
+      inline void  round()                       { x = roundf(x); y = roundf(y);     }
+      inline void  floor()                       { x = floorf(x); y = floorf(y);     }
+      inline void  ceil()                        { x = ceilf(x);  y = ceilf(y);      }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline float side(const V2f& p1, const V2f& p2) const { return (p2 - p1).cross(*this - p1); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if SIMD_V2_32_SSE2
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline V2f(const float values[2]) { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2f(float* const values)   { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2f(const int values[2])   { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
       inline V2f(const __m128 values)   { store(values);                                                       }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline       V2f  operator +  (const V2f&  v) const { return V2f(_mm_add_ps(load(), v.load()));                }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(_mm_sub_ps(load(), v.load()));                }
       inline       V2f  operator *  (const V2f&  v) const { return V2f(_mm_mul_ps(load(), v.load()));                }
@@ -130,17 +125,14 @@ namespace geometry
       inline       V2f& operator -= (const float s)       { store(_mm_sub_ps(load(), _mm_set1_ps(s))); return *this; }
       inline       V2f& operator *= (const float s)       { store(_mm_mul_ps(load(), _mm_set1_ps(s))); return *this; }
       inline       V2f& operator /= (const float s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this; }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline void  swap(V2f& v) { __m128 t = load(); store(v.load()); v.store(t); }
-
       //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
       inline V2f(float* const values)   : x(values[0]), y(values[1])               { }
       inline V2f(const int values[2])   : x((float)values[0]), y((float)values[1]) { }
-
+      //------------------------------------------------------------------------------------------------------------------------//
       inline       V2f  operator +  (const V2f&  v) const { return V2f(x + v.x, y + v.y);     }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(x - v.x, y - v.y);     }
       inline       V2f  operator *  (const V2f&  v) const { return V2f(x * v.x, y * v.y);     }
@@ -159,11 +151,8 @@ namespace geometry
       inline       V2f& operator -= (const float s)       { x -= s;   y -= s;   return *this; }
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline void  swap(V2f& v) { std::swap(x, v.x); std::swap(y, v.y); }
-
       //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
@@ -181,7 +170,6 @@ namespace geometry
       union
       {
          struct { double x, y; };
-         struct { double u, v; };
          double vals[2];
 
          #if SIMD_V2_64_SSE2
@@ -190,9 +178,7 @@ namespace geometry
       };
 
       inline V2d() { }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline double  operator [] (const size_t idx)   const { return vals[idx];                      }
       inline double& operator [] (const size_t idx)         { return vals[idx];                      }
       inline bool    operator == (const V2d&   other) const { return (x == other.x && y == other.y); }
@@ -201,23 +187,22 @@ namespace geometry
       inline bool    operator <= (const V2d&   other) const { return (x <= other.x && y <= other.y); }
       inline bool    operator >  (const V2d&   other) const { return (x >  other.x && y >  other.y); }
       inline bool    operator >= (const V2d&   other) const { return (x >= other.x && y >= other.y); }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
-      inline bool   isZero()                const { return x == 0.0 && y == 0.0;  }
-      inline bool   isNaN()                 const { return isnan(x) || isnan(y);  }
-      inline double dot(const V2d& v)       const { return x * v.x + y * v.y;     }
-      inline double cross(const V2f& v)     const { return x * v.y - y * v.x;     }
-      inline double length2()               const { return dot(*this);            }
-      inline double length()                const { return sqrt(length2());       }
-      inline double distance2(const V2d& v) const { return (*this - v).length2(); }
-      inline double distance(const V2d& v)  const { return sqrt(distance2(v));    }
-      inline V2d    yx()                    const { return V2d(y, x);             }
-      inline void   yx()                          { std::swap(x, y);              }
-      inline void   normalise()                   { *this /= length();            }
-      inline V2d    perp1()                       { return V2d(y, -x);            }
-      inline V2d    perp2()                       { return V2d(-y, x);            }
-
+      inline bool   isZero()                const { return x == 0.0 && y == 0.0;        }
+      inline bool   isNaN()                 const { return isnan(x) || isnan(y);        }
+      inline double dot(const V2d& v)       const { return x * v.x + y * v.y;           }
+      inline double cross(const V2d& v)     const { return x * v.y - y * v.x;           }
+      inline double length2()               const { return dot(*this);                  }
+      inline double length()                const { return sqrt(length2());             }
+      inline double distance2(const V2d& v) const { return (*this - v).length2();       }
+      inline double distance(const V2d& v)  const { return sqrt(distance2(v));          }
+      inline V2d    yx()                    const { return V2d(y, x);                   }
+      inline void   yx()                          { std::swap(x, y);                    }
+      inline void   normalise()                   { *this /= length();                  }
+      inline V2d    perp1()                       { return V2d(y, -x);                  }
+      inline V2d    perp2()                       { return V2d(-y, x);                  }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline double side(const V2d& p1, const V2d& p2) const { return (p2 - p1).cross(*this - p1); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if SIMD_V2_64_SSE2
       inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fX, fY))                                 { }
@@ -226,9 +211,7 @@ namespace geometry
       inline V2d(double* const values)             : simd(_mm_loadu_pd(values))                               { }
       inline V2d(const int values[2])              : simd(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))) { }
       inline V2d(const __m128d values)             : simd(values)                                             { }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline       V2d  operator +  (const V2d&   v) const { return V2d(_mm_add_pd(simd, v.simd));                  }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(_mm_sub_pd(simd, v.simd));                  }
       inline       V2d  operator *  (const V2d&   v) const { return V2d(_mm_mul_pd(simd, v.simd));                  }
@@ -247,11 +230,23 @@ namespace geometry
       inline       V2d& operator -= (const double s)       { simd = _mm_sub_pd(simd, _mm_set1_pd(s)); return *this; }
       inline       V2d& operator *= (const double s)       { simd = _mm_mul_pd(simd, _mm_set1_pd(s)); return *this; }
       inline       V2d& operator /= (const double s)       { simd = _mm_div_pd(simd, _mm_set1_pd(s)); return *this; }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
-      inline void swap(V2d& v) { __m128d t = simd; simd = v.simd; v.simd = t; }
-
+      inline void swap(V2d& v)  { __m128d t = simd; simd = v.simd; v.simd = t;      }
+#if SIMD_V2_64_SSE41
+      inline V2d  round() const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));  }
+      inline V2d  floor() const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR)); }
+      inline V2d  ceil()  const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));  }
+      inline void round()       { simd = _mm_round_pd(simd, _MM_FROUND_NINT);       }
+      inline void floor()       { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);      }
+      inline void ceil()        { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);       }
+#else
+      inline V2d  round() const { return V2d(::round(x), ::round(y)); }
+      inline V2d  floor() const { return V2d(::floor(x), ::floor(y)); }
+      inline V2d  ceil()  const { return V2d(::ceil(x),  ::ceil(y));  }
+      inline void round()       { x = ::round(x); y = ::round(y);     }
+      inline void floor()       { x = ::floor(x); y = ::floor(y);     }
+      inline void ceil()        { x = ::ceil(x);  y = ::ceil(y);      }
+#endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2d(const double x, const double y) : x(x),         y(y)                         { }
@@ -259,9 +254,7 @@ namespace geometry
       inline V2d(const double values[2])         : x(values[0]), y(values[1])                 { }
       inline V2d(double* const values)           : x(values[0]), y(values[1])                 { }
       inline V2d(const int values[2])            : x((double)values[0]), y((double)values[1]) { }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
       inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);     }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);     }
       inline       V2d  operator *  (const V2d&   v) const { return V2d(x * v.x, y * v.y);     }
@@ -280,11 +273,14 @@ namespace geometry
       inline       V2d& operator -= (const double s)       { x -= s;   y -= s;   return *this; }
       inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this; }
       inline       V2d& operator /= (const double s)       { x /= s;   y /= s;   return *this; }
-
       //------------------------------------------------------------------------------------------------------------------------//
-
-      inline void  swap(V2d& v) { std::swap(x, v.x); std::swap(y, v.y); }
-
+      inline void swap(V2d& v)       { std::swap(x, v.x); std::swap(y, v.y); }
+      inline V2d  round()      const { return V2d(::round(x), ::round(y));   }
+      inline V2d  floor()      const { return V2d(::floor(x), ::floor(y));   }
+      inline V2d  ceil()       const { return V2d(::ceil(x), ::ceil(y));     }
+      inline void round()            { x = ::round(x); y = ::round(y);       }
+      inline void floor()            { x = ::floor(x); y = ::floor(y);       }
+      inline void ceil()             { x = ::ceil(x);  y = ::ceil(y);        }
       //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
