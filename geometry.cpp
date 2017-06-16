@@ -47,8 +47,12 @@ void benchV2dDot(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].x = ARR[i].dot(ARR[i +
 void benchV2dCross(V2d* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i + 1]);) }
 void benchV2dMax(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].max(ARR[i + 1]);)              }
 void benchV2dMin(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].min(ARR[i + 1]);)              }
-void benchV2dInside(V2d* ARR)    { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2]);) }
-void benchV2dInsideE(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);) }
+void benchV2dBound(V2d* ARR)     { LOOP(LOOPS - 2, ARR[i].bound(ARR[i + 1], ARR[i + 2]);) }
+void benchV2dSide(V2d* ARR)      { LOOP(LOOPS - 2, ARR[i].x = ARR[i].side(ARR[i + 1], ARR[i + 2]);)                    }
+void benchV2dInsideR(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2]);)          }
+void benchV2dInsideRE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);)   }
+void benchV2dInsideC(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x);)        }
+void benchV2dInsideCE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
 
 void bench()
 {
@@ -75,12 +79,23 @@ void bench()
    benchV2d("V2d | cross()      | ", &benchV2dCross);
    benchV2d("V2d | max()        | ", &benchV2dMax);
    benchV2d("V2d | min()        | ", &benchV2dMin);
-   benchV2d("V2d | inside(v,v)  | ", &benchV2dInside);
-   benchV2d("V2d | inside(v,v,e)| ", &benchV2dInsideE);
+   benchV2d("V2d | bound()      | ", &benchV2dBound);
+   benchV2d("V2d | side(v,v)    | ", &benchV2dSide);
+   benchV2d("V2d | inside(v,v)  | ", &benchV2dInsideR);
+   benchV2d("V2d | inside(v,v,e)| ", &benchV2dInsideRE);
+   benchV2d("V2d | inside(m,r)  | ", &benchV2dInsideC);
+   benchV2d("V2d | inside(m,r,e)| ", &benchV2dInsideCE);
 }
 
 int main()
 {
+   V2f a(-1.0f, 8.0f);
+   V2f mi(0.0f, 0.0f);
+   V2f ma(5.0f, 5.0f);
+   float dfh = ma.length();
+
+   V2f t = a.boundC(mi, ma);
+
    while (true)
    {
       
