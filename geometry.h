@@ -99,11 +99,11 @@ namespace simd
       inline void  max(const V2f& v)             { if (v.x > x) x = v.x; if (v.y > y) y = v.y;       }
       inline void  min(const V2f& v)             { if (v.x < x) x = v.x; if (v.y < y) y = v.y;       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float side(const V2f& s, const V2f& e)                      const { return (e - s).cross(*this - s);             }
-      inline bool  inside(const V2f& min, const V2f& max)                const { return *this >= min     && *this <= max;     }
-      inline bool  inside(const V2f& min, const V2f& max, const V2f& e)  const { return *this >= (min-e) && *this <= (max+e); }
-      inline bool  inside(const V2f& m, const float r2)                  const { return (*this - m).length2() <= r2;          }
-      inline bool  inside(const V2f& m, const float r2, const float e)   const { return (*this - m).length2() <= (r2+e);      }
+      inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
+      inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max;     }
+      inline bool  inside(const V2f& min, const V2f& max, const double e) const { return *this >= (min-e) && *this <= (max+e); }
+      inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
+      inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
       inline void  rotate(float r)
       {
          float cs = ::cosf(r);
@@ -238,11 +238,11 @@ namespace simd
       inline V2d    perp1()                       { return V2d(y, -x);                                }
       inline V2d    perp2()                       { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
-      inline bool   inside(const V2d& min, const V2d& max)                const { return *this >= min && *this <= max;         }
-      inline bool   inside(const V2d& min, const V2d& max, const V2d& e)  const { return *this >= (min-e) && *this <= (max+e); }
-      inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
-      inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
+      inline double side(const V2d& s, const V2d& e)                       const { return (e - s).cross(*this - s);             }
+      inline bool   inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max;         }
+      inline bool   inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min-e) && *this <= (max+e); }
+      inline bool   inside(const V2d& m, const double r2)                  const { return (*this - m).length2() <= r2;          }
+      inline bool   inside(const V2d& m, const double r2, const double e)  const { return (*this - m).length2() <= (r2 + e);    }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V2d  random()                          { return V2d(std::rand(), std::rand());                   }
       static inline void random(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::random(); }
