@@ -55,7 +55,7 @@ void benchV2dInsideC(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].ins
 void benchV2dInsideCE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
 void benchV2dAreaTri(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = ARR[i].area(ARR[i + 1], ARR[i + 2]);)                    }
 void benchV2dAngle(V2d* ARR)     { LOOP(LOOPS, ARR[i].x = ARR[i].angle();) }
-void benchV2dAngleNoN(V2d* ARR)  { LOOP(LOOPS, ARR[i].x = ARR[i].angleNoN();) }
+void benchV2dAngleV(V2d* ARR)    { LOOP(LOOPS - 1, ARR[i].x = ARR[i].angle(ARR[i + 1]);) }
 
 void bench()
 {
@@ -90,7 +90,7 @@ void bench()
    benchV2d("V2d | inside(m,r,e)| ", &benchV2dInsideCE);
    benchV2d("V2d | area(v,v)    | ", &benchV2dAreaTri);
    benchV2d("V2d | angle()      | ", &benchV2dAngle);
-   benchV2d("V2d | angleNoN()   | ", &benchV2dAngleNoN);
+   benchV2d("V2d | angle(v)     | ", &benchV2dAngleV);
 }
 
 int main()
@@ -103,7 +103,7 @@ int main()
    V2f s(0.0f, -1.0f);
    V2f t(1.0f, -0.005f);
 
-   float d1 = p.angle();
+   float d1 = p.angleOri(t);
    float d2 = q.angle();
    float d3 = r.angle();
    float d4 = s.angle();

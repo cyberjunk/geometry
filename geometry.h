@@ -118,8 +118,12 @@ namespace simd
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()    const { float t=acosf(normaliseC().dot(UNITX())); if (y<0.0f) t=(float)TWOPI-t; return t; }
-      inline float angleNoN() const { float t=acosf(dot(UNITX()));              if (y<0.0f) t=(float)TWOPI-t; return t; }
+      inline float angle()                const { return acosf(normaliseC().dot(UNITX()));                                 }
+      inline float angleNoN()             const { return acosf(dot(UNITX()));                                              }
+      inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
+      inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
+      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acosf(dot(v) / lp);             }
+      inline float angleOri(const V2f& v) const { float t = angle(v); if (cross(v) < 0.0f) t = (float)TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V2f  random()                           { return V2f(std::rand(), std::rand());                    }
       static inline V2f  randomN()                          { V2f t(V2f::random()); t.normalise(); return t;           }
@@ -253,8 +257,12 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double angle()    const { double t=acos(normaliseC().dot(UNITX())); if (y<0.0) t = TWOPI - t; return t; }
-      inline double angleNoN() const { double t=acos(dot(UNITX()));              if (y<0.0) t = TWOPI - t; return t; }
+      inline double angle()                const { return acos(normaliseC().dot(UNITX()));                           }
+      inline double angleNoN()             const { return acos(dot(UNITX()));                                        }
+      inline double angleOri()             const { double t = angle();    if (y < 0.0) t = TWOPI - t; return t;      }
+      inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }
+      inline double angle(const V2d& v)    const { double lp = length() * v.length(); return acos(dot(v) / lp);      }
+      inline double angleOri(const V2d& v) const { double t = angle(v); if (cross(v) < 0.0) t = TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V2d  random()                           { return V2d(std::rand(), std::rand());                    }
       static inline V2d  randomN()                          { V2d t(V2d::random()); t.normalise(); return t;           }
