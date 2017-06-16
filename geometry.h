@@ -234,7 +234,6 @@ namespace simd
       inline double distance(const V2d& v)  const { return sqrt(distance2(v));                        }
       inline V2d    yx()                    const { return V2d(y, x);                                 }
       inline void   yx()                          { std::swap(x, y);                                  }
-      inline void   normalise()                   { *this /= length();                                }
       inline V2d    perp1()                       { return V2d(y, -x);                                }
       inline V2d    perp2()                       { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -306,14 +305,15 @@ namespace simd
       }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
-      inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0];            }
-      inline double length()          const { return _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x31)).m128d_f64[0]; }
-      inline V2d    round()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));              }
-      inline V2d    floor()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR));             }
-      inline V2d    ceil()            const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));              }
-      inline void   round()                 { simd = _mm_round_pd(simd, _MM_FROUND_NINT);                   }
-      inline void   floor()                 { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);                  }
-      inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                   }
+      inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0];                 }
+      inline double length()          const { return _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x31)).m128d_f64[0];      }
+      inline V2d    round()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));                   }
+      inline V2d    floor()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR));                  }
+      inline V2d    ceil()            const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));                   }
+      inline void   round()                 { simd = _mm_round_pd(simd, _MM_FROUND_NINT);                        }
+      inline void   floor()                 { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);                       }
+      inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                        }
+      inline void   normalise()             { simd = _mm_div_pd(simd, _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x33))); }
 #else
       inline double dot(const V2d& v) const { return x * v.x + y * v.y;           }
       inline double length()          const { return sqrt(length2());             }
@@ -323,6 +323,7 @@ namespace simd
       inline void   round()                 { x = ::round(x); y = ::round(y);     }
       inline void   floor()                 { x = ::floor(x); y = ::floor(y);     }
       inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);      }
+      inline void   normalise()             { *this /= length();                  }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
@@ -369,6 +370,7 @@ namespace simd
       inline void   round()                 { x = ::round(x); y = ::round(y);                   }
       inline void   floor()                 { x = ::floor(x); y = ::floor(y);                   }
       inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);                    }
+      inline void   normalise()             { *this /= length(); }
       inline void   rotate(double r)
       {
          double cs = ::cos(r);
