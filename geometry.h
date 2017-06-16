@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include <random>
+#define TWOPI (2.0*M_PI)
 //------------------------------------------------------------------------------------------------------------------------//
 #define SIMD_V2_32_ALIGN
 #define SIMD_V2_64_ALIGN
@@ -86,6 +87,7 @@ namespace simd
       inline V2f   yx()                                 const { return V2f(y, x);                                 }
       inline void  yx()                                       { std::swap(x, y);                                  }
       inline void  normalise()                                { *this /= length();                                }
+      inline V2f   normaliseC()                         const { V2f t(*this); t.normalise(); return t;            }
       inline V2f   perp1()                              const { return V2f( y,-x);                                }
       inline V2f   perp2()                              const { return V2f(-y, x);                                }
       inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
@@ -93,7 +95,7 @@ namespace simd
       inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
       inline V2f   maxC(const V2f& v)                   const { return V2f(v.x > x ? v.x : x, v.y > y ? v.y : y); }
       inline V2f   minC(const V2f& v)                   const { return V2f(v.x < x ? v.x : x, v.y < y ? v.y : y); }
-      inline V2f   boundC(const V2f& mi, const V2f& ma) const { V2f t = minC(ma); t.max(mi); return t;            }
+      inline V2f   boundC(const V2f& mi, const V2f& ma) const { V2f t(minC(ma)); t.max(mi); return t;             }
       inline void  round()                                    { x = roundf(x); y = roundf(y);                     }
       inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
       inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
@@ -116,8 +118,13 @@ namespace simd
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2f  random()                          { return V2f(std::rand(), std::rand());                   }
-      static inline void random(V2f* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2f::random(); }
+      inline float angle()    const { float t=acosf(normaliseC().dot(UNITX())); if (y<0.0f) t=(float)TWOPI-t; return t; }
+      inline float angleNoN() const { float t=acosf(dot(UNITX()));              if (y<0.0f) t=(float)TWOPI-t; return t; }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2f  random()                           { return V2f(std::rand(), std::rand());                    }
+      static inline V2f  randomN()                          { V2f t(V2f::random()); t.normalise(); return t;           }
+      static inline void random(V2f* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V2f::random();  }
+      static inline void randomN(V2f* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2f::randomN(); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
@@ -235,6 +242,7 @@ namespace simd
       inline double length2()               const { return dot(*this);                                }
       inline double distance2(const V2d& v) const { return (*this - v).length2();                     }
       inline double distance(const V2d& v)  const { return sqrt(distance2(v));                        }
+      inline V2d    normaliseC()            const { V2d t(*this); t.normalise(); return t;            }
       inline V2d    yx()                    const { return V2d(y, x);                                 }
       inline void   yx()                          { std::swap(x, y);                                  }
       inline V2d    perp1()                 const { return V2d(y, -x);                                }
@@ -245,8 +253,13 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2d  random()                          { return V2d(std::rand(), std::rand());                   }
-      static inline void random(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::random(); }
+      inline double angle()    const { double t=acos(normaliseC().dot(UNITX())); if (y<0.0) t = TWOPI - t; return t; }
+      inline double angleNoN() const { double t=acos(dot(UNITX()));              if (y<0.0) t = TWOPI - t; return t; }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V2d  random()                           { return V2d(std::rand(), std::rand());                    }
+      static inline V2d  randomN()                          { V2d t(V2d::random()); t.normalise(); return t;           }
+      static inline void random(V2d* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V2d::random();  }
+      static inline void randomN(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::randomN(); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
       inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fY, fX))                                 { }
@@ -283,7 +296,7 @@ namespace simd
       inline void swap(V2d& v)                               { __m128d t(simd); simd = v.simd; v.simd = t; }
       inline V2d  maxC(const V2d& v)                   const { return V2d(_mm_max_pd(simd, v.simd));       }
       inline V2d  minC(const V2d& v)                   const { return V2d(_mm_min_pd(simd, v.simd));       }
-      inline V2d  boundC(const V2d& mi, const V2d& ma) const { V2d t = minC(ma); t.max(mi); return t;      }
+      inline V2d  boundC(const V2d& mi, const V2d& ma) const { V2d t(minC(ma)); t.max(mi); return t;       }
       inline void max(const V2d& v)                          { simd = _mm_max_pd(simd, v.simd);            }
       inline void min(const V2d& v)                          { simd = _mm_min_pd(simd, v.simd);            }
       inline void bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                           }
@@ -321,15 +334,15 @@ namespace simd
       inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                        }
       inline void   normalise()             { simd = _mm_div_pd(simd, _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x33))); }
 #else
-      inline double dot(const V2d& v) const { return x * v.x + y * v.y;           }
-      inline double length()          const { return sqrt(length2());             }
-      inline V2d    roundC()          const { return V2d(::round(x), ::round(y)); }
-      inline V2d    floorC()          const { return V2d(::floor(x), ::floor(y)); }
-      inline V2d    ceilC()           const { return V2d(::ceil(x),  ::ceil(y));  }
-      inline void   round()                 { x = ::round(x); y = ::round(y);     }
-      inline void   floor()                 { x = ::floor(x); y = ::floor(y);     }
-      inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);      }
-      inline void   normalise()             { *this /= length();                  }
+      inline double dot(const V2d& v) const { return x * v.x + y * v.y;                    }
+      inline double length()          const { return sqrt(length2());                      }
+      inline V2d    roundC()          const { return V2d(::round(x), ::round(y));          }
+      inline V2d    floorC()          const { return V2d(::floor(x), ::floor(y));          }
+      inline V2d    ceilC()           const { return V2d(::ceil(x),  ::ceil(y));           }
+      inline void   round()                 { x = ::round(x); y = ::round(y);              }
+      inline void   floor()                 { x = ::floor(x); y = ::floor(y);              }
+      inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);               }
+      inline void   normalise()             { *this /= length();                           }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
@@ -368,7 +381,7 @@ namespace simd
       inline void   swap(V2d& v)                               { std::swap(x, v.x); std::swap(y, v.y);             }
       inline V2d    maxC(const V2d& v)                   const { return V2d(v.x > x ? v.x : x, v.y > y ? v.y : y); }
       inline V2d    minC(const V2d& v)                   const { return V2d(v.x < x ? v.x : x, v.y < y ? v.y : y); }
-      inline V2d    boundC(const V2d& mi, const V2d& ma) const { V2d t = minC(ma); t.max(mi); return t;            }
+      inline V2d    boundC(const V2d& mi, const V2d& ma) const { V2d t(minC(ma)); t.max(mi); return t;             }
       inline void   max(const V2d& v)                          { if (v.x > x) x = v.x; if (v.y > y) y = v.y;       }
       inline void   min(const V2d& v)                          { if (v.x < x) x = v.x; if (v.y < y) y = v.y;       }
       inline void   bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                                 }
@@ -387,9 +400,9 @@ namespace simd
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
-      inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
-      inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
+      inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e);}
 #endif
    };
 }

@@ -16,7 +16,7 @@ high_resolution_clock clk;
 void benchV2d(const char* name, void task(V2d* ARR))
 {
    V2d ARR[LOOPS];
-   V2d::random(ARR, LOOPS);
+   V2d::randomN(ARR, LOOPS);
    auto t1 = clk.now();
    task(ARR);
    auto t2 = clk.now();
@@ -54,6 +54,8 @@ void benchV2dInsideRE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].ins
 void benchV2dInsideC(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x);)        }
 void benchV2dInsideCE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
 void benchV2dAreaTri(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = ARR[i].area(ARR[i + 1], ARR[i + 2]);)                    }
+void benchV2dAngle(V2d* ARR)     { LOOP(LOOPS, ARR[i].x = ARR[i].angle();) }
+void benchV2dAngleNoN(V2d* ARR)  { LOOP(LOOPS, ARR[i].x = ARR[i].angleNoN();) }
 
 void bench()
 {
@@ -87,14 +89,26 @@ void bench()
    benchV2d("V2d | inside(m,r)  | ", &benchV2dInsideC);
    benchV2d("V2d | inside(m,r,e)| ", &benchV2dInsideCE);
    benchV2d("V2d | area(v,v)    | ", &benchV2dAreaTri);
+   benchV2d("V2d | angle()      | ", &benchV2dAngle);
+   benchV2d("V2d | angleNoN()   | ", &benchV2dAngleNoN);
 }
 
 int main()
 {
    V2f a(0.0f, 0.0f);
+   
    V2f p(1.0f, 0.0f);
    V2f q(0.0f, 1.0f);
-   
+   V2f r(-1.0f, 0.0f);
+   V2f s(0.0f, -1.0f);
+   V2f t(1.0f, -0.005f);
+
+   float d1 = p.angle();
+   float d2 = q.angle();
+   float d3 = r.angle();
+   float d4 = s.angle();
+   float d5 = t.angle();
+
    float area = a.area(p, q);
 
    //float dfh = ma.length();
