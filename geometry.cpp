@@ -47,6 +47,8 @@ void benchV2dDot(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].x = ARR[i].dot(ARR[i +
 void benchV2dCross(V2d* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i + 1]);) }
 void benchV2dMax(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].max(ARR[i + 1]);)              }
 void benchV2dMin(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].min(ARR[i + 1]);)              }
+void benchV2dInside(V2d* ARR)    { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2]);) }
+void benchV2dInsideE(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);) }
 
 void bench()
 {
@@ -73,6 +75,8 @@ void bench()
    benchV2d("V2d | cross()      | ", &benchV2dCross);
    benchV2d("V2d | max()        | ", &benchV2dMax);
    benchV2d("V2d | min()        | ", &benchV2dMin);
+   benchV2d("V2d | inside(v,v)  | ", &benchV2dInside);
+   benchV2d("V2d | inside(v,v,e)| ", &benchV2dInsideE);
 }
 
 int main()

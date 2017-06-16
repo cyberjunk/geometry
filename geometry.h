@@ -101,7 +101,7 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max;     }
-      inline bool  inside(const V2f& min, const V2f& max, const double e) const { return *this >= (min-e) && *this <= (max+e); }
+      inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min-e) && *this <= (max+e); }
       inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
       inline void  rotate(float r)
@@ -239,8 +239,6 @@ namespace simd
       inline V2d    perp2()                       { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double side(const V2d& s, const V2d& e)                       const { return (e - s).cross(*this - s);             }
-      inline bool   inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max;         }
-      inline bool   inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min-e) && *this <= (max+e); }
       inline bool   inside(const V2d& m, const double r2)                  const { return (*this - m).length2() <= r2;          }
       inline bool   inside(const V2d& m, const double r2, const double e)  const { return (*this - m).length2() <= (r2 + e);    }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -284,6 +282,29 @@ namespace simd
       inline V2d  min(const V2d& v) const { return V2d(_mm_min_pd(simd, v.simd));       }
       inline void max(const V2d& v)       { simd = _mm_max_pd(simd, v.simd);            }
       inline void min(const V2d& v)       { simd = _mm_min_pd(simd, v.simd);            }
+      inline void rotate(double r)
+      {
+         __m128d cs(_mm_set1_pd(::cos(r)));
+         __m128d sn(_mm_set1_pd(::sin(r)));
+         __m128d p(_mm_set_pd(x, -y));
+         simd = _mm_add_pd(_mm_mul_pd(simd, cs), _mm_mul_pd(p, sn));
+      }
+      inline bool inside(const V2d& min, const V2d& max) const
+      {
+         __m128d a(_mm_cmpge_pd(simd, min.simd));
+         __m128d b(_mm_cmple_pd(simd, max.simd));
+         __m128d c(_mm_and_pd(a, b));
+         return _mm_movemask_pd(c) == 0x03;
+      }
+      inline bool inside(const V2d& min, const V2d& max, const double e) const
+      {
+         __m128d eps(_mm_set1_pd(e));
+         __m128d a(_mm_cmpge_pd(simd, _mm_sub_pd(min.simd, eps)));
+         __m128d b(_mm_cmple_pd(simd, _mm_add_pd(max.simd, eps)));
+         __m128d c(_mm_and_pd(a, b));
+         return _mm_movemask_pd(c) == 0x03;
+      }
+      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
       inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0];            }
       inline double length()          const { return _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x31)).m128d_f64[0]; }
@@ -303,13 +324,6 @@ namespace simd
       inline void   floor()                 { x = ::floor(x); y = ::floor(y);     }
       inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);      }
 #endif
-      inline void rotate(double r)
-      {
-         __m128d cs(_mm_set1_pd(::cos(r)));
-         __m128d sn(_mm_set1_pd(::sin(r)));
-         __m128d p(_mm_set_pd(x, -y));
-         simd = _mm_add_pd(_mm_mul_pd(simd, cs), _mm_mul_pd(p, sn));
-   }
       //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2d(const double x, const double y) : x(x),         y(y)                         { }
@@ -363,6 +377,8 @@ namespace simd
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
+      inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
+      inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e); }
       //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
