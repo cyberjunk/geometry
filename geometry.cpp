@@ -53,6 +53,7 @@ void benchV2dInsideR(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].ins
 void benchV2dInsideRE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);)   }
 void benchV2dInsideC(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x);)        }
 void benchV2dInsideCE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
+void benchV2dAreaTri(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = ARR[i].area(ARR[i + 1], ARR[i + 2]);)                    }
 
 void bench()
 {
@@ -85,16 +86,20 @@ void bench()
    benchV2d("V2d | inside(v,v,e)| ", &benchV2dInsideRE);
    benchV2d("V2d | inside(m,r)  | ", &benchV2dInsideC);
    benchV2d("V2d | inside(m,r,e)| ", &benchV2dInsideCE);
+   benchV2d("V2d | area(v,v)    | ", &benchV2dAreaTri);
 }
 
 int main()
 {
-   V2f a(-1.0f, 8.0f);
-   V2f mi(0.0f, 0.0f);
-   V2f ma(5.0f, 5.0f);
-   float dfh = ma.length();
+   V2f a(0.0f, 0.0f);
+   V2f p(1.0f, 0.0f);
+   V2f q(0.0f, 1.0f);
+   
+   float area = a.area(p, q);
 
-   V2f t = a.boundC(mi, ma);
+   //float dfh = ma.length();
+
+   //V2f t = a.boundC(mi, ma);
 
    while (true)
    {

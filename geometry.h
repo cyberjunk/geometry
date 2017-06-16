@@ -106,6 +106,7 @@ namespace simd
       inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min-e) && *this <= (max+e); }
       inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
+      inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this);  }
       inline void  rotate(float r)
       {
          float cs = ::cosf(r);
@@ -239,9 +240,10 @@ namespace simd
       inline V2d    perp1()                 const { return V2d(y, -x);                                }
       inline V2d    perp2()                 const { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double side(const V2d& s, const V2d& e)                       const { return (e - s).cross(*this - s);             }
-      inline bool   inside(const V2d& m, const double r2)                  const { return (*this - m).length2() <= r2;          }
-      inline bool   inside(const V2d& m, const double r2, const double e)  const { return (*this - m).length2() <= (r2 + e);    }
+      inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
+      inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
+      inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
+      inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V2d  random()                          { return V2d(std::rand(), std::rand());                   }
       static inline void random(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::random(); }
