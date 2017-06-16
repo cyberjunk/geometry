@@ -118,7 +118,7 @@ namespace simd
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()                const { return acosf(normaliseC().dot(UNITX()));                                 }
+      inline float angle()                const { return acosf(dot(UNITX())/length());                                     }
       inline float angleNoN()             const { return acosf(dot(UNITX()));                                              }
       inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
@@ -257,7 +257,7 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double angle()                const { return acos(normaliseC().dot(UNITX()));                           }
+      inline double angle()                const { return acos(dot(UNITX())/length());                               }
       inline double angleNoN()             const { return acos(dot(UNITX()));                                        }
       inline double angleOri()             const { double t = angle();    if (y < 0.0) t = TWOPI - t; return t;      }
       inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }

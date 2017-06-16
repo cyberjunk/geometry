@@ -104,10 +104,10 @@ int main()
    V2f t(1.0f, -0.005f);
 
    float d1 = p.angleOri(t);
-   float d2 = q.angle();
-   float d3 = r.angle();
-   float d4 = s.angle();
-   float d5 = t.angle();
+   float d2 = q.angleOri();
+   float d3 = r.angleOri();
+   float d4 = s.angleOri();
+   float d5 = t.angleOri();
 
    float area = a.area(p, q);
 
