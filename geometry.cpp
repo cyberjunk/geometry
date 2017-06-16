@@ -45,6 +45,8 @@ void benchV2dCeil(V2d* ARR)      { LOOP(LOOPS, ARR[i].ceil();)                  
 void benchV2dSwap(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i].swap(ARR[i + 1]);)             }
 void benchV2dDot(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].x = ARR[i].dot(ARR[i + 1]);)   }
 void benchV2dCross(V2d* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i + 1]);) }
+void benchV2dMax(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].max(ARR[i + 1]);)              }
+void benchV2dMin(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].min(ARR[i + 1]);)              }
 
 void bench()
 {
@@ -69,6 +71,8 @@ void bench()
    benchV2d("V2d | swap()       | ", &benchV2dSwap);
    benchV2d("V2d | dot()        | ", &benchV2dDot);
    benchV2d("V2d | cross()      | ", &benchV2dCross);
+   benchV2d("V2d | max()        | ", &benchV2dMax);
+   benchV2d("V2d | min()        | ", &benchV2dMin);
 }
 
 int main()
