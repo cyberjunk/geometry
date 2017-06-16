@@ -230,7 +230,6 @@ namespace simd
       inline bool   isNaN()                 const { return isnan(x) || isnan(y);                      }
       inline double cross(const V2d& v)     const { return x * v.y - y * v.x;                         }
       inline double length2()               const { return dot(*this);                                }
-      inline double length()                const { return sqrt(length2());                           }
       inline double distance2(const V2d& v) const { return (*this - v).length2();                     }
       inline double distance(const V2d& v)  const { return sqrt(distance2(v));                        }
       inline V2d    yx()                    const { return V2d(y, x);                                 }
@@ -286,15 +285,17 @@ namespace simd
       inline void max(const V2d& v)       { simd = _mm_max_pd(simd, v.simd);            }
       inline void min(const V2d& v)       { simd = _mm_min_pd(simd, v.simd);            }
 #if defined(SIMD_V2_64_SSE41)
-      inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0]; }
-      inline V2d    round()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));   }
-      inline V2d    floor()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR));  }
-      inline V2d    ceil()            const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));   }
-      inline void   round()                 { simd = _mm_round_pd(simd, _MM_FROUND_NINT);        }
-      inline void   floor()                 { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);       }
-      inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);        }
+      inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0];            }
+      inline double length()          const { return _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x31)).m128d_f64[0]; }
+      inline V2d    round()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));              }
+      inline V2d    floor()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR));             }
+      inline V2d    ceil()            const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));              }
+      inline void   round()                 { simd = _mm_round_pd(simd, _MM_FROUND_NINT);                   }
+      inline void   floor()                 { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);                  }
+      inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                   }
 #else
-      inline double dot(const V2d& v) const { return x * v.x + y * v.y; }
+      inline double dot(const V2d& v) const { return x * v.x + y * v.y;           }
+      inline double length()          const { return sqrt(length2());             }
       inline V2d    round()           const { return V2d(::round(x), ::round(y)); }
       inline V2d    floor()           const { return V2d(::floor(x), ::floor(y)); }
       inline V2d    ceil()            const { return V2d(::ceil(x),  ::ceil(y));  }
@@ -322,26 +323,27 @@ namespace simd
       inline void* operator new  (size_t size)             { return malloc(sizeof(V2d));        }
       inline void* operator new[](size_t size)             { return malloc(size * sizeof(V2d)); }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);     }
-      inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);     }
-      inline       V2d  operator *  (const V2d&   v) const { return V2d(x * v.x, y * v.y);     }
-      inline       V2d  operator /  (const V2d&   v) const { return V2d(x / v.x, y / v.y);     }
-      inline       V2d  operator *  (const double s) const { return V2d(x * s,   y * s);       }
-      inline       V2d  operator /  (const double s) const { return V2d(x / s,   y / s);       }
-      inline       V2d  operator -  ()               const { return V2d(-x, -y);               }
-      inline const V2d& operator +  ()               const { return *this;                     }
-      inline       V2d& operator =  (const V2d&   v)       { x =  v.x; y =  v.y; return *this; }
-      inline       V2d& operator += (const V2d&   v)       { x += v.x; y += v.y; return *this; }
-      inline       V2d& operator -= (const V2d&   v)       { x -= v.x; y -= v.y; return *this; }
-      inline       V2d& operator *= (const V2d&   v)       { x *= v.x; y *= v.y; return *this; }
-      inline       V2d& operator /= (const V2d&   v)       { x /= v.x; y /= v.y; return *this; }
-      inline       V2d& operator =  (const double s)       { x =  s;   y =  s;   return *this; }
-      inline       V2d& operator += (const double s)       { x += s;   y += s;   return *this; }
-      inline       V2d& operator -= (const double s)       { x -= s;   y -= s;   return *this; }
-      inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this; }
-      inline       V2d& operator /= (const double s)       { x /= s;   y /= s;   return *this; }
+      inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);             }
+      inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);             }
+      inline       V2d  operator *  (const V2d&   v) const { return V2d(x * v.x, y * v.y);             }
+      inline       V2d  operator /  (const V2d&   v) const { return V2d(x / v.x, y / v.y);             }
+      inline       V2d  operator *  (const double s) const { return V2d(x * s,   y * s);               }
+      inline       V2d  operator /  (const double s) const { double t=1.0/s; return V2d(x*t, y*t);     }
+      inline       V2d  operator -  ()               const { return V2d(-x, -y);                       }
+      inline const V2d& operator +  ()               const { return *this;                             }
+      inline       V2d& operator =  (const V2d&   v)       { x =  v.x; y =  v.y; return *this;         }
+      inline       V2d& operator += (const V2d&   v)       { x += v.x; y += v.y; return *this;         }
+      inline       V2d& operator -= (const V2d&   v)       { x -= v.x; y -= v.y; return *this;         }
+      inline       V2d& operator *= (const V2d&   v)       { x *= v.x; y *= v.y; return *this;         }
+      inline       V2d& operator /= (const V2d&   v)       { x /= v.x; y /= v.y; return *this;         }
+      inline       V2d& operator =  (const double s)       { x =  s;   y =  s;   return *this;         }
+      inline       V2d& operator += (const double s)       { x += s;   y += s;   return *this;         }
+      inline       V2d& operator -= (const double s)       { x -= s;   y -= s;   return *this;         }
+      inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this;         }
+      inline       V2d& operator /= (const double s)       { double t=1.0/s; x*=t; y*=t; return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double dot(const V2d& v) const { return x * v.x + y * v.y;                         }
+      inline double length()          const { return sqrt(length2());                           }
       inline void   swap(V2d& v)            { std::swap(x, v.x); std::swap(y, v.y);             }
       inline V2d    max(const V2d& v) const { return V2d(v.x > x ? v.x : x, v.y > y ? v.y : y); }
       inline V2d    min(const V2d& v) const { return V2d(v.x < x ? v.x : x, v.y < y ? v.y : y); }
