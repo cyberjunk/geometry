@@ -92,8 +92,6 @@ namespace simd
       inline V2f   perp2()                              const { return V2f(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
-      inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max;     }
-      inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min-e) && *this <= (max+e); }
       inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
       inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this);  }
@@ -159,6 +157,24 @@ namespace simd
       inline void min(const V2f& v)                          { store(_mm_min_ps(load(), v.load()));                  }
       inline void bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                     }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool inside(const V2f& min, const V2f& max) const
+      {
+         __m128 a(load());
+         __m128 b(_mm_cmpge_ps(a, min.load()));
+         __m128 c(_mm_cmple_ps(a, max.load()));
+         __m128 d(_mm_and_ps(b, c));
+         return _mm_movemask_ps(d) == 0x0F;
+      }
+      inline bool inside(const V2f& min, const V2f& max, const float e) const
+      {
+         __m128 eps(_mm_set1_ps(e));
+         __m128 a(load());
+         __m128 b(_mm_cmpge_ps(a, _mm_sub_ps(min.load(), eps)));
+         __m128 c(_mm_cmple_ps(a, _mm_add_ps(max.load(), eps)));
+         __m128 d(_mm_and_ps(b, c));
+         return _mm_movemask_ps(d) == 0x0F;
+      }
+      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE41)
       inline V2f   roundC()          const { return V2f(_mm_round_ps(load(), _MM_FROUND_NINT));  }
       inline V2f   floorC()          const { return V2f(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
@@ -218,6 +234,8 @@ namespace simd
       inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
       inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
+      inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min - e) && *this <= (max + e); }
 #endif
    };
 
