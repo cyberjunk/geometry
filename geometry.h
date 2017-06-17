@@ -90,12 +90,6 @@ namespace simd
       inline V2f   normaliseC()                         const { V2f t(*this); t.normalise(); return t;            }
       inline V2f   perp1()                              const { return V2f( y,-x);                                }
       inline V2f   perp2()                              const { return V2f(-y, x);                                }
-      inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
-      inline V2f   floorC()                             const { return V2f(floorf(x), floorf(y));                 }
-      inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
-      inline void  round()                                    { x = roundf(x); y = roundf(y);                     }
-      inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
-      inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max;     }
@@ -165,6 +159,22 @@ namespace simd
       inline void min(const V2f& v)                          { store(_mm_min_ps(load(), v.load()));                  }
       inline void bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                     }
       //------------------------------------------------------------------------------------------------------------------------//
+#if defined(SIMD_V2_32_SSE41)
+      inline V2f   roundC()          const { return V2f(_mm_round_ps(load(), _MM_FROUND_NINT));  }
+      inline V2f   floorC()          const { return V2f(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
+      inline V2f   ceilC()           const { return V2f(_mm_round_ps(load(), _MM_FROUND_CEIL));  }
+      inline void  round()                 { store(_mm_round_ps(load(), _MM_FROUND_NINT));       }
+      inline void  floor()                 { store(_mm_round_ps(load(), _MM_FROUND_FLOOR));      }
+      inline void  ceil()                  { store(_mm_round_ps(load(), _MM_FROUND_CEIL));       }
+#else
+      inline V2f   roundC()          const { return V2f(roundf(x), roundf(y));  }
+      inline V2f   floorC()          const { return V2f(floorf(x), floorf(y));  }
+      inline V2f   ceilC()           const { return V2f(ceilf(x),  ceilf(y));   }
+      inline void  round()                 { x = roundf(x); y = roundf(y);      }
+      inline void  floor()                 { x = floorf(x); y = floorf(y);      }
+      inline void  ceil()                  { x = ceilf(x);  y = ceilf(y);       }
+#endif
+      //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
       inline V2f(float* const values)   : x(values[0]), y(values[1])               { }
@@ -201,6 +211,12 @@ namespace simd
       inline void  max(const V2f& v)                          { if (v.x > x) x = v.x; if (v.y > y) y = v.y;       }
       inline void  min(const V2f& v)                          { if (v.x < x) x = v.x; if (v.y < y) y = v.y;       }
       inline void  bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                 }
+      inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
+      inline V2f   floorC()                             const { return V2f(floorf(x), floorf(y));                 }
+      inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
+      inline void  round()                                    { x = roundf(x); y = roundf(y);                     }
+      inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
+      inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
