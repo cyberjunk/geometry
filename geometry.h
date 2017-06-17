@@ -120,8 +120,8 @@ namespace simd
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()                const { return acosf(dot(UNITX())/length());                                     }
-      inline float angleNoN()             const { return acosf(dot(UNITX()));                                              }
+      inline float angle()                const { return acosf(x/length());                                                }
+      inline float angleNoN()             const { return acosf(x);                                                         }
       inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acosf(dot(v) / lp);             }
@@ -259,8 +259,8 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double angle()                const { return acos(dot(UNITX())/length());                               }
-      inline double angleNoN()             const { return acos(dot(UNITX()));                                        }
+      inline double angle()                const { return acos(x/length());                                          }
+      inline double angleNoN()             const { return acos(x);                                                   }
       inline double angleOri()             const { double t = angle();    if (y < 0.0) t = TWOPI - t; return t;      }
       inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }
       inline double angle(const V2d& v)    const { double lp = length() * v.length(); return acos(dot(v) / lp);      }
