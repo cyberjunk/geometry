@@ -13,112 +13,95 @@ using namespace std;
 //------------------------------------------------------------------------------------------------------------------------//
 high_resolution_clock clk;
 //------------------------------------------------------------------------------------------------------------------------//
-void benchV2d(const char* name, void task(V2d* ARR))
+template<typename T>
+void bench(const char* name, void task(T* ARR))
 {
-   V2d ARR[LOOPS];
-   V2d::randomN(ARR, LOOPS);
+   T ARR[LOOPS];
+   T::randomN(ARR, LOOPS);
    auto t1 = clk.now();
    task(ARR);
    auto t2 = clk.now();
    auto sp = t2 - t1;
-   V2d s = V2d::ZERO(); for (size_t i = 0; i < LOOPS; i++) s += ARR[i];
+   T s = T::ZERO(); for (size_t i = 0; i < LOOPS; i++) s += ARR[i];
    printf(name); printf("%010I64i | ", sp.count()); printf("%05.3f \n", s.x + s.y);
 }
+//------------------------------------------------------------------------------------------------------------------------//
 
-void benchV2dAddV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
-void benchV2dSubV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
-void benchV2dMulV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
-void benchV2dDivV(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1];)        }
-void benchV2dAddS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1].x;)      }
-void benchV2dSubS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1].x;)      }
-void benchV2dMulS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1].x;)      }
-void benchV2dDivS(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1].x;)      }
-void benchV2dIsZero(V2d* ARR)    { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero();)      }
-void benchV2dIsZeroE(V2d* ARR)   { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero(0.01);)  }
-void benchV2dRotate(V2d* ARR)    { LOOP(LOOPS, ARR[i].rotate(M_PI_2);)                   }
-void benchV2dLength(V2d* ARR)    { LOOP(LOOPS, ARR[i].x = ARR[i].length();)              }
-void benchV2dLength2(V2d* ARR)   { LOOP(LOOPS, ARR[i].x = ARR[i].length2();)             }
-void benchV2dNormalise(V2d* ARR) { LOOP(LOOPS, ARR[i].normalise();)                      }
-void benchV2dRound(V2d* ARR)     { LOOP(LOOPS, ARR[i].round();)                          }
-void benchV2dFloor(V2d* ARR)     { LOOP(LOOPS, ARR[i].floor();)                          }
-void benchV2dCeil(V2d* ARR)      { LOOP(LOOPS, ARR[i].ceil();)                           }
-void benchV2dSwap(V2d* ARR)      { LOOP(LOOPS - 1, ARR[i].swap(ARR[i + 1]);)             }
-void benchV2dDot(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].x = ARR[i].dot(ARR[i + 1]);)   }
-void benchV2dCross(V2d* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i + 1]);) }
-void benchV2dMax(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].max(ARR[i + 1]);)              }
-void benchV2dMin(V2d* ARR)       { LOOP(LOOPS - 1, ARR[i].min(ARR[i + 1]);)              }
-void benchV2dBound(V2d* ARR)     { LOOP(LOOPS - 2, ARR[i].bound(ARR[i + 1], ARR[i + 2]);) }
-void benchV2dSide(V2d* ARR)      { LOOP(LOOPS - 2, ARR[i].x = ARR[i].side(ARR[i + 1], ARR[i + 2]);)                    }
-void benchV2dInsideR(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2]);)          }
-void benchV2dInsideRE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);)   }
-void benchV2dInsideC(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x);)        }
-void benchV2dInsideCE(V2d* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
-void benchV2dAreaTri(V2d* ARR)   { LOOP(LOOPS - 2, ARR[i].x = ARR[i].area(ARR[i + 1], ARR[i + 2]);)                    }
-void benchV2dAngle(V2d* ARR)     { LOOP(LOOPS, ARR[i].x = ARR[i].angle();) }
-void benchV2dAngleV(V2d* ARR)    { LOOP(LOOPS - 1, ARR[i].x = ARR[i].angle(ARR[i + 1]);) }
-
-void bench()
+template<typename T> void benchAddV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
+template<typename T> void benchSubV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
+template<typename T> void benchMulV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
+template<typename T> void benchDivV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1];)        }
+template<typename T> void benchAddS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1].x;)      }
+template<typename T> void benchSubS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1].x;)      }
+template<typename T> void benchMulS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1].x;)      }
+template<typename T> void benchDivS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1].x;)      }
+template<typename T> void benchIsZero(T* ARR)    { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero();)      }
+template<typename T> void benchIsZeroE(T* ARR)   { LOOP(LOOPS, ARR[i].x = (double)ARR[i].isZero(0.01);)  }
+template<typename T> void benchRotate(T* ARR)    { LOOP(LOOPS, ARR[i].rotate(M_PI_2);)                   }
+template<typename T> void benchLength(T* ARR)    { LOOP(LOOPS, ARR[i].x = ARR[i].length();)              }
+template<typename T> void benchLength2(T* ARR)   { LOOP(LOOPS, ARR[i].x = ARR[i].length2();)             }
+template<typename T> void benchNormalise(T* ARR) { LOOP(LOOPS, ARR[i].normalise();)                      }
+template<typename T> void benchRound(T* ARR)     { LOOP(LOOPS, ARR[i].round();)                          }
+template<typename T> void benchFloor(T* ARR)     { LOOP(LOOPS, ARR[i].floor();)                          }
+template<typename T> void benchCeil(T* ARR)      { LOOP(LOOPS, ARR[i].ceil();)                           }
+template<typename T> void benchAbs(T* ARR)       { LOOP(LOOPS, ARR[i].abs();)                            }
+template<typename T> void benchSwap(T* ARR)      { LOOP(LOOPS - 1, ARR[i].swap(ARR[i + 1]);)             }
+template<typename T> void benchDot(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = ARR[i].dot(ARR[i + 1]);)   }
+template<typename T> void benchCross(T* ARR)     { LOOP(LOOPS - 1, ARR[i].x = ARR[i].cross(ARR[i + 1]);) }
+template<typename T> void benchMax(T* ARR)       { LOOP(LOOPS - 1, ARR[i].max(ARR[i + 1]);)              }
+template<typename T> void benchMin(T* ARR)       { LOOP(LOOPS - 1, ARR[i].min(ARR[i + 1]);)              }
+template<typename T> void benchBound(T* ARR)     { LOOP(LOOPS - 2, ARR[i].bound(ARR[i + 1], ARR[i + 2]);) }
+template<typename T> void benchSide(T* ARR)      { LOOP(LOOPS - 2, ARR[i].x = ARR[i].side(ARR[i + 1], ARR[i + 2]);)                    }
+template<typename T> void benchInsideR(T* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2]);)          }
+template<typename T> void benchInsideRE(T* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2], 0.001);)   }
+template<typename T> void benchInsideC(T* ARR)   { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x);)        }
+template<typename T> void benchInsideCE(T* ARR)  { LOOP(LOOPS - 2, ARR[i].x = (double)ARR[i].inside(ARR[i + 1], ARR[i + 2].x, 0.001);) }
+template<typename T> void benchAreaTri(T* ARR)   { LOOP(LOOPS - 2, ARR[i].x = ARR[i].area(ARR[i + 1], ARR[i + 2]);)                    }
+template<typename T> void benchAngle(T* ARR)     { LOOP(LOOPS, ARR[i].x = ARR[i].angle();)                                             }
+template<typename T> void benchAngleV(T* ARR)    { LOOP(LOOPS - 1, ARR[i].x = ARR[i].angle(ARR[i + 1]);)                               }
+void benchV2d()
 {
-   PRINTHEADER // V2d
-   benchV2d("V2d | operator + v | ", &benchV2dAddV);
-   benchV2d("V2d | operator - v | ", &benchV2dSubV);
-   benchV2d("V2d | operator * v | ", &benchV2dMulV);
-   benchV2d("V2d | operator / v | ", &benchV2dDivV);
-   benchV2d("V2d | operator + s | ", &benchV2dAddS);
-   benchV2d("V2d | operator - s | ", &benchV2dSubS);
-   benchV2d("V2d | operator * s | ", &benchV2dMulS);
-   benchV2d("V2d | operator / s | ", &benchV2dDivS);
-   benchV2d("V2d | isZero()     | ", &benchV2dIsZero);
-   benchV2d("V2d | isZero(e)    | ", &benchV2dIsZeroE);
-   benchV2d("V2d | rotate()     | ", &benchV2dRotate);
-   benchV2d("V2d | length()     | ", &benchV2dLength);
-   benchV2d("V2d | length2()    | ", &benchV2dLength2);
-   benchV2d("V2d | normalise()  | ", &benchV2dNormalise);
-   benchV2d("V2d | round()      | ", &benchV2dRound);
-   benchV2d("V2d | floor()      | ", &benchV2dFloor);
-   benchV2d("V2d | ceil()       | ", &benchV2dCeil);
-   benchV2d("V2d | swap()       | ", &benchV2dSwap);
-   benchV2d("V2d | dot()        | ", &benchV2dDot);
-   benchV2d("V2d | cross()      | ", &benchV2dCross);
-   benchV2d("V2d | max()        | ", &benchV2dMax);
-   benchV2d("V2d | min()        | ", &benchV2dMin);
-   benchV2d("V2d | bound()      | ", &benchV2dBound);
-   benchV2d("V2d | side(v,v)    | ", &benchV2dSide);
-   benchV2d("V2d | inside(v,v)  | ", &benchV2dInsideR);
-   benchV2d("V2d | inside(v,v,e)| ", &benchV2dInsideRE);
-   benchV2d("V2d | inside(m,r)  | ", &benchV2dInsideC);
-   benchV2d("V2d | inside(m,r,e)| ", &benchV2dInsideCE);
-   benchV2d("V2d | area(v,v)    | ", &benchV2dAreaTri);
-   benchV2d("V2d | angle()      | ", &benchV2dAngle);
-   benchV2d("V2d | angle(v)     | ", &benchV2dAngleV);
+   PRINTHEADER;
+   bench<V2d>("V2d | operator + v | ", benchAddV<V2d>);
+   bench<V2d>("V2d | operator - v | ", benchSubV<V2d>);
+   bench<V2d>("V2d | operator * v | ", benchMulV<V2d>);
+   bench<V2d>("V2d | operator / v | ", benchDivV<V2d>);
+   bench<V2d>("V2d | operator + s | ", benchAddS<V2d>);
+   bench<V2d>("V2d | operator - s | ", benchSubS<V2d>);
+   bench<V2d>("V2d | operator * s | ", benchMulS<V2d>);
+   bench<V2d>("V2d | operator / s | ", benchDivS<V2d>);
+   bench<V2d>("V2d | isZero()     | ", benchIsZero<V2d>);
+   bench<V2d>("V2d | isZero(e)    | ", benchIsZeroE<V2d>);
+   bench<V2d>("V2d | rotate()     | ", benchRotate<V2d>);
+   bench<V2d>("V2d | length()     | ", benchLength<V2d>);
+   bench<V2d>("V2d | length2()    | ", benchLength2<V2d>);
+   bench<V2d>("V2d | normalise()  | ", benchNormalise<V2d>);
+   bench<V2d>("V2d | round()      | ", benchRound<V2d>);
+   bench<V2d>("V2d | floor()      | ", benchFloor<V2d>);
+   bench<V2d>("V2d | ceil()       | ", benchCeil<V2d>);
+   bench<V2d>("V2d | abs()        | ", benchAbs<V2d>);
+   bench<V2d>("V2d | swap()       | ", benchSwap<V2d>);
+   bench<V2d>("V2d | dot()        | ", benchDot<V2d>);
+   bench<V2d>("V2d | cross()      | ", benchCross<V2d>);
+   bench<V2d>("V2d | max()        | ", benchMax<V2d>);
+   bench<V2d>("V2d | min()        | ", benchMin<V2d>);
+   bench<V2d>("V2d | bound()      | ", benchBound<V2d>);
+   bench<V2d>("V2d | side(v,v)    | ", benchSide<V2d>);
+   bench<V2d>("V2d | inside(v,v)  | ", benchInsideR<V2d>);
+   bench<V2d>("V2d | inside(v,v,e)| ", benchInsideRE<V2d>);
+   bench<V2d>("V2d | inside(m,r)  | ", benchInsideC<V2d>);
+   bench<V2d>("V2d | inside(m,r,e)| ", benchInsideCE<V2d>);
+   bench<V2d>("V2d | area(v,v)    | ", benchAreaTri<V2d>);
+   bench<V2d>("V2d | angle()      | ", benchAngle<V2d>);
+   bench<V2d>("V2d | angle(v)     | ", benchAngleV<V2d>);
 }
 
 int main()
 {
-   V2f a(0.0f, 0.0f);
-   
-   V2f p(1.0f, 0.0f);
-   V2f q(0.0f, 1.0f);
-   V2f r(-1.0f, 0.0f);
-   V2f s(0.0f, -1.0f);
-   V2f t(1.0f, -0.005f);
-
-   float d1 = p.angleOri(t);
-   float d2 = q.angleOri();
-   float d3 = r.angleOri();
-   float d4 = s.angleOri();
-   float d5 = t.angleOri();
-
-   float area = a.area(p, q);
-
-   //float dfh = ma.length();
-
-   //V2f t = a.boundC(mi, ma);
-
    while (true)
    {
       
-      bench();
+      benchV2d();
       getchar();
    }
 
