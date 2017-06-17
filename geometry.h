@@ -93,17 +93,9 @@ namespace simd
       inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
       inline V2f   floorC()                             const { return V2f(floorf(x), floorf(y));                 }
       inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
-      inline V2f   absC()                               const { return V2f(fabsf(x),  fabsf(y));                  }
-      inline V2f   maxC(const V2f& v)                   const { return V2f(v.x > x ? v.x : x, v.y > y ? v.y : y); }
-      inline V2f   minC(const V2f& v)                   const { return V2f(v.x < x ? v.x : x, v.y < y ? v.y : y); }
-      inline V2f   boundC(const V2f& mi, const V2f& ma) const { V2f t(minC(ma)); t.max(mi); return t;             }
       inline void  round()                                    { x = roundf(x); y = roundf(y);                     }
       inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
       inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
-      inline void  abs()                                      { x = fabsf(x);  y = fabsf(y);                      }
-      inline void  max(const V2f& v)                          { if (v.x > x) x = v.x; if (v.y > y) y = v.y;       }
-      inline void  min(const V2f& v)                          { if (v.x < x) x = v.x; if (v.y < y) y = v.y;       }
-      inline void  bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                 }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max;     }
@@ -163,7 +155,15 @@ namespace simd
       inline       V2f& operator *= (const float s)       { store(_mm_mul_ps(load(), _mm_set1_ps(s))); return *this; }
       inline       V2f& operator /= (const float s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void  swap(V2f& v) { __m128 t(load()); store(v.load()); v.store(t); }
+      inline void swap(V2f& v)                               { __m128 t(load()); store(v.load()); v.store(t);        }
+      inline V2f  absC()                               const { return V2f(_mm_andnot_ps(_mm_set1_ps(-0.f), load())); }
+      inline V2f  maxC(const V2f& v)                   const { return V2f(_mm_max_ps(load(), v.load()));             }
+      inline V2f  minC(const V2f& v)                   const { return V2f(_mm_min_ps(load(), v.load()));             }
+      inline V2f  boundC(const V2f& mi, const V2f& ma) const { V2f t(minC(ma)); t.max(mi); return t;                 }
+      inline void abs()                                      { store(_mm_andnot_ps(_mm_set1_ps(-0.), load()));       }
+      inline void max(const V2f& v)                          { store(_mm_max_ps(load(), v.load()));                  }
+      inline void min(const V2f& v)                          { store(_mm_min_ps(load(), v.load()));                  }
+      inline void bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                     }
       //------------------------------------------------------------------------------------------------------------------------//
 #else
       inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
@@ -192,7 +192,15 @@ namespace simd
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void  swap(V2f& v) { std::swap(x, v.x); std::swap(y, v.y); }
+      inline void  swap(V2f& v)                               { std::swap(x, v.x); std::swap(y, v.y);             }
+      inline V2f   absC()                               const { return V2f(fabsf(x), fabsf(y));                   }
+      inline V2f   maxC(const V2f& v)                   const { return V2f(v.x > x ? v.x : x, v.y > y ? v.y : y); }
+      inline V2f   minC(const V2f& v)                   const { return V2f(v.x < x ? v.x : x, v.y < y ? v.y : y); }
+      inline V2f   boundC(const V2f& mi, const V2f& ma) const { V2f t(minC(ma)); t.max(mi); return t;             }
+      inline void  abs()                                      { x = fabsf(x);  y = fabsf(y);                      }
+      inline void  max(const V2f& v)                          { if (v.x > x) x = v.x; if (v.y > y) y = v.y;       }
+      inline void  min(const V2f& v)                          { if (v.x < x) x = v.x; if (v.y < y) y = v.y;       }
+      inline void  bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                 }
       //------------------------------------------------------------------------------------------------------------------------//
 #endif
    };
