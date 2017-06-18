@@ -89,7 +89,6 @@ namespace simd
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
       inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
-      inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this);  }
       inline void  rotate(float r)
       {
          float cs = ::cosf(r);
@@ -175,6 +174,14 @@ namespace simd
          __m128 d(_mm_and_ps(b, c));
          return _mm_movemask_ps(d) == 0x0F;
       }
+      inline float area(const V2f& p, const V2f& q) const
+      {
+         __m128 a(_mm_sub_ps(p.load(), load()));
+         __m128 b(_mm_sub_ps(q.load(), load()));
+         __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 d(_mm_mul_ps(a, c));
+         return 0.5f * (d.m128_f32[0] - d.m128_f32[1]);
+      }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE41)
       inline V2f   roundC()          const { return V2f(_mm_round_ps(load(), _MM_FROUND_NINT));  }
@@ -243,6 +250,7 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
       inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min - e) && *this <= (max + e); }
+      inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this); }
 #endif
    };
 
@@ -301,7 +309,6 @@ namespace simd
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
       inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
-      inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double angle()                const { return acos(x/length());                                          }
       inline double angleNoN()             const { return acos(x);                                                   }
@@ -383,6 +390,14 @@ namespace simd
          __m128d b(_mm_cmple_pd(simd, _mm_add_pd(max.simd, eps)));
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
+      }
+      inline double area(const V2d& p, const V2d& q) const 
+      { 
+         __m128d a(_mm_sub_pd(p.simd, simd));
+         __m128d b(_mm_sub_pd(q.simd, simd));
+         __m128d c(_mm_shuffle_pd(b, b, _MM_SHUFFLE2(0,1)));
+         __m128d d(_mm_mul_pd(a, c));
+         return 0.5 * (d.m128d_f64[0] - d.m128d_f64[1]);
       }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
@@ -473,6 +488,7 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
       inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e);}
+      inline double area(const V2d& p, const V2d& q)                     const { return 0.5 * (p - *this).cross(q - *this); }
 #endif
    };
 }
