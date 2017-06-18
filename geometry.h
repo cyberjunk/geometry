@@ -86,7 +86,6 @@ namespace simd
       inline V2f   perp1()                              const { return V2f( y,-x);                                }
       inline V2f   perp2()                              const { return V2f(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s);             }
       inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
       inline void  rotate(float r)
@@ -157,6 +156,16 @@ namespace simd
       inline void min(const V2f& v)                          { store(_mm_min_ps(load(), v.load()));                  }
       inline void bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                     }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline float side(const V2f& s, const V2f& e) const 
+      {
+         __m128 t(s.load());
+         __m128 a(_mm_sub_ps(e.load(), t));
+         __m128 b(_mm_sub_ps(load(), t));
+         __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 d(_mm_mul_ps(a, c));
+         return d.m128_f32[0] - d.m128_f32[1];
+      }
+
       inline bool inside(const V2f& min, const V2f& max) const
       {
          __m128 a(load());
@@ -176,8 +185,9 @@ namespace simd
       }
       inline float area(const V2f& p, const V2f& q) const
       {
-         __m128 a(_mm_sub_ps(p.load(), load()));
-         __m128 b(_mm_sub_ps(q.load(), load()));
+         __m128 t(load());
+         __m128 a(_mm_sub_ps(p.load(), t));
+         __m128 b(_mm_sub_ps(q.load(), t));
          __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 d(_mm_mul_ps(a, c));
          return 0.5f * (d.m128_f32[0] - d.m128_f32[1]);
@@ -248,6 +258,7 @@ namespace simd
       inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
       inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s); }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
       inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min - e) && *this <= (max + e); }
       inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this); }
@@ -296,7 +307,6 @@ namespace simd
       inline bool   isZero()                              const { return x == 0.0 && y == 0.0;                      }
       inline bool   isZero(const double e2)               const { return length2() <= e2;                           }
       inline bool   isNaN()                               const { return isnan(x) || isnan(y);                      }
-      inline double cross(const V2d& v)                   const { return x * v.y - y * v.x;                         }
       inline double length2()                             const { return dot(*this);                                }
       inline double distance2(const V2d& v)               const { return (*this - v).length2();                     }
       inline double distance(const V2d& v)                const { return sqrt(distance2(v));                        }
@@ -309,6 +319,7 @@ namespace simd
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
       inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
       inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
+      inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double angle()                const { return acos(x/length());                                          }
       inline double angleNoN()             const { return acos(x);                                                   }
@@ -376,6 +387,12 @@ namespace simd
          __m128d p(_mm_set_pd(x, -y));
          simd = _mm_add_pd(_mm_mul_pd(simd, cs), _mm_mul_pd(p, sn));
       }
+      inline double cross(const V2d& v) const
+      {
+         __m128d a(_mm_shuffle_pd(v.simd, v.simd, _MM_SHUFFLE2(0, 1)));
+         __m128d b(_mm_mul_pd(simd, a));
+         return b.m128d_f64[0] - b.m128d_f64[1];
+      }
       inline bool inside(const V2d& min, const V2d& max) const
       {
          __m128d a(_mm_cmpge_pd(simd, min.simd));
@@ -390,14 +407,6 @@ namespace simd
          __m128d b(_mm_cmple_pd(simd, _mm_add_pd(max.simd, eps)));
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
-      }
-      inline double area(const V2d& p, const V2d& q) const 
-      { 
-         __m128d a(_mm_sub_pd(p.simd, simd));
-         __m128d b(_mm_sub_pd(q.simd, simd));
-         __m128d c(_mm_shuffle_pd(b, b, _MM_SHUFFLE2(0,1)));
-         __m128d d(_mm_mul_pd(a, c));
-         return 0.5 * (d.m128d_f64[0] - d.m128d_f64[1]);
       }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
@@ -460,6 +469,7 @@ namespace simd
       inline       V2d& operator /= (const double s)       { double t=1.0/s; x*=t; y*=t; return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double dot(const V2d& v)                    const { return x * v.x + y * v.y;                         }
+      inline double cross(const V2d& v)                  const { return x * v.y - y * v.x;                         }
       inline double length()                             const { return sqrt(length2());                           }
       inline void   swap(V2d& v)                               { std::swap(x, v.x); std::swap(y, v.y);             }
       inline V2d    maxC(const V2d& v)                   const { return V2d(v.x > x ? v.x : x, v.y > y ? v.y : y); }
@@ -488,7 +498,6 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
       inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e);}
-      inline double area(const V2d& p, const V2d& q)                     const { return 0.5 * (p - *this).cross(q - *this); }
 #endif
    };
 }
