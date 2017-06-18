@@ -24,13 +24,15 @@ void bench(const char* name, const char* op, void task(T* ARR))
    auto t2 = clk.now();
    auto sp = t2 - t1;
    T s = T::ZERO(); for (size_t i = 0; i < LOOPS; i++) s += ARR[i];
-   printf(name); printf(" | "); printf(op); printf("%010I64i | ", sp.count()); printf("%05.3f \n", s.x + s.y);
+   printf(name); printf(" | "); printf(op); printf("%010I64i | ", sp.count()); printf("%+014.7f \n", s.x + s.y);
 }
 //------------------------------------------------------------------------------------------------------------------------//
-template<typename T, typename F> void benchLtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] < ARR[i + 1];)        }
-template<typename T, typename F> void benchLeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] <= ARR[i + 1];)       }
-template<typename T, typename F> void benchGtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] > ARR[i + 1];)        }
-template<typename T, typename F> void benchGeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] >= ARR[i + 1];)       }
+template<typename T, typename F> void benchEqV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] == ARR[i + 1]);)  }
+template<typename T, typename F> void benchNeqV(T* ARR)      { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] != ARR[i + 1]);)  }
+template<typename T, typename F> void benchLtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] < ARR[i + 1]);)   }
+template<typename T, typename F> void benchLeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] <= ARR[i + 1]);)  }
+template<typename T, typename F> void benchGtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] > ARR[i + 1]);)   }
+template<typename T, typename F> void benchGeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] >= ARR[i + 1]);)  }
 template<typename T, typename F> void benchAddV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
 template<typename T, typename F> void benchSubV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
 template<typename T, typename F> void benchMulV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
@@ -66,6 +68,8 @@ template<typename T, typename F> void benchAngleV(T* ARR)    { LOOP(LOOPS - 1, A
 template<typename T, typename F> void benchRun(const char* name)
 {
    PRINTHEADER;
+   bench<T>(name, "operator ==v | ", benchLtV<T, F>);
+   bench<T>(name, "operator !=v | ", benchLtV<T, F>);
    bench<T>(name, "operator < v | ", benchLtV<T, F>);
    bench<T>(name, "operator <=v | ", benchLeV<T, F>);
    bench<T>(name, "operator > v | ", benchGtV<T, F>);
