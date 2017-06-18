@@ -27,6 +27,10 @@ void bench(const char* name, const char* op, void task(T* ARR))
    printf(name); printf(" | "); printf(op); printf("%010I64i | ", sp.count()); printf("%05.3f \n", s.x + s.y);
 }
 //------------------------------------------------------------------------------------------------------------------------//
+template<typename T, typename F> void benchLtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] < ARR[i + 1];)        }
+template<typename T, typename F> void benchLeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] <= ARR[i + 1];)       }
+template<typename T, typename F> void benchGtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] > ARR[i + 1];)        }
+template<typename T, typename F> void benchGeV(T* ARR)       { LOOP(LOOPS - 1, ARR[i] = ARR[i] >= ARR[i + 1];)       }
 template<typename T, typename F> void benchAddV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] + ARR[i + 1];)        }
 template<typename T, typename F> void benchSubV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1];)        }
 template<typename T, typename F> void benchMulV(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1];)        }
@@ -35,9 +39,9 @@ template<typename T, typename F> void benchAddS(T* ARR)      { LOOP(LOOPS - 1, A
 template<typename T, typename F> void benchSubS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] - ARR[i + 1].x;)      }
 template<typename T, typename F> void benchMulS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] * ARR[i + 1].x;)      }
 template<typename T, typename F> void benchDivS(T* ARR)      { LOOP(LOOPS - 1, ARR[i] = ARR[i] / ARR[i + 1].x;)      }
-template<typename T, typename F> void benchIsZero(T* ARR)    { LOOP(LOOPS, ARR[i].x = (F)ARR[i].isZero();)      }
-template<typename T, typename F> void benchIsZeroE(T* ARR)   { LOOP(LOOPS, ARR[i].x = (F)ARR[i].isZero((F)0.01);)  }
-template<typename T, typename F> void benchRotate(T* ARR)    { LOOP(LOOPS, ARR[i].rotate((F)M_PI_2);)                   }
+template<typename T, typename F> void benchIsZero(T* ARR)    { LOOP(LOOPS, ARR[i].x = (F)ARR[i].isZero();)           }
+template<typename T, typename F> void benchIsZeroE(T* ARR)   { LOOP(LOOPS, ARR[i].x = (F)ARR[i].isZero((F)0.01);)    }
+template<typename T, typename F> void benchRotate(T* ARR)    { LOOP(LOOPS, ARR[i].rotate((F)M_PI_2);)                }
 template<typename T, typename F> void benchLength(T* ARR)    { LOOP(LOOPS, ARR[i].x = ARR[i].length();)              }
 template<typename T, typename F> void benchLength2(T* ARR)   { LOOP(LOOPS, ARR[i].x = ARR[i].length2();)             }
 template<typename T, typename F> void benchNormalise(T* ARR) { LOOP(LOOPS, ARR[i].normalise();)                      }
@@ -62,6 +66,10 @@ template<typename T, typename F> void benchAngleV(T* ARR)    { LOOP(LOOPS - 1, A
 template<typename T, typename F> void benchRun(const char* name)
 {
    PRINTHEADER;
+   bench<T>(name, "operator < v | ", benchLtV<T, F>);
+   bench<T>(name, "operator <=v | ", benchLeV<T, F>);
+   bench<T>(name, "operator > v | ", benchGtV<T, F>);
+   bench<T>(name, "operator >=v | ", benchGeV<T, F>);
    bench<T>(name, "operator + v | ", benchAddV<T, F>);
    bench<T>(name, "operator - v | ", benchSubV<T, F>);
    bench<T>(name, "operator * v | ", benchMulV<T, F>);

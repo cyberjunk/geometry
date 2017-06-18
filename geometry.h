@@ -60,10 +60,6 @@ namespace simd
       inline float& operator [] (const size_t i)       { return vals[i];                }
       inline bool   operator == (const V2f&   v) const { return (x == v.x && y == v.y); }
       inline bool   operator != (const V2f&   v) const { return (x != v.x || y != v.y); }
-      inline bool   operator <  (const V2f&   v) const { return (x <  v.x && y <  v.y); }
-      inline bool   operator <= (const V2f&   v) const { return (x <= v.x && y <= v.y); }
-      inline bool   operator >  (const V2f&   v) const { return (x >  v.x && y >  v.y); }
-      inline bool   operator >= (const V2f&   v) const { return (x >= v.x && y >= v.y); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f  operator +  (const float v[2]) const { return *this + V2f(v);         }
       inline V2f  operator -  (const float v[2]) const { return *this - V2f(v);         }
@@ -129,6 +125,10 @@ namespace simd
       inline void* operator new  (size_t size)            { return _aligned_malloc(sizeof(V2f), 8);        }
       inline void* operator new[](size_t size)            { return _aligned_malloc(size * sizeof(V2f), 8); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline       bool operator <  (const V2f&  v) const { return _mm_movemask_ps(_mm_cmplt_ps(load(), v.load())) == 0x0F; }
+      inline       bool operator <= (const V2f&  v) const { return _mm_movemask_ps(_mm_cmple_ps(load(), v.load())) == 0x0F; }
+      inline       bool operator >  (const V2f&  v) const { return _mm_movemask_ps(_mm_cmpgt_ps(load(), v.load())) == 0x0F; }
+      inline       bool operator >= (const V2f&  v) const { return _mm_movemask_ps(_mm_cmpge_ps(load(), v.load())) == 0x0F; }
       inline       V2f  operator +  (const V2f&  v) const { return V2f(_mm_add_ps(load(), v.load()));                }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(_mm_sub_ps(load(), v.load()));                }
       inline       V2f  operator *  (const V2f&  v) const { return V2f(_mm_mul_ps(load(), v.load()));                }
@@ -200,6 +200,10 @@ namespace simd
       inline void* operator new  (size_t size)            { return malloc(sizeof(V2f));        }
       inline void* operator new[](size_t size)            { return malloc(size * sizeof(V2f)); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline       bool operator <  (const V2f&  v) const { return (x <  v.x && y <  v.y);    }
+      inline       bool operator <= (const V2f&  v) const { return (x <= v.x && y <= v.y);    }
+      inline       bool operator >  (const V2f&  v) const { return (x >  v.x && y >  v.y);    }
+      inline       bool operator >= (const V2f&  v) const { return (x >= v.x && y >= v.y);    }
       inline       V2f  operator +  (const V2f&  v) const { return V2f(x + v.x, y + v.y);     }
       inline       V2f  operator -  (const V2f&  v) const { return V2f(x - v.x, y - v.y);     }
       inline       V2f  operator *  (const V2f&  v) const { return V2f(x * v.x, y * v.y);     }
@@ -269,10 +273,6 @@ namespace simd
       inline double& operator [] (const size_t i)       { return vals[i];                }
       inline bool    operator == (const V2d&   v) const { return (x == v.x && y == v.y); }
       inline bool    operator != (const V2d&   v) const { return (x != v.x || y != v.y); }
-      inline bool    operator <  (const V2d&   v) const { return (x <  v.x && y <  v.y); }
-      inline bool    operator <= (const V2d&   v) const { return (x <= v.x && y <= v.y); }
-      inline bool    operator >  (const V2d&   v) const { return (x >  v.x && y >  v.y); }
-      inline bool    operator >= (const V2d&   v) const { return (x >= v.x && y >= v.y); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d  operator +  (const double v[2]) const { return *this + V2d(v);         }
       inline V2d  operator -  (const double v[2]) const { return *this - V2d(v);         }
@@ -328,6 +328,10 @@ namespace simd
       inline void* operator new  (size_t size)             { return _aligned_malloc(sizeof(V2d), 16);       }
       inline void* operator new[](size_t size)             { return _aligned_malloc(size* sizeof(V2d), 16); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline       bool operator <  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmplt_pd(simd, v.simd)) == 0x03; }
+      inline       bool operator <= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmple_pd(simd, v.simd)) == 0x03; }
+      inline       bool operator >  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpgt_pd(simd, v.simd)) == 0x03; }
+      inline       bool operator >= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpge_pd(simd, v.simd)) == 0x03; }
       inline       V2d  operator +  (const V2d&   v) const { return V2d(_mm_add_pd(simd, v.simd));                  }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(_mm_sub_pd(simd, v.simd));                  }
       inline       V2d  operator *  (const V2d&   v) const { return V2d(_mm_mul_pd(simd, v.simd));                  }
@@ -413,6 +417,10 @@ namespace simd
       inline void* operator new  (size_t size)             { return malloc(sizeof(V2d));        }
       inline void* operator new[](size_t size)             { return malloc(size * sizeof(V2d)); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline       bool operator <  (const V2d&   v) const { return (x <  v.x && y <  v.y);            }
+      inline       bool operator <= (const V2d&   v) const { return (x <= v.x && y <= v.y);            }
+      inline       bool operator >  (const V2d&   v) const { return (x >  v.x && y >  v.y);            }
+      inline       bool operator >= (const V2d&   v) const { return (x >= v.x && y >= v.y);            }
       inline       V2d  operator +  (const V2d&   v) const { return V2d(x + v.x, y + v.y);             }
       inline       V2d  operator -  (const V2d&   v) const { return V2d(x - v.x, y - v.y);             }
       inline       V2d  operator *  (const V2d&   v) const { return V2d(x * v.x, y * v.y);             }
