@@ -86,8 +86,8 @@ namespace simd
       inline V2f   perp1()                              const { return V2f( y,-x);                                }
       inline V2f   perp2()                              const { return V2f(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  inside(const V2f& m, const float r2)                   const { return (*this - m).length2() <= r2;          }
-      inline bool  inside(const V2f& m, const float r2, const float e)    const { return (*this - m).length2() <= (r2+e);      }
+      inline bool  inside(const V2f& m, const float r2)                   const { return distance2(m) <= r2;          }
+      inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
       inline void  rotate(float r)
       {
          float cs = ::cosf(r);
@@ -317,8 +317,8 @@ namespace simd
       inline V2d    perp2()                               const { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
-      inline bool   inside(const V2d& m, const double r2)                 const { return (*this - m).length2() <= r2;          }
-      inline bool   inside(const V2d& m, const double r2, const double e) const { return (*this - m).length2() <= (r2 + e);    }
+      inline bool   inside(const V2d& m, const double r2)                 const { return distance2(m) <= r2;                   }
+      inline bool   inside(const V2d& m, const double r2, const double e) const { return distance2(m) <= (r2 + e);             }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double angle()                const { return acos(x/length());                                          }
@@ -420,15 +420,35 @@ namespace simd
       inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                        }
       inline void   normalise()             { simd = _mm_div_pd(simd, _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x33))); }
 #else
-      inline double dot(const V2d& v) const { return x * v.x + y * v.y;                    }
-      inline double length()          const { return sqrt(length2());                      }
+      inline double dot(const V2d& v) const 
+      {
+         __m128d a(_mm_mul_pd(simd, v.simd));
+         __m128d b(_mm_castps_pd(_mm_movehl_ps(_mm_undefined_ps(), _mm_castpd_ps(a))));
+         __m128d c(_mm_add_sd(a, b));
+         return c.m128d_f64[0];
+      }
+      inline double length() const 
+      { 
+         __m128d a(_mm_mul_pd(simd, simd));
+         __m128d b(_mm_castps_pd(_mm_movehl_ps(_mm_undefined_ps(), _mm_castpd_ps(a))));
+         __m128d c(_mm_add_sd(a, b));
+         __m128d d(_mm_sqrt_sd(c, c));
+         return d.m128d_f64[0];
+      }
       inline V2d    roundC()          const { return V2d(::round(x), ::round(y));          }
       inline V2d    floorC()          const { return V2d(::floor(x), ::floor(y));          }
       inline V2d    ceilC()           const { return V2d(::ceil(x),  ::ceil(y));           }
       inline void   round()                 { x = ::round(x); y = ::round(y);              }
       inline void   floor()                 { x = ::floor(x); y = ::floor(y);              }
       inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);               }
-      inline void   normalise()             { *this /= length();                           }
+      inline void   normalise()             
+      { 
+         __m128d a(_mm_mul_pd(simd, simd));
+         __m128d b(_mm_shuffle_pd(a, a, _MM_SHUFFLE2(0,1)));
+         __m128d c(_mm_add_pd(a, b));
+         __m128d d(_mm_sqrt_pd(c));
+         simd = _mm_div_pd(simd, d);
+      }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
