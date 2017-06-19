@@ -76,6 +76,15 @@ namespace simd
       inline V2f& operator -= (const float v[2])       { *this -= V2f(v); return *this; }
       inline V2f& operator *= (const float v[2])       { *this *= V2f(v); return *this; }
       inline V2f& operator /= (const float v[2])       { *this /= V2f(v); return *this; }
+      inline V2f  operator +  (const int   v[2]) const { return *this + V2f(v);         }
+      inline V2f  operator -  (const int   v[2]) const { return *this - V2f(v);         }
+      inline V2f  operator *  (const int   v[2]) const { return *this * V2f(v);         }
+      inline V2f  operator /  (const int   v[2]) const { return *this / V2f(v);         }
+      inline V2f& operator =  (const int   v[2])       { *this =  V2f(v); return *this; }
+      inline V2f& operator += (const int   v[2])       { *this += V2f(v); return *this; }
+      inline V2f& operator -= (const int   v[2])       { *this -= V2f(v); return *this; }
+      inline V2f& operator *= (const int   v[2])       { *this *= V2f(v); return *this; }
+      inline V2f& operator /= (const int   v[2])       { *this /= V2f(v); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
       inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
@@ -329,6 +338,15 @@ namespace simd
       inline V2d& operator -= (const double v[2])       { *this -= V2d(v); return *this; }
       inline V2d& operator *= (const double v[2])       { *this *= V2d(v); return *this; }
       inline V2d& operator /= (const double v[2])       { *this /= V2d(v); return *this; }
+      inline V2d  operator +  (const int    v[2]) const { return *this + V2d(v);         }
+      inline V2d  operator -  (const int    v[2]) const { return *this - V2d(v);         }
+      inline V2d  operator *  (const int    v[2]) const { return *this * V2d(v);         }
+      inline V2d  operator /  (const int    v[2]) const { return *this / V2d(v);         }
+      inline V2d& operator =  (const int    v[2])       { *this =  V2d(v); return *this; }
+      inline V2d& operator += (const int    v[2])       { *this += V2d(v); return *this; }
+      inline V2d& operator -= (const int    v[2])       { *this -= V2d(v); return *this; }
+      inline V2d& operator *= (const int    v[2])       { *this *= V2d(v); return *this; }
+      inline V2d& operator /= (const int    v[2])       { *this /= V2d(v); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool   equals(const V2d& v, const double e2) const { return (*this - v).length2() <= e2;               }
       inline bool   isZero()                              const { return x == 0.0 && y == 0.0;                      }
