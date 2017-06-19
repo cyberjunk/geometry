@@ -42,9 +42,34 @@
 namespace simd
 {
    /// <summary>
+   /// Generic 2D Vector
+   /// </summary>
+   template <typename V, typename F>
+   class V2
+   {
+   public:
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V ZERO()  { return V((F)0.0, (F)0.0); }
+      static inline V UNITX() { return V((F)1.0, (F)0.0); }
+      static inline V UNITY() { return V((F)0.0, (F)1.0); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V  operator [] (const size_t i) const { return vals[i]; }
+      inline V& operator [] (const size_t i)       { return vals[i]; }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V    random()                         { return V(std::rand(), std::rand());                    }
+      static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
+      static inline void random(V* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V::random();  }
+      static inline void randomN(V* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V::randomN(); }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+
+   /// <summary>
    /// Single Precision 2D Vector
    /// </summary>
-   SIMD_V2_32_ALIGN class V2f
+   SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
    {
    public:
       //------------------------------------------------------------------------------------------------------------------------//
@@ -54,37 +79,11 @@ namespace simd
          float vals[2];
       };
       //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2f ZERO()  { return V2f(0.0f, 0.0f); }
-      static inline V2f UNITX() { return V2f(1.0f, 0.0f); }
-      static inline V2f UNITY() { return V2f(0.0f, 1.0f); }
-      //------------------------------------------------------------------------------------------------------------------------//
       inline V2f()                                                          { }
       inline V2f(const float x, const float y)   : x(x),        y(y)        { }
       inline V2f(const float s)                  : x(s),        y(s)        { }
       inline V2f(const double x, const double y) : x((float)x), y((float)y) { }
       inline V2f(const int x, const int y)       : x((float)x), y((float)y) { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline float  operator [] (const size_t i) const { return vals[i];                }
-      inline float& operator [] (const size_t i)       { return vals[i];                }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f  operator +  (const float v[2]) const { return *this + V2f(v);         }
-      inline V2f  operator -  (const float v[2]) const { return *this - V2f(v);         }
-      inline V2f  operator *  (const float v[2]) const { return *this * V2f(v);         }
-      inline V2f  operator /  (const float v[2]) const { return *this / V2f(v);         }
-      inline V2f& operator =  (const float v[2])       { *this =  V2f(v); return *this; }
-      inline V2f& operator += (const float v[2])       { *this += V2f(v); return *this; }
-      inline V2f& operator -= (const float v[2])       { *this -= V2f(v); return *this; }
-      inline V2f& operator *= (const float v[2])       { *this *= V2f(v); return *this; }
-      inline V2f& operator /= (const float v[2])       { *this /= V2f(v); return *this; }
-      inline V2f  operator +  (const int   v[2]) const { return *this + V2f(v);         }
-      inline V2f  operator -  (const int   v[2]) const { return *this - V2f(v);         }
-      inline V2f  operator *  (const int   v[2]) const { return *this * V2f(v);         }
-      inline V2f  operator /  (const int   v[2]) const { return *this / V2f(v);         }
-      inline V2f& operator =  (const int   v[2])       { *this =  V2f(v); return *this; }
-      inline V2f& operator += (const int   v[2])       { *this += V2f(v); return *this; }
-      inline V2f& operator -= (const int   v[2])       { *this -= V2f(v); return *this; }
-      inline V2f& operator *= (const int   v[2])       { *this *= V2f(v); return *this; }
-      inline V2f& operator /= (const int   v[2])       { *this /= V2f(v); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
       inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
@@ -118,11 +117,6 @@ namespace simd
       inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acosf(dot(v) / lp);             }
       inline float angleOri(const V2f& v) const { float t = angle(v); if (cross(v) < 0.0f) t = (float)TWOPI - t; return t; }
-      //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2f  random()                           { return V2f(std::rand(), std::rand());                    }
-      static inline V2f  randomN()                          { V2f t(V2f::random()); t.normalise(); return t;           }
-      static inline void random(V2f* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V2f::random();  }
-      static inline void randomN(V2f* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2f::randomN(); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
@@ -308,7 +302,7 @@ namespace simd
    /// <summary>
    /// Double Precision 2D Vector
    /// </summary>
-   SIMD_V2_64_ALIGN class V2d
+   SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
    public:
       union
@@ -320,33 +314,7 @@ namespace simd
          #endif
       };
       //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2d ZERO()  { return V2d(0.0, 0.0); }
-      static inline V2d UNITX() { return V2d(1.0, 0.0); }
-      static inline V2d UNITY() { return V2d(0.0, 1.0); }
-      //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline double  operator [] (const size_t i) const { return vals[i];                }
-      inline double& operator [] (const size_t i)       { return vals[i];                }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2d  operator +  (const double v[2]) const { return *this + V2d(v);         }
-      inline V2d  operator -  (const double v[2]) const { return *this - V2d(v);         }
-      inline V2d  operator *  (const double v[2]) const { return *this * V2d(v);         }
-      inline V2d  operator /  (const double v[2]) const { return *this / V2d(v);         }
-      inline V2d& operator =  (const double v[2])       { *this =  V2d(v); return *this; }
-      inline V2d& operator += (const double v[2])       { *this += V2d(v); return *this; }
-      inline V2d& operator -= (const double v[2])       { *this -= V2d(v); return *this; }
-      inline V2d& operator *= (const double v[2])       { *this *= V2d(v); return *this; }
-      inline V2d& operator /= (const double v[2])       { *this /= V2d(v); return *this; }
-      inline V2d  operator +  (const int    v[2]) const { return *this + V2d(v);         }
-      inline V2d  operator -  (const int    v[2]) const { return *this - V2d(v);         }
-      inline V2d  operator *  (const int    v[2]) const { return *this * V2d(v);         }
-      inline V2d  operator /  (const int    v[2]) const { return *this / V2d(v);         }
-      inline V2d& operator =  (const int    v[2])       { *this =  V2d(v); return *this; }
-      inline V2d& operator += (const int    v[2])       { *this += V2d(v); return *this; }
-      inline V2d& operator -= (const int    v[2])       { *this -= V2d(v); return *this; }
-      inline V2d& operator *= (const int    v[2])       { *this *= V2d(v); return *this; }
-      inline V2d& operator /= (const int    v[2])       { *this /= V2d(v); return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool   equals(const V2d& v, const double e2) const { return (*this - v).length2() <= e2;               }
       inline bool   isZero()                              const { return x == 0.0 && y == 0.0;                      }
@@ -372,11 +340,6 @@ namespace simd
       inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }
       inline double angle(const V2d& v)    const { double lp = length() * v.length(); return acos(dot(v) / lp);      }
       inline double angleOri(const V2d& v) const { double t = angle(v); if (cross(v) < 0.0) t = TWOPI - t; return t; }
-      //------------------------------------------------------------------------------------------------------------------------//
-      static inline V2d  random()                           { return V2d(std::rand(), std::rand());                    }
-      static inline V2d  randomN()                          { V2d t(V2d::random()); t.normalise(); return t;           }
-      static inline void random(V2d* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V2d::random();  }
-      static inline void randomN(V2d* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V2d::randomN(); }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
       inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fY, fX))                                 { }
