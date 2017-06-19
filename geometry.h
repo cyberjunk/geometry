@@ -86,6 +86,8 @@ namespace simd
       inline void max(const V& v)                        { if (v.x > x) x = v.x; if (v.y > y) y = v.y;     }
       inline void min(const V& v)                        { if (v.x < x) x = v.x; if (v.y < y) y = v.y;     }
       inline void bound(const V& mi, const V& ma)        { min(ma); max(mi);                               }
+      inline V    perp1()                          const { return V(y, -x);                                }
+      inline V    perp2()                          const { return V(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
       static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
@@ -119,8 +121,6 @@ namespace simd
       inline float distance(const V2f& v)               const { return sqrtf(distance2(v));                       }
       inline void  normalise()                                { *this /= length();                                }
       inline V2f   normaliseC()                         const { V2f t(*this); t.normalise(); return t;            }
-      inline V2f   perp1()                              const { return V2f( y,-x);                                }
-      inline V2f   perp2()                              const { return V2f(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  inside(const V2f& m, const float r2)                   const { return distance2(m) <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
@@ -321,8 +321,6 @@ namespace simd
       inline double distance2(const V2d& v)               const { return (*this - v).length2();                     }
       inline double distance(const V2d& v)                const { return sqrt(distance2(v));                        }
       inline V2d    normaliseC()                          const { V2d t(*this); t.normalise(); return t;            }
-      inline V2d    perp1()                               const { return V2d(y, -x);                                }
-      inline V2d    perp2()                               const { return V2d(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
       inline bool   inside(const V2d& m, const double r2)                 const { return distance2(m) <= r2;                   }
