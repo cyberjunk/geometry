@@ -309,9 +309,6 @@ namespace simd
       {
          struct { double x, y; };
          double vals[2];
-         #if defined(SIMD_V2_64_SSE2)
-         __m128d simd;
-         #endif
       };
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
@@ -342,104 +339,108 @@ namespace simd
       inline double angleOri(const V2d& v) const { double t = angle(v); if (cross(v) < 0.0) t = TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
-      inline V2d(const double fX, const double fY) : simd(_mm_set_pd(fY, fX))                                 { }
-      inline V2d(const float fX, const float fY)   : simd(_mm_set_pd((double)fY, (double)fX))                 { }
-      inline V2d(const int fX, const int fY)       : simd(_mm_set_pd((double)fY, (double)fX))                 { }
-      inline V2d(const double scalar)              : simd(_mm_set1_pd(scalar))                                { }
-      inline V2d(const double values[2])           : simd(_mm_loadu_pd(values))                               { }
-      inline V2d(double* const values)             : simd(_mm_loadu_pd(values))                               { }
-      inline V2d(const int values[2])              : simd(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))) { }
-      inline V2d(const __m128d values)             : simd(values)                                             { }
+      inline __m128d load()                 const { return _mm_load_pd(vals); }
+      inline void    store(const __m128d v)       { _mm_store_pd(vals, v);    }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2d(const double fX, const double fY) { store(_mm_set_pd(fY, fX));                                 }
+      inline V2d(const float fX, const float fY)   { store(_mm_set_pd((double)fY, (double)fX));                 }
+      inline V2d(const int fX, const int fY)       { store(_mm_set_pd((double)fY, (double)fX));                 }
+      inline V2d(const double scalar)              { store(_mm_set1_pd(scalar));                                }
+      inline V2d(const double values[2])           { store(_mm_loadu_pd(values));                               }
+      inline V2d(double* const values)             { store(_mm_loadu_pd(values));                               }
+      inline V2d(const int values[2])              { store(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))); }
+      inline V2d(const __m128d values)             { store(values);                                             }
       //------------------------------------------------------------------------------------------------------------------------//
       inline void* operator new  (size_t size)             { return _aligned_malloc(sizeof(V2d), 16);       }
       inline void* operator new[](size_t size)             { return _aligned_malloc(size* sizeof(V2d), 16); }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline       bool operator == (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(simd, v.simd)) == 0x03; }
-      inline       bool operator != (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(simd, v.simd)) != 0x00; }
-      inline       bool operator <  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmplt_pd(simd, v.simd)) == 0x03; }
-      inline       bool operator <= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmple_pd(simd, v.simd)) == 0x03; }
-      inline       bool operator >  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpgt_pd(simd, v.simd)) == 0x03; }
-      inline       bool operator >= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpge_pd(simd, v.simd)) == 0x03; }
-      inline       V2d  operator +  (const V2d&   v) const { return V2d(_mm_add_pd(simd, v.simd));                  }
-      inline       V2d  operator -  (const V2d&   v) const { return V2d(_mm_sub_pd(simd, v.simd));                  }
-      inline       V2d  operator *  (const V2d&   v) const { return V2d(_mm_mul_pd(simd, v.simd));                  }
-      inline       V2d  operator /  (const V2d&   v) const { return V2d(_mm_div_pd(simd, v.simd));                  }
-      inline       V2d  operator *  (const double s) const { return V2d(_mm_mul_pd(simd, _mm_set1_pd(s)));          }
-      inline       V2d  operator /  (const double s) const { return V2d(_mm_div_pd(simd, _mm_set1_pd(s)));          }
-      inline       V2d  operator -  ()               const { return V2d(_mm_sub_pd(_mm_setzero_pd(), simd));        }
-      inline const V2d& operator +  ()               const { return *this;                                          }
-      inline       V2d& operator =  (const V2d&   v)       { simd = v.simd;                           return *this; }
-      inline       V2d& operator += (const V2d&   v)       { simd = _mm_add_pd(simd, v.simd);         return *this; }
-      inline       V2d& operator -= (const V2d&   v)       { simd = _mm_sub_pd(simd, v.simd);         return *this; }
-      inline       V2d& operator *= (const V2d&   v)       { simd = _mm_mul_pd(simd, v.simd);         return *this; }
-      inline       V2d& operator /= (const V2d&   v)       { simd = _mm_div_pd(simd, v.simd);         return *this; }
-      inline       V2d& operator =  (const double s)       { simd = _mm_set1_pd(s);                   return *this; }
-      inline       V2d& operator += (const double s)       { simd = _mm_add_pd(simd, _mm_set1_pd(s)); return *this; }
-      inline       V2d& operator -= (const double s)       { simd = _mm_sub_pd(simd, _mm_set1_pd(s)); return *this; }
-      inline       V2d& operator *= (const double s)       { simd = _mm_mul_pd(simd, _mm_set1_pd(s)); return *this; }
-      inline       V2d& operator /= (const double s)       { simd = _mm_div_pd(simd, _mm_set1_pd(s)); return *this; }
+      inline       bool operator == (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) == 0x03; }
+      inline       bool operator != (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) != 0x00; }
+      inline       bool operator <  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmplt_pd(load(), v.load())) == 0x03; }
+      inline       bool operator <= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmple_pd(load(), v.load())) == 0x03; }
+      inline       bool operator >  (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpgt_pd(load(), v.load())) == 0x03; }
+      inline       bool operator >= (const V2d&   v) const { return _mm_movemask_pd(_mm_cmpge_pd(load(), v.load())) == 0x03; }
+      inline       V2d  operator +  (const V2d&   v) const { return V2d(_mm_add_pd(load(), v.load()));                       }
+      inline       V2d  operator -  (const V2d&   v) const { return V2d(_mm_sub_pd(load(), v.load()));                       }
+      inline       V2d  operator *  (const V2d&   v) const { return V2d(_mm_mul_pd(load(), v.load()));                       }
+      inline       V2d  operator /  (const V2d&   v) const { return V2d(_mm_div_pd(load(), v.load()));                       }
+      inline       V2d  operator *  (const double s) const { return V2d(_mm_mul_pd(load(), _mm_set1_pd(s)));                 }
+      inline       V2d  operator /  (const double s) const { return V2d(_mm_div_pd(load(), _mm_set1_pd(s)));                 }
+      inline       V2d  operator -  ()               const { return V2d(_mm_sub_pd(_mm_setzero_pd(), load()));               }
+      inline const V2d& operator +  ()               const { return *this;                                                   }
+      inline       V2d& operator =  (const V2d&   v)       { store(v.load());                           return *this;        }
+      inline       V2d& operator += (const V2d&   v)       { store(_mm_add_pd(load(), v.load()));       return *this;        }
+      inline       V2d& operator -= (const V2d&   v)       { store(_mm_sub_pd(load(), v.load()));       return *this;        }
+      inline       V2d& operator *= (const V2d&   v)       { store(_mm_mul_pd(load(), v.load()));       return *this;        }
+      inline       V2d& operator /= (const V2d&   v)       { store(_mm_div_pd(load(), v.load()));       return *this;        }
+      inline       V2d& operator =  (const double s)       { store(_mm_set1_pd(s));                     return *this;        }
+      inline       V2d& operator += (const double s)       { store(_mm_add_pd(load(), _mm_set1_pd(s))); return *this;        }
+      inline       V2d& operator -= (const double s)       { store(_mm_sub_pd(load(), _mm_set1_pd(s))); return *this;        }
+      inline       V2d& operator *= (const double s)       { store(_mm_mul_pd(load(), _mm_set1_pd(s))); return *this;        }
+      inline       V2d& operator /= (const double s)       { store(_mm_div_pd(load(), _mm_set1_pd(s))); return *this;        }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void swap(V2d& v)                               { __m128d t(simd); simd = v.simd; v.simd = t;        }
-      inline V2d  absC()                               const { return V2d(_mm_andnot_pd(_mm_set1_pd(-0.), simd)); }
-      inline V2d  maxC(const V2d& v)                   const { return V2d(_mm_max_pd(simd, v.simd));              }
-      inline V2d  minC(const V2d& v)                   const { return V2d(_mm_min_pd(simd, v.simd));              }
-      inline V2d  boundC(const V2d& mi, const V2d& ma) const { V2d t(minC(ma)); t.max(mi); return t;              }
-      inline void abs()                                      { simd = _mm_andnot_pd(_mm_set1_pd(-0.), simd);      }
-      inline void max(const V2d& v)                          { simd = _mm_max_pd(simd, v.simd);                   }
-      inline void min(const V2d& v)                          { simd = _mm_min_pd(simd, v.simd);                   }
-      inline void bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                                  }
+      inline void swap(V2d& v)                               { __m128d t(load()); store(v.load()); v.store(t);      }
+      inline V2d  absC()                               const { return V2d(_mm_andnot_pd(_mm_set1_pd(-0.), load())); }
+      inline V2d  maxC(const V2d& v)                   const { return V2d(_mm_max_pd(load(), v.load()));            }
+      inline V2d  minC(const V2d& v)                   const { return V2d(_mm_min_pd(load(), v.load()));            }
+      inline V2d  boundC(const V2d& mi, const V2d& ma) const { V2d t(minC(ma)); t.max(mi); return t;                }
+      inline void abs()                                      { store(_mm_andnot_pd(_mm_set1_pd(-0.), load()));      }
+      inline void max(const V2d& v)                          { store(_mm_max_pd(load(), v.load()));                 }
+      inline void min(const V2d& v)                          { store(_mm_min_pd(load(), v.load()));                 }
+      inline void bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                                    }
       inline void rotate(double r)
       {
          __m128d cs(_mm_set1_pd(::cos(r)));
          __m128d sn(_mm_set1_pd(::sin(r)));
          __m128d p(_mm_set_pd(x, -y));
-         simd = _mm_add_pd(_mm_mul_pd(simd, cs), _mm_mul_pd(p, sn));
+         store(_mm_add_pd(_mm_mul_pd(load(), cs), _mm_mul_pd(p, sn)));
       }
       inline double cross(const V2d& v) const
       {
-         __m128d a(_mm_shuffle_pd(v.simd, v.simd, _MM_SHUFFLE2(0, 1)));
-         __m128d b(_mm_mul_pd(simd, a));
+         __m128d a(_mm_shuffle_pd(v.load(), v.load(), _MM_SHUFFLE2(0, 1)));
+         __m128d b(_mm_mul_pd(load(), a));
          __m128d c(_mm_shuffle_pd(b, b, _MM_SHUFFLE2(0, 1)));
          __m128d d(_mm_sub_sd(b, c));
          return d.m128d_f64[0];
       }
       inline bool inside(const V2d& min, const V2d& max) const
       {
-         __m128d a(_mm_cmpge_pd(simd, min.simd));
-         __m128d b(_mm_cmple_pd(simd, max.simd));
+         __m128d a(_mm_cmpge_pd(load(), min.load()));
+         __m128d b(_mm_cmple_pd(load(), max.load()));
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
       }
       inline bool inside(const V2d& min, const V2d& max, const double e) const
       {
          __m128d eps(_mm_set1_pd(e));
-         __m128d a(_mm_cmpge_pd(simd, _mm_sub_pd(min.simd, eps)));
-         __m128d b(_mm_cmple_pd(simd, _mm_add_pd(max.simd, eps)));
+         __m128d a(_mm_cmpge_pd(load(), _mm_sub_pd(min.load(), eps)));
+         __m128d b(_mm_cmple_pd(load(), _mm_add_pd(max.load(), eps)));
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
       }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
-      inline double dot(const V2d& v) const { return _mm_dp_pd(simd, v.simd, 0x31).m128d_f64[0];                 }
-      inline double length()          const { return _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x31)).m128d_f64[0];      }
-      inline V2d    roundC()          const { return V2d(_mm_round_pd(simd, _MM_FROUND_NINT));                   }
-      inline V2d    floorC()          const { return V2d(_mm_round_pd(simd, _MM_FROUND_FLOOR));                  }
-      inline V2d    ceilC()           const { return V2d(_mm_round_pd(simd, _MM_FROUND_CEIL));                   }
-      inline void   round()                 { simd = _mm_round_pd(simd, _MM_FROUND_NINT);                        }
-      inline void   floor()                 { simd = _mm_round_pd(simd, _MM_FROUND_FLOOR);                       }
-      inline void   ceil()                  { simd = _mm_round_pd(simd, _MM_FROUND_CEIL);                        }
-      inline void   normalise()             { simd = _mm_div_pd(simd, _mm_sqrt_pd(_mm_dp_pd(simd, simd, 0x33))); }
+      inline double dot(const V2d& v) const { return _mm_dp_pd(load(), v.load(), 0x31).m128d_f64[0];                            }
+      inline double length()          const { __m128d t(load()); return _mm_sqrt_pd(_mm_dp_pd(t, t, 0x31)).m128d_f64[0];        }
+      inline V2d    roundC()          const { return V2d(_mm_round_pd(load(), _MM_FROUND_NINT));                                }
+      inline V2d    floorC()          const { return V2d(_mm_round_pd(load(), _MM_FROUND_FLOOR));                               }
+      inline V2d    ceilC()           const { return V2d(_mm_round_pd(load(), _MM_FROUND_CEIL));                                }
+      inline void   round()                 { store(_mm_round_pd(load(), _MM_FROUND_NINT));                                     }
+      inline void   floor()                 { store(_mm_round_pd(load(), _MM_FROUND_FLOOR));                                    }
+      inline void   ceil()                  { store(_mm_round_pd(load(), _MM_FROUND_CEIL));                                     }
+      inline void   normalise()             { __m128d t(load()); store(_mm_div_pd(load(), _mm_sqrt_pd(_mm_dp_pd(t, t, 0x33)))); }
 #else
       inline double dot(const V2d& v) const 
       {
-         __m128d a(_mm_mul_pd(simd, v.simd));
+         __m128d a(_mm_mul_pd(load(), v.load()));
          __m128d b(_mm_castps_pd(_mm_movehl_ps(_mm_undefined_ps(), _mm_castpd_ps(a))));
          __m128d c(_mm_add_sd(a, b));
          return c.m128d_f64[0];
       }
       inline double length() const 
       { 
-         __m128d a(_mm_mul_pd(simd, simd));
+         __m128d t(load());
+         __m128d a(_mm_mul_pd(t, t));
          __m128d b(_mm_castps_pd(_mm_movehl_ps(_mm_undefined_ps(), _mm_castpd_ps(a))));
          __m128d c(_mm_add_sd(a, b));
          __m128d d(_mm_sqrt_sd(c, c));
@@ -453,11 +454,12 @@ namespace simd
       inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);               }
       inline void   normalise()             
       { 
-         __m128d a(_mm_mul_pd(simd, simd));
+         __m128d t(load());
+         __m128d a(_mm_mul_pd(t, t));
          __m128d b(_mm_shuffle_pd(a, a, _MM_SHUFFLE2(0,1)));
          __m128d c(_mm_add_pd(a, b));
          __m128d d(_mm_sqrt_pd(c));
-         simd = _mm_div_pd(simd, d);
+         store(_mm_div_pd(t, d));
       }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
