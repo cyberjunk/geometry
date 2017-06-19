@@ -48,6 +48,17 @@ namespace simd
    class V2
    {
    public:
+      union
+      {
+         struct { F x, y; };
+         F vals[2];
+      };
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2()                                                  { }
+      inline V2(const F x, const F y) : x(x),         y(y)         { }
+      inline V2(const F scalar)       : x(scalar),    y(scalar)    { }
+      inline V2(const F values[2])    : x(values[0]), y(values[1]) { }
+      inline V2(F* const values)      : x(values[0]), y(values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V ZERO()  { return V((F)0.0, (F)0.0); }
       static inline V UNITX() { return V((F)1.0, (F)0.0); }
@@ -73,17 +84,11 @@ namespace simd
    {
    public:
       //------------------------------------------------------------------------------------------------------------------------//
-      union
-      {
-         struct { float x, y; };
-         float vals[2];
-      };
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f()                                                          { }
-      inline V2f(const float x, const float y)   : x(x),        y(y)        { }
-      inline V2f(const float s)                  : x(s),        y(s)        { }
-      inline V2f(const double x, const double y) : x((float)x), y((float)y) { }
-      inline V2f(const int x, const int y)       : x((float)x), y((float)y) { }
+      inline V2f()                                                        { }
+      inline V2f(const float x, const float y)   : V2(x,        y)        { }
+      inline V2f(const float s)                  : V2(s,        s)        { }
+      inline V2f(const double x, const double y) : V2((float)x, (float)y) { }
+      inline V2f(const int x, const int y)       : V2((float)x, (float)y) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
       inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
@@ -238,9 +243,9 @@ namespace simd
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
-      inline V2f(const float values[2]) : x(values[0]), y(values[1])               { }
-      inline V2f(float* const values)   : x(values[0]), y(values[1])               { }
-      inline V2f(const int values[2])   : x((float)values[0]), y((float)values[1]) { }
+      inline V2f(const float values[2]) : V2(values[0], values[1])               { }
+      inline V2f(float* const values)   : V2(values[0], values[1])               { }
+      inline V2f(const int values[2])   : V2((float)values[0], (float)values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline void* operator new  (size_t size)            { return malloc(sizeof(V2f));        }
       inline void* operator new[](size_t size)            { return malloc(size * sizeof(V2f)); }
@@ -305,11 +310,6 @@ namespace simd
    SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
    public:
-      union
-      {
-         struct { double x, y; };
-         double vals[2];
-      };
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -464,13 +464,13 @@ namespace simd
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
-      inline V2d(const double x, const double y) : x(x),         y(y)                         { }
-      inline V2d(const double scalar)            : x(scalar),    y(scalar)                    { }
-      inline V2d(const double values[2])         : x(values[0]), y(values[1])                 { }
-      inline V2d(double* const values)           : x(values[0]), y(values[1])                 { }
-      inline V2d(const int values[2])            : x((double)values[0]), y((double)values[1]) { }
-      inline V2d(const float x, const float y)   : x((double)x), y((double)y)                 { }
-      inline V2d(const int x, const int y)       : x((double)x), y((double)y)                 { }
+      inline V2d(const double x, const double y) : V2(x, y)                                   { }
+      inline V2d(const double scalar)            : V2(scalar, scalar)                         { }
+      inline V2d(const double values[2])         : V2(values[0], values[1])                   { }
+      inline V2d(double* const values)           : V2(values[0], values[1])                   { }
+      inline V2d(const int values[2])            : V2((double)values[0], (double)values[1])   { }
+      inline V2d(const float x, const float y)   : V2((double)x, (double)y)                   { }
+      inline V2d(const int x, const int y)       : V2((double)x, (double)y)                   { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline void* operator new  (size_t size)             { return malloc(sizeof(V2d));        }
       inline void* operator new[](size_t size)             { return malloc(size * sizeof(V2d)); }
