@@ -78,6 +78,7 @@ namespace simd
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y);           }
       inline F    cross(const V& v)                const { return x * v.y - y * v.x;                       }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
+      inline F    length2()                        const { return dot(*((V*)this)); }
       inline V    yx()                             const { return V(y, x);                                 }
       inline void yx()                                   { std::swap(x, y);                                }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
@@ -116,7 +117,6 @@ namespace simd
       inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
       inline bool  isZero(const float e2)               const { return length2() <= e2;                           }
       inline bool  isNaN()                              const { return isnan(x) || isnan(y);                      }
-      inline float length2()                            const { return dot(*this);                                }
       inline float distance2(const V2f& v)              const { return (*this - v).length2();                     }
       inline float distance(const V2f& v)               const { return sqrtf(distance2(v));                       }
       inline void  normalise()                                { *this /= length();                                }
@@ -317,7 +317,6 @@ namespace simd
       inline bool   isZero()                              const { return x == 0.0 && y == 0.0;                      }
       inline bool   isZero(const double e2)               const { return length2() <= e2;                           }
       inline bool   isNaN()                               const { return isnan(x) || isnan(y);                      }
-      inline double length2()                             const { return dot(*this);                                }
       inline double distance2(const V2d& v)               const { return (*this - v).length2();                     }
       inline double distance(const V2d& v)                const { return sqrt(distance2(v));                        }
       inline V2d    normaliseC()                          const { V2d t(*this); t.normalise(); return t;            }
