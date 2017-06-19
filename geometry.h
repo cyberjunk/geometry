@@ -410,7 +410,9 @@ namespace simd
       {
          __m128d a(_mm_shuffle_pd(v.simd, v.simd, _MM_SHUFFLE2(0, 1)));
          __m128d b(_mm_mul_pd(simd, a));
-         return b.m128d_f64[0] - b.m128d_f64[1];
+         __m128d c(_mm_shuffle_pd(b, b, _MM_SHUFFLE2(0, 1)));
+         __m128d d(_mm_sub_sd(b, c));
+         return d.m128d_f64[0];
       }
       inline bool inside(const V2d& min, const V2d& max) const
       {
