@@ -73,10 +73,8 @@ namespace simd
       inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
       inline bool  isZero(const float e2)               const { return length2() <= e2;                           }
       inline bool  isNaN()                              const { return isnan(x) || isnan(y);                      }
-      inline float dot(const V2f& v)                    const { return x * v.x + y * v.y;                         }
       inline float cross(const V2f& v)                  const { return x * v.y - y * v.x;                         }
       inline float length2()                            const { return dot(*this);                                }
-      inline float length()                             const { return sqrtf(length2());                          }
       inline float distance2(const V2f& v)              const { return (*this - v).length2();                     }
       inline float distance(const V2f& v)               const { return sqrtf(distance2(v));                       }
       inline V2f   yx()                                 const { return V2f(y, x);                                 }
@@ -156,6 +154,22 @@ namespace simd
       inline void min(const V2f& v)                          { store(_mm_min_ps(load(), v.load()));                  }
       inline void bound(const V2f& mi, const V2f& ma)        { min(ma); max(mi);                                     }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline float dot(const V2f& v) const
+      {
+         __m128 a(_mm_mul_ps(load(), v.load()));
+         __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 c(_mm_add_ss(a, b));
+         return c.m128_f32[0];
+      }
+      inline float length() const 
+      { 
+         __m128 t(load());
+         __m128 a(_mm_mul_ps(t, t));
+         __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 c(_mm_add_ss(a, b));
+         __m128 d(_mm_sqrt_ss(c));
+         return d.m128_f32[0];
+      }
       inline float side(const V2f& s, const V2f& e) const 
       {
          __m128 t(s.load());
@@ -163,9 +177,10 @@ namespace simd
          __m128 b(_mm_sub_ps(load(), t));
          __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 d(_mm_mul_ps(a, c));
-         return d.m128_f32[0] - d.m128_f32[1];
+         __m128 f(_mm_shuffle_ps(d, d, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 g(_mm_sub_ss(d, f));
+         return g.m128_f32[0];
       }
-
       inline bool inside(const V2f& min, const V2f& max) const
       {
          __m128 a(load());
@@ -242,6 +257,8 @@ namespace simd
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline float dot(const V2f& v)                    const { return x * v.x + y * v.y;                         }
+      inline float length()                             const { return sqrtf(length2());                          }
       inline void  swap(V2f& v)                               { std::swap(x, v.x); std::swap(y, v.y);             }
       inline V2f   absC()                               const { return V2f(fabsf(x), fabsf(y));                   }
       inline V2f   maxC(const V2f& v)                   const { return V2f(v.x > x ? v.x : x, v.y > y ? v.y : y); }
