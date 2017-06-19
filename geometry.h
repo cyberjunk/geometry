@@ -205,7 +205,9 @@ namespace simd
          __m128 b(_mm_sub_ps(q.load(), t));
          __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 d(_mm_mul_ps(a, c));
-         return 0.5f * (d.m128_f32[0] - d.m128_f32[1]);
+         __m128 e(_mm_shuffle_ps(d, d, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 f(_mm_sub_ss(d, e));
+         return 0.5f * f.m128_f32[0];
       }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE41)
