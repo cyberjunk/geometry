@@ -8,6 +8,14 @@
 //------------------------------------------------------------------------------------------------------------------------//
 #define SIMD_V2_32_ALIGN
 #define SIMD_V2_64_ALIGN
+
+#if defined(SIMD_V2_32_SSE41) && !defined(SIMD_V2_32_SSE2)
+# define SIMD_V2_32_SSE2
+#endif
+#if defined(SIMD_V2_64_SSE41) && !defined(SIMD_V2_64_SSE2)
+# define SIMD_V2_64_SSE2
+#endif
+
 #if defined(SIMD_TYPES_SSE) || defined(SIMD_TYPES_AVX)
 #  define ALIGN8                          __declspec(align(8))
 #  define ALIGN16 __declspec(intrin_type) __declspec(align(16))
