@@ -78,7 +78,7 @@ namespace simd
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y);           }
       inline F    cross(const V& v)                const { return x * v.y - y * v.x;                       }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
-      inline F    length2()                        const { return dot(*((V*)this)); }
+      inline F    length2()                        const { return dot(*((V*)this));                        }
       inline V    yx()                             const { return V(y, x);                                 }
       inline void yx()                                   { std::swap(x, y);                                }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
@@ -105,6 +105,11 @@ namespace simd
    /// </summary>
    SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
    {
+   protected:
+      static inline float cos(const float s)  { return ::cosf(s); }
+      static inline float sin(const float s)  { return ::sinf(s); }
+      static inline float acos(const float s) { return ::acosf(s); }
+
    public:
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f()                                                        { }
@@ -126,18 +131,18 @@ namespace simd
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
       inline void  rotate(float r)
       {
-         float cs = ::cosf(r);
-         float sn = ::sinf(r);
+         float cs = cos(r);
+         float sn = sin(r);
          float p = x;
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()                const { return acosf(x/length());                                                }
-      inline float angleNoN()             const { return acosf(x);                                                         }
+      inline float angle()                const { return acos(x/length());                                                }
+      inline float angleNoN()             const { return acos(x);                                                         }
       inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
-      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acosf(dot(v) / lp);             }
+      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acos(dot(v) / lp);             }
       inline float angleOri(const V2f& v) const { float t = angle(v); if (cross(v) < 0.0f) t = (float)TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
@@ -309,6 +314,11 @@ namespace simd
    /// </summary>
    SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
+   protected:
+      static inline double cos(const double s)  { return ::cos(s);  }
+      static inline double sin(const double s)  { return ::sin(s);  }
+      static inline double acos(const double s) { return ::acos(s); }
+
    public:
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
@@ -385,8 +395,8 @@ namespace simd
       inline void bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                                    }
       inline void rotate(double r)
       {
-         __m128d cs(_mm_set1_pd(::cos(r)));
-         __m128d sn(_mm_set1_pd(::sin(r)));
+         __m128d cs(_mm_set1_pd(cos(r)));
+         __m128d sn(_mm_set1_pd(sin(r)));
          __m128d p(_mm_set_pd(x, -y));
          store(_mm_add_pd(_mm_mul_pd(load(), cs), _mm_mul_pd(p, sn)));
       }
