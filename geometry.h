@@ -75,10 +75,13 @@ namespace simd
       inline bool  operator >    (const V& v)     const { return (x >  v.x && y >  v.y); }
       inline bool  operator >=   (const V& v)     const { return (x >= v.x && y >= v.y); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0;              }
+      inline bool isZero(const F e2)               const { return length2() <= e2;                         }
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y);           }
       inline F    cross(const V& v)                const { return x * v.y - y * v.x;                       }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
       inline F    length2()                        const { return dot(*((V*)this));                        }
+      inline F    length()                         const { return V::_sqrt(length2());                     }
       inline V    yx()                             const { return V(y, x);                                 }
       inline void yx()                                   { std::swap(x, y);                                }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
@@ -105,10 +108,11 @@ namespace simd
    /// </summary>
    SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
    {
-   protected:
-      static inline float cos(const float s)  { return ::cosf(s); }
-      static inline float sin(const float s)  { return ::sinf(s); }
-      static inline float acos(const float s) { return ::acosf(s); }
+   public:
+      static inline float _sqrt(const float s) { return ::sqrtf(s); }
+      static inline float _cos(const float s)  { return ::cosf(s); }
+      static inline float _sin(const float s)  { return ::sinf(s); }
+      static inline float _acos(const float s) { return ::acosf(s); }
 
    public:
       //------------------------------------------------------------------------------------------------------------------------//
@@ -119,11 +123,9 @@ namespace simd
       inline V2f(const int x, const int y)       : V2((float)x, (float)y) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
-      inline bool  isZero()                             const { return x == 0.0f && y == 0.0f;                    }
-      inline bool  isZero(const float e2)               const { return length2() <= e2;                           }
       inline bool  isNaN()                              const { return isnan(x) || isnan(y);                      }
       inline float distance2(const V2f& v)              const { return (*this - v).length2();                     }
-      inline float distance(const V2f& v)               const { return sqrtf(distance2(v));                       }
+      inline float distance(const V2f& v)               const { return _sqrt(distance2(v));                       }
       inline void  normalise()                                { *this /= length();                                }
       inline V2f   normaliseC()                         const { V2f t(*this); t.normalise(); return t;            }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -131,18 +133,18 @@ namespace simd
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
       inline void  rotate(float r)
       {
-         float cs = cos(r);
-         float sn = sin(r);
+         float cs = _cos(r);
+         float sn = _sin(r);
          float p = x;
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()                const { return acos(x/length());                                                }
-      inline float angleNoN()             const { return acos(x);                                                         }
+      inline float angle()                const { return _acos(x/length());                                                }
+      inline float angleNoN()             const { return _acos(x);                                                         }
       inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
       inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
-      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return acos(dot(v) / lp);             }
+      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return _acos(dot(v) / lp);             }
       inline float angleOri(const V2f& v) const { float t = angle(v); if (cross(v) < 0.0f) t = (float)TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
@@ -288,7 +290,6 @@ namespace simd
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float length()                             const { return sqrtf(length2());                          }
       inline V2f   absC()                               const { return V2f(fabsf(x), fabsf(y));                   }
       inline void  abs()                                      { x = fabsf(x);  y = fabsf(y);                      }
       inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
@@ -314,21 +315,20 @@ namespace simd
    /// </summary>
    SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
-   protected:
-      static inline double cos(const double s)  { return ::cos(s);  }
-      static inline double sin(const double s)  { return ::sin(s);  }
-      static inline double acos(const double s) { return ::acos(s); }
+   public:
+      static inline double _sqrt(const double s) { return ::sqrt(s); }
+      static inline double _cos(const double s)  { return ::cos(s);  }
+      static inline double _sin(const double s)  { return ::sin(s);  }
+      static inline double _acos(const double s) { return ::acos(s); }
 
    public:
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool   equals(const V2d& v, const double e2) const { return (*this - v).length2() <= e2;               }
-      inline bool   isZero()                              const { return x == 0.0 && y == 0.0;                      }
-      inline bool   isZero(const double e2)               const { return length2() <= e2;                           }
       inline bool   isNaN()                               const { return isnan(x) || isnan(y);                      }
       inline double distance2(const V2d& v)               const { return (*this - v).length2();                     }
-      inline double distance(const V2d& v)                const { return sqrt(distance2(v));                        }
+      inline double distance(const V2d& v)                const { return _sqrt(distance2(v));                        }
       inline V2d    normaliseC()                          const { V2d t(*this); t.normalise(); return t;            }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
@@ -336,11 +336,11 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2, const double e) const { return distance2(m) <= (r2 + e);             }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double angle()                const { return acos(x/length());                                          }
-      inline double angleNoN()             const { return acos(x);                                                   }
+      inline double angle()                const { return _acos(x/length());                                          }
+      inline double angleNoN()             const { return _acos(x);                                                   }
       inline double angleOri()             const { double t = angle();    if (y < 0.0) t = TWOPI - t; return t;      }
       inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }
-      inline double angle(const V2d& v)    const { double lp = length() * v.length(); return acos(dot(v) / lp);      }
+      inline double angle(const V2d& v)    const { double lp = length() * v.length(); return _acos(dot(v) / lp);      }
       inline double angleOri(const V2d& v) const { double t = angle(v); if (cross(v) < 0.0) t = TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
@@ -395,8 +395,8 @@ namespace simd
       inline void bound(const V2d& mi, const V2d& ma)        { min(ma); max(mi);                                    }
       inline void rotate(double r)
       {
-         __m128d cs(_mm_set1_pd(cos(r)));
-         __m128d sn(_mm_set1_pd(sin(r)));
+         __m128d cs(_mm_set1_pd(_cos(r)));
+         __m128d sn(_mm_set1_pd(_sin(r)));
          __m128d p(_mm_set_pd(x, -y));
          store(_mm_add_pd(_mm_mul_pd(load(), cs), _mm_mul_pd(p, sn)));
       }
@@ -496,7 +496,6 @@ namespace simd
       inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this;         }
       inline       V2d& operator /= (const double s)       { double t=1.0/s; x*=t; y*=t; return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline double length()                             const { return sqrt(length2());                           }
       inline V2d    roundC()                             const { return V2d(::round(x), ::round(y));               }
       inline V2d    floorC()                             const { return V2d(::floor(x), ::floor(y));               }
       inline V2d    ceilC()                              const { return V2d(::ceil(x),  ::ceil(y));                }
