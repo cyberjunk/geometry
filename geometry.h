@@ -87,11 +87,14 @@ namespace simd
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
       inline V    minC(const V& v)                 const { return V(v.x < x ? v.x : x, v.y < y ? v.y : y); }
       inline V    boundC(const V& mi, const V& ma) const { V t(minC(ma)); t.max(mi); return t;             }
+      inline V    absC()                           const { return V(V::_abs(x), V::_abs(y));               }
       inline void max(const V& v)                        { if (v.x > x) x = v.x; if (v.y > y) y = v.y;     }
       inline void min(const V& v)                        { if (v.x < x) x = v.x; if (v.y < y) y = v.y;     }
       inline void bound(const V& mi, const V& ma)        { min(ma); max(mi);                               }
+      inline void abs()                                  { x = V::_abs(x); y = V::_abs(y);                 }
       inline V    perp1()                          const { return V(y, -x);                                }
       inline V    perp2()                          const { return V(-y, x);                                }
+
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
       static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
@@ -109,6 +112,7 @@ namespace simd
    SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
    {
    public:
+      static inline float _abs(const float s)  { return ::fabsf(s); }
       static inline float _sqrt(const float s) { return ::sqrtf(s); }
       static inline float _cos(const float s)  { return ::cosf(s); }
       static inline float _sin(const float s)  { return ::sinf(s); }
@@ -290,8 +294,6 @@ namespace simd
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f   absC()                               const { return V2f(fabsf(x), fabsf(y));                   }
-      inline void  abs()                                      { x = fabsf(x);  y = fabsf(y);                      }
       inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
       inline V2f   floorC()                             const { return V2f(floorf(x), floorf(y));                 }
       inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
@@ -316,6 +318,7 @@ namespace simd
    SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
    public:
+      static inline double _abs(const double s)  { return ::abs(s);  }
       static inline double _sqrt(const double s) { return ::sqrt(s); }
       static inline double _cos(const double s)  { return ::cos(s);  }
       static inline double _sin(const double s)  { return ::sin(s);  }
@@ -499,11 +502,9 @@ namespace simd
       inline V2d    roundC()                             const { return V2d(::round(x), ::round(y));               }
       inline V2d    floorC()                             const { return V2d(::floor(x), ::floor(y));               }
       inline V2d    ceilC()                              const { return V2d(::ceil(x),  ::ceil(y));                }
-      inline V2d    absC()                               const { return V2d(::abs(x),   ::abs(y));                 }
       inline void   round()                                    { x = ::round(x); y = ::round(y);                   }
       inline void   floor()                                    { x = ::floor(x); y = ::floor(y);                   }
       inline void   ceil()                                     { x = ::ceil(x);  y = ::ceil(y);                    }
-      inline void   abs()                                      { x = ::abs(x);   y = ::abs(y);                     }
       inline void   normalise()                                { *this /= length();                                }
       inline void   rotate(double r)
       {
