@@ -94,7 +94,6 @@ namespace simd
       inline void abs()                                  { x = V::_abs(x); y = V::_abs(y);                 }
       inline V    perp1()                          const { return V(y, -x);                                }
       inline V    perp2()                          const { return V(-y, x);                                }
-
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
       static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
@@ -112,13 +111,14 @@ namespace simd
    SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
    {
    public:
-      static inline float _abs(const float s)  { return ::fabsf(s); }
-      static inline float _sqrt(const float s) { return ::sqrtf(s); }
-      static inline float _cos(const float s)  { return ::cosf(s); }
-      static inline float _sin(const float s)  { return ::sinf(s); }
-      static inline float _acos(const float s) { return ::acosf(s); }
-
-   public:
+      static inline float _abs(const float s)   { return ::fabsf(s); }
+      static inline float _round(const float s) { return ::roundf(s); }
+      static inline float _floor(const float s) { return ::floorf(s); }
+      static inline float _ceil(const float s)  { return ::ceilf(s); }
+      static inline float _sqrt(const float s)  { return ::sqrtf(s); }
+      static inline float _cos(const float s)   { return ::cosf(s); }
+      static inline float _sin(const float s)   { return ::sinf(s); }
+      static inline float _acos(const float s)  { return ::acosf(s); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f()                                                        { }
       inline V2f(const float x, const float y)   : V2(x,        y)        { }
@@ -262,12 +262,12 @@ namespace simd
       inline void  floor()                 { store(_mm_round_ps(load(), _MM_FROUND_FLOOR));      }
       inline void  ceil()                  { store(_mm_round_ps(load(), _MM_FROUND_CEIL));       }
 #else
-      inline V2f   roundC()          const { return V2f(roundf(x), roundf(y));  }
-      inline V2f   floorC()          const { return V2f(floorf(x), floorf(y));  }
-      inline V2f   ceilC()           const { return V2f(ceilf(x),  ceilf(y));   }
-      inline void  round()                 { x = roundf(x); y = roundf(y);      }
-      inline void  floor()                 { x = floorf(x); y = floorf(y);      }
-      inline void  ceil()                  { x = ceilf(x);  y = ceilf(y);       }
+      inline V2f   roundC()          const { return V2f(_round(x), _round(y));  }
+      inline V2f   floorC()          const { return V2f(_floor(x), _floor(y));  }
+      inline V2f   ceilC()           const { return V2f(_ceil(x),  _ceil(y));   }
+      inline void  round()                 { x = _round(x); y = _round(y);      }
+      inline void  floor()                 { x = _floor(x); y = _floor(y);      }
+      inline void  ceil()                  { x = _ceil(x);  y = _ceil(y);       }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
@@ -294,12 +294,12 @@ namespace simd
       inline       V2f& operator *= (const float s)       { x *= s;   y *= s;   return *this; }
       inline       V2f& operator /= (const float s)       { x /= s;   y /= s;   return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f   roundC()                             const { return V2f(roundf(x), roundf(y));                 }
-      inline V2f   floorC()                             const { return V2f(floorf(x), floorf(y));                 }
-      inline V2f   ceilC()                              const { return V2f(ceilf(x),  ceilf(y));                  }
-      inline void  round()                                    { x = roundf(x); y = roundf(y);                     }
-      inline void  floor()                                    { x = floorf(x); y = floorf(y);                     }
-      inline void  ceil()                                     { x = ceilf(x);  y = ceilf(y);                      }
+      inline V2f   roundC()                             const { return V2f(_round(x), _round(y));                 }
+      inline V2f   floorC()                             const { return V2f(_floor(x), _floor(y));                 }
+      inline V2f   ceilC()                              const { return V2f(_ceil(x),  _ceil(y));                  }
+      inline void  round()                                    { x = _round(x); y = _round(y);                     }
+      inline void  floor()                                    { x = _floor(x); y = _floor(y);                     }
+      inline void  ceil()                                     { x = _ceil(x);  y = _ceil(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s); }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
@@ -318,13 +318,14 @@ namespace simd
    SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
    {
    public:
-      static inline double _abs(const double s)  { return ::abs(s);  }
-      static inline double _sqrt(const double s) { return ::sqrt(s); }
-      static inline double _cos(const double s)  { return ::cos(s);  }
-      static inline double _sin(const double s)  { return ::sin(s);  }
-      static inline double _acos(const double s) { return ::acos(s); }
-
-   public:
+      static inline double _abs(const double s)   { return ::abs(s);  }
+      static inline double _round(const double s) { return ::round(s); }
+      static inline double _floor(const double s) { return ::floor(s); }
+      static inline double _ceil(const double s)  { return ::ceil(s); }
+      static inline double _sqrt(const double s)  { return ::sqrt(s); }
+      static inline double _cos(const double s)   { return ::cos(s);  }
+      static inline double _sin(const double s)   { return ::sin(s);  }
+      static inline double _acos(const double s)  { return ::acos(s); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
       //------------------------------------------------------------------------------------------------------------------------//
@@ -454,12 +455,12 @@ namespace simd
          __m128d d(_mm_sqrt_sd(c, c));
          return d.m128d_f64[0];
       }
-      inline V2d    roundC()          const { return V2d(::round(x), ::round(y));          }
-      inline V2d    floorC()          const { return V2d(::floor(x), ::floor(y));          }
-      inline V2d    ceilC()           const { return V2d(::ceil(x),  ::ceil(y));           }
-      inline void   round()                 { x = ::round(x); y = ::round(y);              }
-      inline void   floor()                 { x = ::floor(x); y = ::floor(y);              }
-      inline void   ceil()                  { x = ::ceil(x);  y = ::ceil(y);               }
+      inline V2d    roundC()          const { return V2d(_round(x), _round(y));         }
+      inline V2d    floorC()          const { return V2d(_floor(x), _floor(y));         }
+      inline V2d    ceilC()           const { return V2d(_ceil(x), _ceil(y));           }
+      inline void   round()                 { x = _round(x); y = _round(y);             }
+      inline void   floor()                 { x = _floor(x); y = _floor(y);             }
+      inline void   ceil()                  { x = _ceil(x);  y = _ceil(y);              }
       inline void   normalise()             
       { 
          __m128d t(load());
@@ -499,13 +500,13 @@ namespace simd
       inline       V2d& operator *= (const double s)       { x *= s;   y *= s;   return *this;         }
       inline       V2d& operator /= (const double s)       { double t=1.0/s; x*=t; y*=t; return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2d    roundC()                             const { return V2d(::round(x), ::round(y));               }
-      inline V2d    floorC()                             const { return V2d(::floor(x), ::floor(y));               }
-      inline V2d    ceilC()                              const { return V2d(::ceil(x),  ::ceil(y));                }
-      inline void   round()                                    { x = ::round(x); y = ::round(y);                   }
-      inline void   floor()                                    { x = ::floor(x); y = ::floor(y);                   }
-      inline void   ceil()                                     { x = ::ceil(x);  y = ::ceil(y);                    }
-      inline void   normalise()                                { *this /= length();                                }
+      inline V2d    roundC()                             const { return V2d(_round(x), _round(y));               }
+      inline V2d    floorC()                             const { return V2d(_floor(x), _floor(y));               }
+      inline V2d    ceilC()                              const { return V2d(_ceil(x),  _ceil(y));                }
+      inline void   round()                                    { x = _round(x); y = _round(y);                   }
+      inline void   floor()                                    { x = _floor(x); y = _floor(y);                   }
+      inline void   ceil()                                     { x = _ceil(x);  y = _ceil(y);                    }
+      inline void   normalise()                                { *this /= length();                              }
       inline void   rotate(double r)
       {
          double cs = ::cos(r);
