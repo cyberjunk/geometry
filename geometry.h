@@ -125,9 +125,27 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
 
    /// <summary>
+   /// Generic 2D Vector for Floating Point (V2f, V2d)
+   /// </summary>
+   template <typename V, typename F>
+   class V2fd : public V2<V, F>
+   {
+   public:
+      inline V2fd() { }
+      inline V2fd(const F x, const F y) : V2(x, y)                 { }
+      inline V2fd(const F scalar)       : V2(scalar, scalar)       { }
+      inline V2fd(const F values[2])    : V2(values[0], values[1]) { }
+      inline V2fd(F* const values)      : V2(values[0], values[1]) { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+
+   /// <summary>
    /// Single Precision 2D Vector
    /// </summary>
-   SIMD_V2_32_ALIGN class V2f : public V2<V2f, float>
+   SIMD_V2_32_ALIGN class V2f : public V2fd<V2f, float>
    {
    public:
       static inline float _abs(const float s)   { return ::fabsf(s); }
@@ -139,11 +157,11 @@ namespace simd
       static inline float _sin(const float s)   { return ::sinf(s); }
       static inline float _acos(const float s)  { return ::acosf(s); }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f()                                                        { }
-      inline V2f(const float x, const float y)   : V2(x,        y)        { }
-      inline V2f(const float s)                  : V2(s,        s)        { }
-      inline V2f(const double x, const double y) : V2((float)x, (float)y) { }
-      inline V2f(const int x, const int y)       : V2((float)x, (float)y) { }
+      inline V2f()                                                          { }
+      inline V2f(const float x, const float y)   : V2fd(x,               y) { }
+      inline V2f(const float s)                  : V2fd(s,               s) { }
+      inline V2f(const double x, const double y) : V2fd((float)x, (float)y) { }
+      inline V2f(const int x, const int y)       : V2fd((float)x, (float)y) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
       inline bool  isNaN()                              const { return isnan(x) || isnan(y);                      }
@@ -290,9 +308,9 @@ namespace simd
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
-      inline V2f(const float values[2]) : V2(values[0], values[1])               { }
-      inline V2f(float* const values)   : V2(values[0], values[1])               { }
-      inline V2f(const int values[2])   : V2((float)values[0], (float)values[1]) { }
+      inline V2f(const float values[2]) : V2fd(values[0], values[1])               { }
+      inline V2f(float* const values)   : V2fd(values[0], values[1])               { }
+      inline V2f(const int values[2])   : V2fd((float)values[0], (float)values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f& operator /= (const V2f& v)         { x /= v.x; y /= v.y; return *this;                 }
       inline V2f  operator /  (const V2f& v)   const { return V2f(x / v.x, y / v.y);                     }
@@ -320,7 +338,7 @@ namespace simd
    /// <summary>
    /// Double Precision 2D Vector
    /// </summary>
-   SIMD_V2_64_ALIGN class V2d : public V2<V2d, double>
+   SIMD_V2_64_ALIGN class V2d : public V2fd<V2d, double>
    {
    public:
       static inline double _abs(const double s)   { return ::abs(s);  }
@@ -478,13 +496,13 @@ namespace simd
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
-      inline V2d(const double x, const double y) : V2(x, y)                                   { }
-      inline V2d(const double scalar)            : V2(scalar, scalar)                         { }
-      inline V2d(const double values[2])         : V2(values[0], values[1])                   { }
-      inline V2d(double* const values)           : V2(values[0], values[1])                   { }
-      inline V2d(const int values[2])            : V2((double)values[0], (double)values[1])   { }
-      inline V2d(const float x, const float y)   : V2((double)x, (double)y)                   { }
-      inline V2d(const int x, const int y)       : V2((double)x, (double)y)                   { }
+      inline V2d(const double x, const double y) : V2fd(x, y)                                   { }
+      inline V2d(const double scalar)            : V2fd(scalar, scalar)                         { }
+      inline V2d(const double values[2])         : V2fd(values[0], values[1])                   { }
+      inline V2d(double* const values)           : V2fd(values[0], values[1])                   { }
+      inline V2d(const int values[2])            : V2fd((double)values[0], (double)values[1])   { }
+      inline V2d(const float x, const float y)   : V2fd((double)x, (double)y)                   { }
+      inline V2d(const int x, const int y)       : V2fd((double)x, (double)y)                   { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d& operator /= (const V2d& v)                   { x /= v.x; y /= v.y; return *this;                 }
       inline V2d  operator /  (const V2d& v)             const { return V2d(x / v.x, y / v.y);                     }
