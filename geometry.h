@@ -136,6 +136,12 @@ namespace simd
       inline V2fd(const F scalar)       : V2(scalar, scalar)       { }
       inline V2fd(const F values[2])    : V2(values[0], values[1]) { }
       inline V2fd(F* const values)      : V2(values[0], values[1]) { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V& operator /= (const V& v)       { x /= v.x; y /= v.y; return (V&)*this;               }
+      inline V  operator /  (const V& v) const { return V(x / v.x, y / v.y);                         }
+      inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
+      inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
+      //------------------------------------------------------------------------------------------------------------------------//
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -311,11 +317,6 @@ namespace simd
       inline V2f(const float values[2]) : V2fd(values[0], values[1])               { }
       inline V2f(float* const values)   : V2fd(values[0], values[1])               { }
       inline V2f(const int values[2])   : V2fd((float)values[0], (float)values[1]) { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f& operator /= (const V2f& v)         { x /= v.x; y /= v.y; return *this;                 }
-      inline V2f  operator /  (const V2f& v)   const { return V2f(x / v.x, y / v.y);                     }
-      inline V2f& operator /= (const float s)        { float t = 1.0f / s; x *= t; y *= t; return *this; }
-      inline V2f  operator /  (const float  s) const { float t = 1.0f / s; return V2f(x * t, y * t);     }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2f   roundC()                             const { return V2f(_round(x), _round(y));                 }
       inline V2f   floorC()                             const { return V2f(_floor(x), _floor(y));                 }
@@ -503,11 +504,6 @@ namespace simd
       inline V2d(const int values[2])            : V2fd((double)values[0], (double)values[1])   { }
       inline V2d(const float x, const float y)   : V2fd((double)x, (double)y)                   { }
       inline V2d(const int x, const int y)       : V2fd((double)x, (double)y)                   { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2d& operator /= (const V2d& v)                   { x /= v.x; y /= v.y; return *this;                 }
-      inline V2d  operator /  (const V2d& v)             const { return V2d(x / v.x, y / v.y);                     }
-      inline V2d& operator /= (const double s)                 { double t = 1.0 / s; x *= t; y *= t; return *this; }
-      inline V2d  operator /  (const double  s)          const { double t = 1.0 / s; return V2d(x * t, y * t);     }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d    roundC()                             const { return V2d(_round(x), _round(y));               }
       inline V2d    floorC()                             const { return V2d(_floor(x), _floor(y));               }
