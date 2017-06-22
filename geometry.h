@@ -142,6 +142,13 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline V     roundC()                             const { return V(V::_round(x), V::_round(y)); }
+      inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y)); }
+      inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y));  }
+      inline void  round()                                    { x = V::_round(x); y = V::_round(y);   }
+      inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);   }
+      inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);    }
+      //------------------------------------------------------------------------------------------------------------------------//
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -317,13 +324,6 @@ namespace simd
       inline V2f(const float values[2]) : V2fd(values[0], values[1])               { }
       inline V2f(float* const values)   : V2fd(values[0], values[1])               { }
       inline V2f(const int values[2])   : V2fd((float)values[0], (float)values[1]) { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline V2f   roundC()                             const { return V2f(_round(x), _round(y));                 }
-      inline V2f   floorC()                             const { return V2f(_floor(x), _floor(y));                 }
-      inline V2f   ceilC()                              const { return V2f(_ceil(x),  _ceil(y));                  }
-      inline void  round()                                    { x = _round(x); y = _round(y);                     }
-      inline void  floor()                                    { x = _floor(x); y = _floor(y);                     }
-      inline void  ceil()                                     { x = _ceil(x);  y = _ceil(y);                      }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s); }
       inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
@@ -505,12 +505,6 @@ namespace simd
       inline V2d(const float x, const float y)   : V2fd((double)x, (double)y)                   { }
       inline V2d(const int x, const int y)       : V2fd((double)x, (double)y)                   { }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2d    roundC()                             const { return V2d(_round(x), _round(y));               }
-      inline V2d    floorC()                             const { return V2d(_floor(x), _floor(y));               }
-      inline V2d    ceilC()                              const { return V2d(_ceil(x),  _ceil(y));                }
-      inline void   round()                                    { x = _round(x); y = _round(y);                   }
-      inline void   floor()                                    { x = _floor(x); y = _floor(y);                   }
-      inline void   ceil()                                     { x = _ceil(x);  y = _ceil(y);                    }
       inline void   normalise()                                { *this /= length();                              }
       inline void   rotate(double r)
       {
