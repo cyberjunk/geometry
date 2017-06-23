@@ -149,6 +149,13 @@ namespace simd
       inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);   }
       inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);    }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline F angle()              const { return V::_acos(x / length()); }
+      inline F angleNoN()           const { return V::_acos(x); }
+      inline F angleOri()           const { F t = angle();    if (y < (F)0.0) t = (F)TWOPI - t; return t; }
+      inline F angleOriNoN()        const { F t = angleNoN(); if (y < (F)0.0) t = (F)TWOPI - t; return t; }
+      inline F angle(const V& v)    const { F lp = length() * v.length(); return V::_acos(dot(v) / lp); }
+      inline F angleOri(const V& v) const { F t = angle(v); if (cross(v) < (F)0.0) t = (F)TWOPI - t; return t; }
+      //------------------------------------------------------------------------------------------------------------------------//
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -193,13 +200,6 @@ namespace simd
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline float angle()                const { return _acos(x/length());                                                }
-      inline float angleNoN()             const { return _acos(x);                                                         }
-      inline float angleOri()             const { float t = angle();    if (y < 0.0f) t = (float)TWOPI - t; return t;      }
-      inline float angleOriNoN()          const { float t = angleNoN(); if (y < 0.0f) t = (float)TWOPI - t; return t;      }
-      inline float angle(const V2f& v)    const { float lp = length() * v.length(); return _acos(dot(v) / lp);             }
-      inline float angleOri(const V2f& v) const { float t = angle(v); if (cross(v) < 0.0f) t = (float)TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
@@ -363,13 +363,6 @@ namespace simd
       inline bool   inside(const V2d& m, const double r2)                 const { return distance2(m) <= r2;                   }
       inline bool   inside(const V2d& m, const double r2, const double e) const { return distance2(m) <= (r2 + e);             }
       inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline double angle()                const { return _acos(x/length());                                          }
-      inline double angleNoN()             const { return _acos(x);                                                   }
-      inline double angleOri()             const { double t = angle();    if (y < 0.0) t = TWOPI - t; return t;      }
-      inline double angleOriNoN()          const { double t = angleNoN(); if (y < 0.0) t = TWOPI - t; return t;      }
-      inline double angle(const V2d& v)    const { double lp = length() * v.length(); return _acos(dot(v) / lp);      }
-      inline double angleOri(const V2d& v) const { double t = angle(v); if (cross(v) < 0.0) t = TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
       inline __m128d load()                 const { return _mm_load_pd(vals); }
