@@ -32,7 +32,7 @@
 namespace simd
 {
    /// <summary>
-   /// Abstract 2D Vector
+   /// Abstract 2D Vector for Floating Point AND Integer
    /// </summary>
    template <typename V, typename F>
    class V2 abstract
@@ -86,6 +86,7 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0;              }
       inline bool isZero(const F e2)               const { return length2() <= e2;                         }
+      inline bool equals(const V& v, const F e2)   const { return (*this - v).length2() <= e2;             }
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y);           }
       inline F    cross(const V& v)                const { return x * v.y - y * v.x;                       }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
@@ -117,7 +118,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
 
    /// <summary>
-   /// Abstract 2D Vector for Floating Point (V2f, V2d)
+   /// Abstract 2D Vector for Floating Point
    /// </summary>
    template <typename V, typename F>
    class V2fd abstract : public V2<V, F>
@@ -134,7 +135,6 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  equals(const V& v, const F e2)       const { return (*this - v).length2() <= e2;   }
       inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);    }
       inline void  normalise()                                { *this /= length();                    }
       inline V     normaliseC()                         const { V t(*this); t.normalise(); return t;  }
@@ -167,7 +167,6 @@ namespace simd
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
-
       //------------------------------------------------------------------------------------------------------------------------//
    };
 
