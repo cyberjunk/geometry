@@ -142,6 +142,13 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool  equals(const V& v, const F e2)       const { return (*this - v).length2() <= e2;   }
+      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);    }
+      inline F     distance2(const V& v)                const { return (*this - v).length2();         }
+      inline F     distance(const V& v)                 const { return V::_sqrt(distance2(v));        }
+      inline void  normalise()                                { *this /= length();                    }
+      inline V     normaliseC()                         const { V t(*this); t.normalise(); return t;  }
+      //------------------------------------------------------------------------------------------------------------------------//
       inline V     roundC()                             const { return V(V::_round(x), V::_round(y)); }
       inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y)); }
       inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y));  }
@@ -182,13 +189,7 @@ namespace simd
       inline V2f(const float s)                  : V2fd(s,               s) { }
       inline V2f(const double x, const double y) : V2fd((float)x, (float)y) { }
       inline V2f(const int x, const int y)       : V2fd((float)x, (float)y) { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  equals(const V2f& v, const float e2) const { return (*this - v).length2() <= e2;               }
-      inline bool  isNaN()                              const { return isnan(x) || isnan(y);                      }
-      inline float distance2(const V2f& v)              const { return (*this - v).length2();                     }
-      inline float distance(const V2f& v)               const { return _sqrt(distance2(v));                       }
-      inline void  normalise()                                { *this /= length();                                }
-      inline V2f   normaliseC()                         const { V2f t(*this); t.normalise(); return t;            }
+
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  inside(const V2f& m, const float r2)                   const { return distance2(m) <= r2;          }
       inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
@@ -352,12 +353,6 @@ namespace simd
       static inline double _acos(const double s)  { return ::acos(s); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline bool   equals(const V2d& v, const double e2) const { return (*this - v).length2() <= e2;               }
-      inline bool   isNaN()                               const { return isnan(x) || isnan(y);                      }
-      inline double distance2(const V2d& v)               const { return (*this - v).length2();                     }
-      inline double distance(const V2d& v)                const { return _sqrt(distance2(v));                        }
-      inline V2d    normaliseC()                          const { V2d t(*this); t.normalise(); return t;            }
       //------------------------------------------------------------------------------------------------------------------------//
       inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
       inline bool   inside(const V2d& m, const double r2)                 const { return distance2(m) <= r2;                   }
