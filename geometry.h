@@ -170,40 +170,34 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
    };
 
-   //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
-
    /// <summary>
-   /// Single Precision 2D Vector (Generic, no SIMD)
+   /// Abstract 2D Vector for Single Precision FP
    /// </summary>
-   class V2fg : public V2fd<V2fg, float>
+   template <typename V>
+   class V2ft abstract : public V2fd<V, float>
    {
    public:
-      static inline float _abs(const float s)   { return ::fabsf(s); }
+      static inline float _abs(const float s)   { return ::fabsf(s);  }
       static inline float _round(const float s) { return ::roundf(s); }
       static inline float _floor(const float s) { return ::floorf(s); }
-      static inline float _ceil(const float s)  { return ::ceilf(s); }
-      static inline float _sqrt(const float s)  { return ::sqrtf(s); }
-      static inline float _cos(const float s)   { return ::cosf(s); }
-      static inline float _sin(const float s)   { return ::sinf(s); }
-      static inline float _acos(const float s)  { return ::acosf(s); }
+      static inline float _ceil(const float s)  { return ::ceilf(s);  }
+      static inline float _sqrt(const float s)  { return ::sqrtf(s);  }
+      static inline float _cos(const float s)   { return ::cosf(s);   }
+      static inline float _sin(const float s)   { return ::sinf(s);   }
+      static inline float _acos(const float s)  { return ::acosf(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2fg()                                                                          { }
-      inline V2fg(const float x, const float y)   : V2fd(x,               y)                 { }
-      inline V2fg(const float s)                  : V2fd(s,               s)                 { }
-      inline V2fg(const float values[2])          : V2fd(values[0], values[1])               { }
-      inline V2fg(float* const values)            : V2fd(values[0], values[1])               { }
-      inline V2fg(const int values[2])            : V2fd((float)values[0], (float)values[1]) { }
-      inline V2fg(const double x, const double y) : V2fd((float)x, (float)y)                 { }
-      inline V2fg(const int x, const int y)       : V2fd((float)x, (float)y)                 { }
-      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2ft() { }
+      inline V2ft(const float x, const float y) : V2fd(x, y)                 { }
+      inline V2ft(const float scalar)           : V2fd(scalar, scalar)       { }
+      inline V2ft(const float values[2])        : V2fd(values[0], values[1]) { }
+      inline V2ft(float* const values)          : V2fd(values[0], values[1]) { }
    };
 
    /// <summary>
-   /// Double Precision 2D Vector (Generic, no SIMD)
+   /// Abstract 2D Vector for Double Precision FP
    /// </summary>
-   class V2dg : public V2fd<V2dg, double>
+   template <typename V>
+   class V2dt abstract : public V2fd<V, double>
    {
    public:
       static inline double _abs(const double s)   { return ::abs(s);   }
@@ -215,15 +209,47 @@ namespace simd
       static inline double _sin(const double s)   { return ::sin(s);   }
       static inline double _acos(const double s)  { return ::acos(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline V2dt() { }
+      inline V2dt(const double x, const double y) : V2fd(x, y)                 { }
+      inline V2dt(const double scalar)            : V2fd(scalar, scalar)       { }
+      inline V2dt(const double values[2])         : V2fd(values[0], values[1]) { }
+      inline V2dt(double* const values)           : V2fd(values[0], values[1]) { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+
+   /// <summary>
+   /// Single Precision 2D Vector (Generic, no SIMD)
+   /// </summary>
+   class V2fg : public V2ft<V2fg>
+   {
+   public:
+      inline V2fg()                                                                          { }
+      inline V2fg(const float x, const float y)   : V2ft(x, y)                               { }
+      inline V2fg(const float s)                  : V2ft(s, s)                               { }
+      inline V2fg(const float values[2])          : V2ft(values[0], values[1])               { }
+      inline V2fg(float* const values)            : V2ft(values[0], values[1])               { }
+      inline V2fg(const int values[2])            : V2ft((float)values[0], (float)values[1]) { }
+      inline V2fg(const double x, const double y) : V2ft((float)x, (float)y)                 { }
+      inline V2fg(const int x, const int y)       : V2ft((float)x, (float)y)                 { }
+   };
+
+   /// <summary>
+   /// Double Precision 2D Vector (Generic, no SIMD)
+   /// </summary>
+   class V2dg : public V2dt<V2dg>
+   {
+   public:
       inline V2dg()                                                                            { }
-      inline V2dg(const double x, const double y) : V2fd(x, y)                                 { }
-      inline V2dg(const double s)                 : V2fd(s, s)                                 { }
-      inline V2dg(const double values[2])         : V2fd(values[0], values[1])                 { }
-      inline V2dg(double* const values)           : V2fd(values[0], values[1])                 { }
-      inline V2dg(const int values[2])            : V2fd((double)values[0], (double)values[1]) { }
-      inline V2dg(const float x, const float y)   : V2fd((double)x, (double)y)                 { }
-      inline V2dg(const int x, const int y)       : V2fd((double)x, (double)y)                 { }
-      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2dg(const double x, const double y) : V2dt(x, y)                                 { }
+      inline V2dg(const double s)                 : V2dt(s, s)                                 { }
+      inline V2dg(const double values[2])         : V2dt(values[0], values[1])                 { }
+      inline V2dg(double* const values)           : V2dt(values[0], values[1])                 { }
+      inline V2dg(const int values[2])            : V2dt((double)values[0], (double)values[1]) { }
+      inline V2dg(const float x, const float y)   : V2dt((double)x, (double)y)                 { }
+      inline V2dg(const int x, const int y)       : V2dt((double)x, (double)y)                 { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -234,26 +260,17 @@ namespace simd
    /// <summary>
    /// Single Precision 2D Vector (SSE/SIMD)
    /// </summary>
-   ALIGN8 class V2fs : public V2fd<V2fs, float>
+   ALIGN8 class V2fs : public V2ft<V2fs>
    {
    public:
-      static inline float _abs(const float s)   { return V2fg::_abs(s);   }
-      static inline float _round(const float s) { return V2fg::_round(s); }
-      static inline float _floor(const float s) { return V2fg::_floor(s); }
-      static inline float _ceil(const float s)  { return V2fg::_ceil(s);  }
-      static inline float _sqrt(const float s)  { return V2fg::_sqrt(s);  }
-      static inline float _cos(const float s)   { return V2fg::_cos(s);   }
-      static inline float _sin(const float s)   { return V2fg::_sin(s);   }
-      static inline float _acos(const float s)  { return V2fg::_acos(s);  }
-      //------------------------------------------------------------------------------------------------------------------------//
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2fs()                                                          { }
-      inline V2fs(const float x, const float y)   : V2fd(x, y)               { }
-      inline V2fs(const float s)                  : V2fd(s, s)               { }
-      inline V2fs(const double x, const double y) : V2fd((float)x, (float)y) { }
-      inline V2fs(const int x, const int y)       : V2fd((float)x, (float)y) { }
+      inline V2fs(const float x, const float y)   : V2ft(x, y)               { }
+      inline V2fs(const float s)                  : V2ft(s, s)               { }
+      inline V2fs(const double x, const double y) : V2ft((float)x, (float)y) { }
+      inline V2fs(const int x, const int y)       : V2ft((float)x, (float)y) { }
       inline V2fs(const float values[2])          { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(float* const values)            { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
@@ -374,18 +391,9 @@ namespace simd
    /// <summary>
    /// Double Precision 2D Vector
    /// </summary>
-   ALIGN16 class V2ds : public V2fd<V2ds, double>
+   ALIGN16 class V2ds : public V2dt<V2ds>
    {
    public:
-      static inline double _abs(const double s)   { return V2dg::_abs(s);  }
-      static inline double _round(const double s) { return V2dg::_round(s); }
-      static inline double _floor(const double s) { return V2dg::_floor(s); }
-      static inline double _ceil(const double s)  { return V2dg::_ceil(s); }
-      static inline double _sqrt(const double s)  { return V2dg::_sqrt(s); }
-      static inline double _cos(const double s)   { return V2dg::_cos(s);  }
-      static inline double _sin(const double s)   { return V2dg::_sin(s);  }
-      static inline double _acos(const double s)  { return V2dg::_acos(s); }
-      //------------------------------------------------------------------------------------------------------------------------//
       inline __m128d load()                 const { return _mm_load_pd(vals); }
       inline void    store(const __m128d v)       { _mm_store_pd(vals, v);    }
       //------------------------------------------------------------------------------------------------------------------------//
