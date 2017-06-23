@@ -165,7 +165,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <PreprocessorDefinitions>SIMD_TYPES_SSE;SIMD_TYPES_AVX;SIMD_V2_32_SSE41;SIMD_V2_64_SSE41;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SIMD_TYPES_SSE;SIMD_TYPES_AVX;SIMD_V2_FP_32_SSE41;SIMD_V2_FP_64_SSE41;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -202,7 +202,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>SIMD_TYPES_SSE;SIMD_TYPES_AVX;SIMD_V2_32_SSE41;SIMD_V2_64_SSE41;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SIMD_TYPES_SSE;SIMD_TYPES_AVX;SIMD_V2_FP_32_SSE41;SIMD_V2_FP_64_SSE41;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

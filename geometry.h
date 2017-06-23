@@ -7,11 +7,11 @@
 #define TWOPI (2.0*M_PI)
 //------------------------------------------------------------------------------------------------------------------------//
 
-#if defined(SIMD_V2_32_SSE41) && !defined(SIMD_V2_32_SSE2)
-# define SIMD_V2_32_SSE2
+#if defined(SIMD_V2_FP_32_SSE41) && !defined(SIMD_V2_FP_32_SSE2)
+# define SIMD_V2_FP_32_SSE2
 #endif
-#if defined(SIMD_V2_64_SSE41) && !defined(SIMD_V2_64_SSE2)
-# define SIMD_V2_64_SSE2
+#if defined(SIMD_V2_FP_64_SSE41) && !defined(SIMD_V2_FP_64_SSE2)
+# define SIMD_V2_FP_64_SSE2
 #endif
 
 #if defined(SIMD_TYPES_SSE) || defined(SIMD_TYPES_AVX)
@@ -345,7 +345,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                             SIMD CLASSES [L4]                                                          //
    //------------------------------------------------------------------------------------------------------------------------//
-#if defined(SIMD_V2_32_SSE2)
+#if defined(SIMD_V2_FP_32_SSE2)
    /// <summary>
    /// Single Precision 2D Vector (SSE/SIMD)
    /// </summary>
@@ -457,7 +457,7 @@ namespace simd
          __m128 f(_mm_sub_ss(d, e));
          return 0.5f * f.m128_f32[0];
       }
-#if defined(SIMD_V2_32_SSE41)
+#if defined(SIMD_V2_FP_32_SSE41)
       inline V2fs  roundC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_NINT)); }
       inline V2fs  floorC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
       inline V2fs  ceilC()  const { return V2fs(_mm_round_ps(load(), _MM_FROUND_CEIL)); }
@@ -475,7 +475,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
 
-#if defined(SIMD_V2_64_SSE2)
+#if defined(SIMD_V2_FP_64_SSE2)
    /// <summary>
    /// Double Precision 2D Vector
    /// </summary>
@@ -561,7 +561,7 @@ namespace simd
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
       }
-#if defined(SIMD_V2_64_SSE41)
+#if defined(SIMD_V2_FP_64_SSE41)
       inline double dot(const V2ds& v) const { return _mm_dp_pd(load(), v.load(), 0x31).m128d_f64[0];                            }
       inline double length()           const { __m128d t(load()); return _mm_sqrt_pd(_mm_dp_pd(t, t, 0x31)).m128d_f64[0];        }
       inline V2ds   roundC()           const { return V2ds(_mm_round_pd(load(), _MM_FROUND_NINT));                               }
@@ -604,7 +604,31 @@ namespace simd
 #else
    typedef V2dg V2d;  // use plain as default
 #endif
+   
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+
+#if defined(SIMD_V2_INT_32_SSE2)
+   // TODO INT32 SSE
+   typedef V2is V2i;  // use SIMD as default
+#else
+   typedef V2ig V2i;  // use plain as default
+#endif
+
+#if defined(SIMD_V2_INT_64_SSE2)
+   // TODO INT64 SSE
+   typedef V2ls V2l;  // use SIMD as default
+#else
+   typedef V2lg V2l;  // use plain as default
+#endif
+
 #pragma endregion
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
 
 #pragma region V3
    //------------------------------------------------------------------------------------------------------------------------//
@@ -614,7 +638,7 @@ namespace simd
    /// Abstract 3D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
-   class V3 abstract
+   class V3 abstract : public VB<V, F>
    {
    public:
       union
@@ -730,7 +754,7 @@ namespace simd
    class V3ilt abstract : public V3<V, F>
    {
    public:
-      static inline F _abs(const int s) { return ::abs(s); }
+      static inline F _abs(const int s)  { return ::abs(s);        }
       static inline F _sqrt(const int s) { return (F)::sqrt<F>(s); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V3ilt()                                              { }
