@@ -107,6 +107,12 @@ namespace simd
       inline V    perp1()                          const { return V(y, -x);                                }
       inline V    perp2()                          const { return V(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline F    side(const V& s, const V& e)                  const { return (e - s).cross(*this - s);                 }
+      inline bool inside(const V& min, const V& max)            const { return *this >= min       && *this <= max;       }
+      inline bool inside(const V& min, const V& max, const F e) const { return *this >= (min - e) && *this <= (max + e); }
+      inline bool inside(const V& m, const F r2)                const { return distance2(m) <= r2;                       }
+      inline bool inside(const V& m, const F r2, const F e)     const { return distance2(m) <= (r2 + e);                 }
+      //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
       static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
       static inline void random(V* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V::random();  }
@@ -153,11 +159,6 @@ namespace simd
       inline F angle(const V& v)    const { F lp = length() * v.length(); return V::_acos(dot(v) / lp);        }
       inline F angleOri(const V& v) const { F t = angle(v); if (cross(v) < (F)0.0) t = (F)TWOPI - t; return t; }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline F    side(const V& s, const V& e)                  const { return (e - s).cross(*this - s);                      }
-      inline bool inside(const V& min, const V& max)            const { return *this >= min       && *this <= max;            }
-      inline bool inside(const V& min, const V& max, const F e) const { return *this >= (min - e) && *this <= (max + e);      }
-      inline bool inside(const V& m, const F r2)                const { return distance2(m) <= r2;                            }
-      inline bool inside(const V& m, const F r2, const F e)     const { return distance2(m) <= (r2 + e);                      }
       inline F    area(const V& p, const V& q)                  const { return (F)0.5 * (p - (V&)*this).cross(q - (V&)*this); }
       inline void rotate(F r)
       {
