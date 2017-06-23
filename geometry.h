@@ -259,9 +259,8 @@ namespace simd
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
       inline V2fs(const __m128 values)            { store(values);                                                       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void* operator new  (size_t size) { return _aligned_malloc(sizeof(V2fs), 8); }
-      inline void* operator new[](size_t size) { return _aligned_malloc(size * sizeof(V2fs), 8); }
-         //------------------------------------------------------------------------------------------------------------------------//
+      inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2fs), 8);                        }
+      inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2fs), 8);                 }
       inline       bool  operator == (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) == 0x0F; }
       inline       bool  operator != (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) != 0x00; }
       inline       bool  operator <  (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmplt_ps(load(), v.load())) == 0x0F; }
@@ -352,7 +351,6 @@ namespace simd
          __m128 f(_mm_sub_ss(d, e));
          return 0.5f * f.m128_f32[0];
       }
-      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE41)
       inline V2fs  roundC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_NINT)); }
       inline V2fs  floorC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
@@ -401,15 +399,14 @@ namespace simd
       inline V2ds(const int values[2])              { store(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))); }
       inline V2ds(const __m128d values)             { store(values);                                             }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void* operator new  (size_t size)             { return _aligned_malloc(sizeof(V2ds), 16);       }
-      inline void* operator new[](size_t size)             { return _aligned_malloc(size* sizeof(V2ds), 16); }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline       bool operator == (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) == 0x03; }
-      inline       bool operator != (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) != 0x00; }
-      inline       bool operator <  (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmplt_pd(load(), v.load())) == 0x03; }
-      inline       bool operator <= (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmple_pd(load(), v.load())) == 0x03; }
-      inline       bool operator >  (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmpgt_pd(load(), v.load())) == 0x03; }
-      inline       bool operator >= (const V2ds&   v) const { return _mm_movemask_pd(_mm_cmpge_pd(load(), v.load())) == 0x03; }
+      inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2ds), 16);                       }
+      inline       void* operator new[](size_t size)        { return _aligned_malloc(size* sizeof(V2ds), 16);                 }
+      inline       bool  operator == (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) == 0x03; }
+      inline       bool  operator != (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmpeq_pd(load(), v.load())) != 0x00; }
+      inline       bool  operator <  (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmplt_pd(load(), v.load())) == 0x03; }
+      inline       bool  operator <= (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmple_pd(load(), v.load())) == 0x03; }
+      inline       bool  operator >  (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmpgt_pd(load(), v.load())) == 0x03; }
+      inline       bool  operator >= (const V2ds&  v) const { return _mm_movemask_pd(_mm_cmpge_pd(load(), v.load())) == 0x03; }
       inline       V2ds  operator +  (const V2ds&  v) const { return V2ds(_mm_add_pd(load(), v.load()));                      }
       inline       V2ds  operator -  (const V2ds&  v) const { return V2ds(_mm_sub_pd(load(), v.load()));                      }
       inline       V2ds  operator *  (const V2ds&  v) const { return V2ds(_mm_mul_pd(load(), v.load()));                      }
@@ -418,11 +415,11 @@ namespace simd
       inline       V2ds  operator /  (const double s) const { return V2ds(_mm_div_pd(load(), _mm_set1_pd(s)));                }
       inline       V2ds  operator -  ()               const { return V2ds(_mm_sub_pd(_mm_setzero_pd(), load()));              }
       inline const V2ds& operator +  ()               const { return *this;                                                   }
-      inline       V2ds& operator =  (const V2ds&   v)      { store(v.load());                           return *this;        }
-      inline       V2ds& operator += (const V2ds&   v)      { store(_mm_add_pd(load(), v.load()));       return *this;        }
-      inline       V2ds& operator -= (const V2ds&   v)      { store(_mm_sub_pd(load(), v.load()));       return *this;        }
-      inline       V2ds& operator *= (const V2ds&   v)      { store(_mm_mul_pd(load(), v.load()));       return *this;        }
-      inline       V2ds& operator /= (const V2ds&   v)      { store(_mm_div_pd(load(), v.load()));       return *this;        }
+      inline       V2ds& operator =  (const V2ds&  v)       { store(v.load());                           return *this;        }
+      inline       V2ds& operator += (const V2ds&  v)       { store(_mm_add_pd(load(), v.load()));       return *this;        }
+      inline       V2ds& operator -= (const V2ds&  v)       { store(_mm_sub_pd(load(), v.load()));       return *this;        }
+      inline       V2ds& operator *= (const V2ds&  v)       { store(_mm_mul_pd(load(), v.load()));       return *this;        }
+      inline       V2ds& operator /= (const V2ds&  v)       { store(_mm_div_pd(load(), v.load()));       return *this;        }
       inline       V2ds& operator =  (const double s)       { store(_mm_set1_pd(s));                     return *this;        }
       inline       V2ds& operator += (const double s)       { store(_mm_add_pd(load(), _mm_set1_pd(s))); return *this;        }
       inline       V2ds& operator -= (const double s)       { store(_mm_sub_pd(load(), _mm_set1_pd(s))); return *this;        }
@@ -468,7 +465,6 @@ namespace simd
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
       }
-      //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE41)
       inline double dot(const V2ds& v) const { return _mm_dp_pd(load(), v.load(), 0x31).m128d_f64[0];                            }
       inline double length()           const { __m128d t(load()); return _mm_sqrt_pd(_mm_dp_pd(t, t, 0x31)).m128d_f64[0];        }
