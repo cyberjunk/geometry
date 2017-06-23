@@ -156,12 +156,28 @@ namespace simd
       inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);   }
       inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);    }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline F angle()              const { return V::_acos(x / length()); }
-      inline F angleNoN()           const { return V::_acos(x); }
-      inline F angleOri()           const { F t = angle();    if (y < (F)0.0) t = (F)TWOPI - t; return t; }
-      inline F angleOriNoN()        const { F t = angleNoN(); if (y < (F)0.0) t = (F)TWOPI - t; return t; }
-      inline F angle(const V& v)    const { F lp = length() * v.length(); return V::_acos(dot(v) / lp); }
+      inline F angle()              const { return V::_acos(x / length());                                     }
+      inline F angleNoN()           const { return V::_acos(x);                                                }
+      inline F angleOri()           const { F t = angle();    if (y < (F)0.0) t = (F)TWOPI - t; return t;      }
+      inline F angleOriNoN()        const { F t = angleNoN(); if (y < (F)0.0) t = (F)TWOPI - t; return t;      }
+      inline F angle(const V& v)    const { F lp = length() * v.length(); return V::_acos(dot(v) / lp);        }
       inline F angleOri(const V& v) const { F t = angle(v); if (cross(v) < (F)0.0) t = (F)TWOPI - t; return t; }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline F    side(const V& s, const V& e)                  const { return (e - s).cross(*this - s);                      }
+      inline bool inside(const V& min, const V& max)            const { return *this >= min       && *this <= max;            }
+      inline bool inside(const V& min, const V& max, const F e) const { return *this >= (min - e) && *this <= (max + e);      }
+      inline bool inside(const V& m, const F r2)                const { return distance2(m) <= r2;                            }
+      inline bool inside(const V& m, const F r2, const F e)     const { return distance2(m) <= (r2 + e);                      }
+      inline F    area(const V& p, const V& q)                  const { return (F)0.5 * (p - (V&)*this).cross(q - (V&)*this); }
+      inline void rotate(F r)
+      {
+         F cs = V::_cos(r);
+         F sn = V::_sin(r);
+         F p = x;
+         x = p * cs - y * sn;
+         y = p * sn + y * cs;
+      }
+
       //------------------------------------------------------------------------------------------------------------------------//
    };
 
@@ -189,18 +205,6 @@ namespace simd
       inline V2f(const float s)                  : V2fd(s,               s) { }
       inline V2f(const double x, const double y) : V2fd((float)x, (float)y) { }
       inline V2f(const int x, const int y)       : V2fd((float)x, (float)y) { }
-
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  inside(const V2f& m, const float r2)                   const { return distance2(m) <= r2;          }
-      inline bool  inside(const V2f& m, const float r2, const float e)    const { return distance2(m) <= (r2+e);      }
-      inline void  rotate(float r)
-      {
-         float cs = _cos(r);
-         float sn = _sin(r);
-         float p = x;
-         x = p * cs - y * sn;
-         y = p * sn + y * cs;
-      }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
       inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
@@ -312,13 +316,6 @@ namespace simd
       inline void  round()                 { store(_mm_round_ps(load(), _MM_FROUND_NINT));       }
       inline void  floor()                 { store(_mm_round_ps(load(), _MM_FROUND_FLOOR));      }
       inline void  ceil()                  { store(_mm_round_ps(load(), _MM_FROUND_CEIL));       }
-#else
-      inline V2f   roundC()          const { return V2f(_round(x), _round(y));  }
-      inline V2f   floorC()          const { return V2f(_floor(x), _floor(y));  }
-      inline V2f   ceilC()           const { return V2f(_ceil(x),  _ceil(y));   }
-      inline void  round()                 { x = _round(x); y = _round(y);      }
-      inline void  floor()                 { x = _floor(x); y = _floor(y);      }
-      inline void  ceil()                  { x = _ceil(x);  y = _ceil(y);       }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
 #else
@@ -326,10 +323,6 @@ namespace simd
       inline V2f(float* const values)   : V2fd(values[0], values[1])               { }
       inline V2f(const int values[2])   : V2fd((float)values[0], (float)values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline float side(const V2f& s, const V2f& e)                       const { return (e - s).cross(*this - s); }
-      inline bool  inside(const V2f& min, const V2f& max)                 const { return *this >= min     && *this <= max; }
-      inline bool  inside(const V2f& min, const V2f& max, const float e)  const { return *this >= (min - e) && *this <= (max + e); }
-      inline float area(const V2f& p, const V2f& q)                       const { return 0.5f * (p - *this).cross(q - *this); }
 #endif
    };
 
@@ -353,11 +346,6 @@ namespace simd
       static inline double _acos(const double s)  { return ::acos(s); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2d() { }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline double side(const V2d& s, const V2d& e)                      const { return (e - s).cross(*this - s);             }
-      inline bool   inside(const V2d& m, const double r2)                 const { return distance2(m) <= r2;                   }
-      inline bool   inside(const V2d& m, const double r2, const double e) const { return distance2(m) <= (r2 + e);             }
-      inline double area(const V2d& p, const V2d& q)                      const { return 0.5 * (p - *this).cross(q - *this);   }
       //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_64_SSE2)
       inline __m128d load()                 const { return _mm_load_pd(vals); }
@@ -467,12 +455,6 @@ namespace simd
          __m128d d(_mm_sqrt_sd(c, c));
          return d.m128d_f64[0];
       }
-      inline V2d    roundC()          const { return V2d(_round(x), _round(y));         }
-      inline V2d    floorC()          const { return V2d(_floor(x), _floor(y));         }
-      inline V2d    ceilC()           const { return V2d(_ceil(x), _ceil(y));           }
-      inline void   round()                 { x = _round(x); y = _round(y);             }
-      inline void   floor()                 { x = _floor(x); y = _floor(y);             }
-      inline void   ceil()                  { x = _ceil(x);  y = _ceil(y);              }
       inline void   normalise()             
       { 
          __m128d t(load());
@@ -493,18 +475,6 @@ namespace simd
       inline V2d(const float x, const float y)   : V2fd((double)x, (double)y)                   { }
       inline V2d(const int x, const int y)       : V2fd((double)x, (double)y)                   { }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void   normalise()                                { *this /= length();                              }
-      inline void   rotate(double r)
-      {
-         double cs = ::cos(r);
-         double sn = ::sin(r);
-         double p = x;
-         x = p * cs - y * sn;
-         y = p * sn + y * cs;
-      }
-      //------------------------------------------------------------------------------------------------------------------------//
-      inline bool inside(const V2d& min, const V2d& max)                 const { return *this >= min && *this <= max; }
-      inline bool inside(const V2d& min, const V2d& max, const double e) const { return *this >= (min - e) && *this <= (max + e);}
 #endif
    };
 }
