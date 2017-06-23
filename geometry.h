@@ -91,6 +91,8 @@ namespace simd
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
       inline F    length2()                        const { return dot(*((V*)this));                        }
       inline F    length()                         const { return V::_sqrt(length2());                     }
+      inline F    distance2(const V& v)            const { return (*this - v).length2();                   }
+      inline F    distance(const V& v)             const { return V::_sqrt(distance2(v));                  }
       inline V    yx()                             const { return V(y, x);                                 }
       inline void yx()                                   { std::swap(x, y);                                }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
@@ -134,8 +136,6 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  equals(const V& v, const F e2)       const { return (*this - v).length2() <= e2;   }
       inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);    }
-      inline F     distance2(const V& v)                const { return (*this - v).length2();         }
-      inline F     distance(const V& v)                 const { return V::_sqrt(distance2(v));        }
       inline void  normalise()                                { *this /= length();                    }
       inline V     normaliseC()                         const { V t(*this); t.normalise(); return t;  }
       //------------------------------------------------------------------------------------------------------------------------//
