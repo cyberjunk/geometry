@@ -45,7 +45,7 @@ namespace simd
    /// Generic 2D Vector
    /// </summary>
    template <typename V, typename F>
-   class V2
+   class V2 abstract
    {
    public:
       union
@@ -128,7 +128,7 @@ namespace simd
    /// Generic 2D Vector for Floating Point (V2f, V2d)
    /// </summary>
    template <typename V, typename F>
-   class V2fd : public V2<V, F>
+   class V2fd abstract : public V2<V, F>
    {
    public:
       inline V2fd() { }
