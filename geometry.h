@@ -117,9 +117,7 @@ namespace simd
       inline bool inside(const V& m, const F r2, const F e)     const { return distance2(m) <= (r2 + e);                 }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
-      static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
       static inline void random(V* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V::random();  }
-      static inline void randomN(V* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V::randomN(); }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -170,6 +168,9 @@ namespace simd
          x = p * cs - y * sn;
          y = p * sn + y * cs;
       }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V    randomN()                        { V t(V::random()); t.normalise(); return t;             }
+      static inline void randomN(V* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V::randomN(); }
       //------------------------------------------------------------------------------------------------------------------------//
    };
 

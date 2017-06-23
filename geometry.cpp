@@ -27,6 +27,19 @@ void bench(const char* name, const char* op, void task(T* ARR))
    printf(name); printf(" | "); printf(op); printf("%010I64i | ", sp.count()); printf("%+015.7f || ", s.x + s.y);
 }
 //------------------------------------------------------------------------------------------------------------------------//
+template<typename T>
+void benchInt(const char* name, const char* op, void task(T* ARR))
+{
+   T ARR[LOOPS];
+   T::random(ARR, LOOPS);
+   auto t1 = clk.now();
+   task(ARR);
+   auto t2 = clk.now();
+   auto sp = t2 - t1;
+   T s = T::ZERO(); for (size_t i = 0; i < LOOPS; i++) s += ARR[i];
+   printf(name); printf(" | "); printf(op); printf("%010I64i | ", sp.count()); printf("%+015.7i || ", s.x + s.y);
+}
+//------------------------------------------------------------------------------------------------------------------------//
 template<typename T, typename F> void benchEqV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] == ARR[i + 1]);)  }
 template<typename T, typename F> void benchNeqV(T* ARR)      { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] != ARR[i + 1]);)  }
 template<typename T, typename F> void benchLtV(T* ARR)       { LOOP(LOOPS - 1, ARR[i].x = (F)(ARR[i] < ARR[i + 1]);)   }
@@ -84,13 +97,8 @@ template<typename T, typename T2, typename F> void benchRun(const char* name, co
    bench<T>(name, "operator / s | ", benchDivS<T, F>);      bench<T2>(nameT2, "operator / s | ", benchDivS<T2, F>);      printf("\n");
    bench<T>(name, "isZero()     | ", benchIsZero<T, F>);    bench<T2>(nameT2, "isZero()     | ", benchIsZero<T2, F>);    printf("\n");
    bench<T>(name, "isZero(e)    | ", benchIsZeroE<T, F>);   bench<T2>(nameT2, "isZero(e)    | ", benchIsZeroE<T2, F>);   printf("\n");
-   bench<T>(name, "rotate()     | ", benchRotate<T, F>);    bench<T2>(nameT2, "rotate()     | ", benchRotate<T2, F>);    printf("\n");
    bench<T>(name, "length()     | ", benchLength<T, F>);    bench<T2>(nameT2, "length()     | ", benchLength<T2, F>);    printf("\n");
    bench<T>(name, "length2()    | ", benchLength2<T, F>);   bench<T2>(nameT2, "length2()    | ", benchLength2<T2, F>);   printf("\n");
-   bench<T>(name, "normalise()  | ", benchNormalise<T, F>); bench<T2>(nameT2, "normalise()  | ", benchNormalise<T2, F>); printf("\n");
-   bench<T>(name, "round()      | ", benchRound<T, F>);     bench<T2>(nameT2, "round()      | ", benchRound<T2, F>);     printf("\n");
-   bench<T>(name, "floor()      | ", benchFloor<T, F>);     bench<T2>(nameT2, "floor()      | ", benchFloor<T2, F>);     printf("\n");
-   bench<T>(name, "ceil()       | ", benchCeil<T, F>);      bench<T2>(nameT2, "ceil()       | ", benchCeil<T2, F>);      printf("\n");
    bench<T>(name, "abs()        | ", benchAbs<T, F>);       bench<T2>(nameT2, "abs()        | ", benchAbs<T2, F>);       printf("\n");
    bench<T>(name, "swap()       | ", benchSwap<T, F>);      bench<T2>(nameT2, "swap()       | ", benchSwap<T2, F>);      printf("\n");
    bench<T>(name, "dot()        | ", benchDot<T, F>);       bench<T2>(nameT2, "dot()        | ", benchDot<T2, F>);       printf("\n");
@@ -103,10 +111,51 @@ template<typename T, typename T2, typename F> void benchRun(const char* name, co
    bench<T>(name, "inside(v,v,e)| ", benchInsideRE<T, F>);  bench<T2>(nameT2, "inside(v,v,e)| ", benchInsideRE<T2, F>);  printf("\n");
    bench<T>(name, "inside(m,r)  | ", benchInsideC<T, F>);   bench<T2>(nameT2, "inside(m,r)  | ", benchInsideC<T2, F>);   printf("\n");
    bench<T>(name, "inside(m,r,e)| ", benchInsideCE<T, F>);  bench<T2>(nameT2, "inside(m,r,e)| ", benchInsideCE<T2, F>);  printf("\n");
+   // fp
+   bench<T>(name, "rotate()     | ", benchRotate<T, F>);    bench<T2>(nameT2, "rotate()     | ", benchRotate<T2, F>);    printf("\n");
+   bench<T>(name, "normalise()  | ", benchNormalise<T, F>); bench<T2>(nameT2, "normalise()  | ", benchNormalise<T2, F>); printf("\n");
+   bench<T>(name, "round()      | ", benchRound<T, F>);     bench<T2>(nameT2, "round()      | ", benchRound<T2, F>);     printf("\n");
+   bench<T>(name, "floor()      | ", benchFloor<T, F>);     bench<T2>(nameT2, "floor()      | ", benchFloor<T2, F>);     printf("\n");
+   bench<T>(name, "ceil()       | ", benchCeil<T, F>);      bench<T2>(nameT2, "ceil()       | ", benchCeil<T2, F>);      printf("\n");
    bench<T>(name, "area(v,v)    | ", benchAreaTri<T, F>);   bench<T2>(nameT2, "area(v,v)    | ", benchAreaTri<T2, F>);   printf("\n");
    bench<T>(name, "angle()      | ", benchAngle<T, F>);     bench<T2>(nameT2, "angle()      | ", benchAngle<T2, F>);     printf("\n");
    bench<T>(name, "angle(v)     | ", benchAngleV<T, F>);    bench<T2>(nameT2, "angle(v)     | ", benchAngleV<T2, F>);    printf("\n");
 }
+template<typename T, typename T2, typename F> void benchRunInt(const char* name, const char* nameT2)
+{
+   PRINTHEADER;
+   benchInt<T>(name, "operator ==v | ", benchLtV<T, F>);       benchInt<T2>(nameT2, "operator ==v | ", benchLtV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator !=v | ", benchLtV<T, F>);       benchInt<T2>(nameT2, "operator !=v | ", benchLtV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator < v | ", benchLtV<T, F>);       benchInt<T2>(nameT2, "operator < v | ", benchLtV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator <=v | ", benchLeV<T, F>);       benchInt<T2>(nameT2, "operator <=v | ", benchLeV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator > v | ", benchGtV<T, F>);       benchInt<T2>(nameT2, "operator > v | ", benchGtV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator >=v | ", benchGeV<T, F>);       benchInt<T2>(nameT2, "operator >=v | ", benchGeV<T2, F>);       printf("\n");
+   benchInt<T>(name, "operator + v | ", benchAddV<T, F>);      benchInt<T2>(nameT2, "operator + v | ", benchAddV<T2, F>);      printf("\n");
+   benchInt<T>(name, "operator - v | ", benchSubV<T, F>);      benchInt<T2>(nameT2, "operator - v | ", benchSubV<T2, F>);      printf("\n");
+   benchInt<T>(name, "operator * v | ", benchMulV<T, F>);      benchInt<T2>(nameT2, "operator * v | ", benchMulV<T2, F>);      printf("\n");
+   //benchInt<T>(name, "operator / v | ", benchDivV<T, F>);      benchInt<T2>(nameT2, "operator / v | ", benchDivV<T2, F>);      printf("\n");
+   benchInt<T>(name, "operator + s | ", benchAddS<T, F>);      benchInt<T2>(nameT2, "operator + s | ", benchAddS<T2, F>);      printf("\n");
+   benchInt<T>(name, "operator - s | ", benchSubS<T, F>);      benchInt<T2>(nameT2, "operator - s | ", benchSubS<T2, F>);      printf("\n");
+   benchInt<T>(name, "operator * s | ", benchMulS<T, F>);      benchInt<T2>(nameT2, "operator * s | ", benchMulS<T2, F>);      printf("\n");
+   //benchInt<T>(name, "operator / s | ", benchDivS<T, F>);      benchInt<T2>(nameT2, "operator / s | ", benchDivS<T2, F>);      printf("\n");
+   benchInt<T>(name, "isZero()     | ", benchIsZero<T, F>);    benchInt<T2>(nameT2, "isZero()     | ", benchIsZero<T2, F>);    printf("\n");
+   benchInt<T>(name, "isZero(e)    | ", benchIsZeroE<T, F>);   benchInt<T2>(nameT2, "isZero(e)    | ", benchIsZeroE<T2, F>);   printf("\n");
+   benchInt<T>(name, "length()     | ", benchLength<T, F>);    benchInt<T2>(nameT2, "length()     | ", benchLength<T2, F>);    printf("\n");
+   benchInt<T>(name, "length2()    | ", benchLength2<T, F>);   benchInt<T2>(nameT2, "length2()    | ", benchLength2<T2, F>);   printf("\n");
+   benchInt<T>(name, "abs()        | ", benchAbs<T, F>);       benchInt<T2>(nameT2, "abs()        | ", benchAbs<T2, F>);       printf("\n");
+   benchInt<T>(name, "swap()       | ", benchSwap<T, F>);      benchInt<T2>(nameT2, "swap()       | ", benchSwap<T2, F>);      printf("\n");
+   benchInt<T>(name, "dot()        | ", benchDot<T, F>);       benchInt<T2>(nameT2, "dot()        | ", benchDot<T2, F>);       printf("\n");
+   benchInt<T>(name, "cross()      | ", benchCross<T, F>);     benchInt<T2>(nameT2, "cross()      | ", benchCross<T2, F>);     printf("\n");
+   benchInt<T>(name, "max()        | ", benchMax<T, F>);       benchInt<T2>(nameT2, "max()        | ", benchMax<T2, F>);       printf("\n");
+   benchInt<T>(name, "min()        | ", benchMin<T, F>);       benchInt<T2>(nameT2, "min()        | ", benchMin<T2, F>);       printf("\n");
+   benchInt<T>(name, "bound()      | ", benchBound<T, F>);     benchInt<T2>(nameT2, "bound()      | ", benchBound<T2, F>);     printf("\n");
+   benchInt<T>(name, "side(v,v)    | ", benchSide<T, F>);      benchInt<T2>(nameT2, "side(v,v)    | ", benchSide<T2, F>);      printf("\n");
+   benchInt<T>(name, "inside(v,v)  | ", benchInsideR<T, F>);   benchInt<T2>(nameT2, "inside(v,v)  | ", benchInsideR<T2, F>);   printf("\n");
+   benchInt<T>(name, "inside(v,v,e)| ", benchInsideRE<T, F>);  benchInt<T2>(nameT2, "inside(v,v,e)| ", benchInsideRE<T2, F>);  printf("\n");
+   benchInt<T>(name, "inside(m,r)  | ", benchInsideC<T, F>);   benchInt<T2>(nameT2, "inside(m,r)  | ", benchInsideC<T2, F>);   printf("\n");
+   benchInt<T>(name, "inside(m,r,e)| ", benchInsideCE<T, F>);  benchInt<T2>(nameT2, "inside(m,r,e)| ", benchInsideCE<T2, F>);  printf("\n");
+}
+
 //------------------------------------------------------------------------------------------------------------------------//
 
 void printSizes()
@@ -126,6 +175,8 @@ int main()
 {
    while (true)
    {
+      benchRunInt<V2ig, V2ig, int>("V2ig", "V2ig");
+
 #if defined(SIMD_V2_32_SSE2)
       benchRun<V2dg, V2ds, double>("V2dg", "V2ds");
 #else
