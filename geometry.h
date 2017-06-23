@@ -31,8 +31,11 @@
 //------------------------------------------------------------------------------------------------------------------------//
 namespace simd
 {
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                          ROOT TEMPLATE [L1, ABSTRACT]                                                  //
+   //------------------------------------------------------------------------------------------------------------------------//
    /// <summary>
-   /// Abstract 2D Vector for Floating Point AND Integer
+   /// Abstract 2D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
    class V2 abstract
@@ -120,21 +123,20 @@ namespace simd
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
+   //                                 FLOATING POINT & INTEGER TEMPLATES [L2, ABSTRACT]                                      //
    //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
-
    /// <summary>
-   /// Abstract 2D Vector for Floating Point
+   /// Abstract 2D Vector Template for Floating Point (32/64) [L2]
    /// </summary>
    template <typename V, typename F>
-   class V2fd abstract : public V2<V, F>
+   class V2fdt abstract : public V2<V, F>
    {
    public:
-      inline V2fd() { }
-      inline V2fd(const F x, const F y) : V2(x, y)                 { }
-      inline V2fd(const F scalar)       : V2(scalar, scalar)       { }
-      inline V2fd(const F values[2])    : V2(values[0], values[1]) { }
-      inline V2fd(F* const values)      : V2(values[0], values[1]) { }
+      inline V2fdt() { }
+      inline V2fdt(const F x, const F y) : V2(x, y)                 { }
+      inline V2fdt(const F scalar)       : V2(scalar, scalar)       { }
+      inline V2fdt(const F values[2])    : V2(values[0], values[1]) { }
+      inline V2fdt(F* const values)      : V2(values[0], values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V& operator /= (const V& v)       { x /= v.x; y /= v.y; return (V&)*this;               }
       inline V  operator /  (const V& v) const { return V(x / v.x, y / v.y);                         }
@@ -172,10 +174,30 @@ namespace simd
    };
 
    /// <summary>
-   /// Abstract 2D Vector for Single Precision FP
+   /// Abstract 2D Vector for Integer (32/64) [L2]
+   /// </summary>
+   template <typename V, typename F>
+   class V2ilt abstract : public V2<V, F>
+   {
+   public:
+      static inline F _abs(const int s)  { return ::abs(s);         }
+      static inline F _sqrt(const int s) { return (F)::sqrt<F>(s);  }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2ilt()                                                { }
+      inline V2ilt(const F x, const F y) : V2(x, y)                 { }
+      inline V2ilt(const F scalar)       : V2(scalar, scalar)       { }
+      inline V2ilt(const F values[2])    : V2(values[0], values[1]) { }
+      inline V2ilt(F* const values)      : V2(values[0], values[1]) { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                       32-BIT & 64-BIT TEMPLATES [L3, ABSTRACT]                                         //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Abstract 2D Vector Template for Single Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V2ft abstract : public V2fd<V, float>
+   class V2ft abstract : public V2fdt<V, float>
    {
    public:
       static inline float _abs(const float s)   { return ::fabsf(s);  }
@@ -188,17 +210,17 @@ namespace simd
       static inline float _acos(const float s)  { return ::acosf(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2ft() { }
-      inline V2ft(const float x, const float y) : V2fd(x, y)                 { }
-      inline V2ft(const float scalar)           : V2fd(scalar, scalar)       { }
-      inline V2ft(const float values[2])        : V2fd(values[0], values[1]) { }
-      inline V2ft(float* const values)          : V2fd(values[0], values[1]) { }
+      inline V2ft(const float x, const float y) : V2fdt(x, y)                 { }
+      inline V2ft(const float scalar)           : V2fdt(scalar, scalar)       { }
+      inline V2ft(const float values[2])        : V2fdt(values[0], values[1]) { }
+      inline V2ft(float* const values)          : V2fdt(values[0], values[1]) { }
    };
 
    /// <summary>
-   /// Abstract 2D Vector for Double Precision FP
+   /// Abstract 2D Vector Template for Double Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V2dt abstract : public V2fd<V, double>
+   class V2dt abstract : public V2fdt<V, double>
    {
    public:
       static inline double _abs(const double s)   { return ::abs(s);   }
@@ -211,18 +233,45 @@ namespace simd
       static inline double _acos(const double s)  { return ::acos(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2dt() { }
-      inline V2dt(const double x, const double y) : V2fd(x, y)                 { }
-      inline V2dt(const double scalar)            : V2fd(scalar, scalar)       { }
-      inline V2dt(const double values[2])         : V2fd(values[0], values[1]) { }
-      inline V2dt(double* const values)           : V2fd(values[0], values[1]) { }
+      inline V2dt(const double x, const double y) : V2fdt(x, y)                 { }
+      inline V2dt(const double scalar)            : V2fdt(scalar, scalar)       { }
+      inline V2dt(const double values[2])         : V2fdt(values[0], values[1]) { }
+      inline V2dt(double* const values)           : V2fdt(values[0], values[1]) { }
+   };
+
+   /// <summary>
+   /// Abstract 2D Vector Template for Integer (32) [L3]
+   /// </summary>
+   template <typename V>
+   class V2it abstract : public V2ilt<V, int>
+   {
+   public:
+      inline V2it()                                                       { }
+      inline V2it(const int x, const int y) : V2ilt(x, y)                 { }
+      inline V2it(const int scalar)         : V2ilt(scalar, scalar)       { }
+      inline V2it(const int values[2])      : V2ilt(values[0], values[1]) { }
+      inline V2it(int* const values)        : V2ilt(values[0], values[1]) { }
+   };
+
+   /// <summary>
+   /// Abstract 2D Vector Template for Integer (64) [L3]
+   /// </summary>
+   template <typename V>
+   class V2lt abstract : public V2ilt<V, long long>
+   {
+   public:
+      inline V2lt() { }
+      inline V2lt(const long long x, const long long y) : V2ilt(x, y)                 { }
+      inline V2lt(const long long scalar)               : V2ilt(scalar, scalar)       { }
+      inline V2lt(const long long values[2])            : V2ilt(values[0], values[1]) { }
+      inline V2lt(long long* const values)              : V2ilt(values[0], values[1]) { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
+   //                                     GENERIC/NON-SIMD CLASSES [L4]                                                      //
    //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
-
    /// <summary>
-   /// Single Precision 2D Vector (Generic, no SIMD)
+   /// Single Precision 2D Vector (Generic, no SIMD) [L4]
    /// </summary>
    class V2fg : public V2ft<V2fg>
    {
@@ -238,7 +287,7 @@ namespace simd
    };
 
    /// <summary>
-   /// Double Precision 2D Vector (Generic, no SIMD)
+   /// Double Precision 2D Vector (Generic, no SIMD) [L4]
    /// </summary>
    class V2dg : public V2dt<V2dg>
    {
@@ -253,10 +302,35 @@ namespace simd
       inline V2dg(const int x, const int y)       : V2dt((double)x, (double)y)                 { }
    };
 
-   //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
-   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// 32-Bit Integer 2D Vector (Generic, no SIMD) [L4]
+   /// </summary>
+   class V2ig : public V2it<V2ig>
+   {
+   public:
+      inline V2ig() { }
+      inline V2ig(const int x, const int y) : V2it(x, y)                 { }
+      inline V2ig(const int scalar)         : V2it(scalar, scalar)       { }
+      inline V2ig(const int values[2])      : V2it(values[0], values[1]) { }
+      inline V2ig(int* const values)        : V2it(values[0], values[1]) { }
+   };
 
+   /// <summary>
+   /// 64-Bit Integer 2D Vector (Generic, no SIMD) [L4]
+   /// </summary>
+   class V2lg : public V2lt<V2lg>
+   {
+   public:
+      inline V2lg() { }
+      inline V2lg(const long long x, const long long y) : V2lt(x, y)                 { }
+      inline V2lg(const long long scalar)               : V2lt(scalar, scalar)       { }
+      inline V2lg(const long long values[2])            : V2lt(values[0], values[1]) { }
+      inline V2lg(long long* const values)              : V2lt(values[0], values[1]) { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                             SIMD CLASSES [L4]                                                          //
+   //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_32_SSE2)
    /// <summary>
    /// Single Precision 2D Vector (SSE/SIMD)
@@ -384,7 +458,6 @@ namespace simd
    typedef V2fg V2f;  // use plain as default
 #endif
 
-   //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
 
