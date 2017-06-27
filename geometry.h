@@ -57,6 +57,9 @@ namespace simd
    template <typename V, typename F>
    class V2 abstract : public VB<V, F>
    {
+   protected:
+      inline V*   thiss() const { return (V*)this; }
+
    public:
       union
       {
@@ -86,48 +89,48 @@ namespace simd
       inline V     operator /    (const V& v)     const { return V(x / v.x, y / v.y);           }
       inline V     operator *    (const F  s)     const { return V(x * s,   y * s);             }
       inline V     operator /    (const F  s)     const { return V(x / s,   y / s);             }
-      inline V&    operator =    (const V& v)           { x =  v.x; y =  v.y; return (V&)*this; }
-      inline V&    operator +=   (const V& v)           { x += v.x; y += v.y; return (V&)*this; }
-      inline V&    operator -=   (const V& v)           { x -= v.x; y -= v.y; return (V&)*this; }
-      inline V&    operator *=   (const V& v)           { x *= v.x; y *= v.y; return (V&)*this; }
-      inline V&    operator /=   (const V& v)           { x /= v.x; y /= v.y; return (V&)*this; }
-      inline V&    operator =    (const F  s)           { x =  s;   y =  s;   return (V&)*this; }
-      inline V&    operator +=   (const F  s)           { x += s;   y += s;   return (V&)*this; }
-      inline V&    operator -=   (const F  s)           { x -= s;   y -= s;   return (V&)*this; }
-      inline V&    operator *=   (const F  s)           { x *= s;   y *= s;   return (V&)*this; }
-      inline V&    operator /=   (const F  s)           { x /= s;   y /= s;   return (V&)*this; }
+      inline V&    operator =    (const V& v)           { x =  v.x; y =  v.y; return *thiss();  }
+      inline V&    operator +=   (const V& v)           { x += v.x; y += v.y; return *thiss();  }
+      inline V&    operator -=   (const V& v)           { x -= v.x; y -= v.y; return *thiss();  }
+      inline V&    operator *=   (const V& v)           { x *= v.x; y *= v.y; return *thiss();  }
+      inline V&    operator /=   (const V& v)           { x /= v.x; y /= v.y; return *thiss();  }
+      inline V&    operator =    (const F  s)           { x =  s;   y =  s;   return *thiss();  }
+      inline V&    operator +=   (const F  s)           { x += s;   y += s;   return *thiss();  }
+      inline V&    operator -=   (const F  s)           { x -= s;   y -= s;   return *thiss();  }
+      inline V&    operator *=   (const F  s)           { x *= s;   y *= s;   return *thiss();  }
+      inline V&    operator /=   (const F  s)           { x /= s;   y /= s;   return *thiss();  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V  operator - ()               const { return V(-x, -y);      }
       inline const V& operator + ()               const { return *this;          }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0;              }
-      inline bool isZero(const F e2)               const { return length2() <= e2;                         }
-      inline bool equals(const V& v, const F e2)   const { return (*this - v).length2() <= e2;             }
+      inline bool isZero(const F e2)               const { return thiss()->length2() <= e2;                }
+      inline bool equals(const V& v, const F e2)   const { return (*thiss() - v).length2() <= e2;          }
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y);           }
       inline F    cross(const V& v)                const { return x * v.y - y * v.x;                       }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y;                       }
-      inline F    length2()                        const { return dot(*((V*)this));                        }
-      inline F    length()                         const { return V::_sqrt(length2());                     }
-      inline F    distance2(const V& v)            const { return (*this - v).length2();                   }
-      inline F    distance(const V& v)             const { return V::_sqrt(distance2(v));                  }
+      inline F    length2()                        const { return thiss()->dot(*thiss());                  }
+      inline F    length()                         const { return V::_sqrt(thiss()->length2());            }
+      inline F    distance2(const V& v)            const { return (*thiss() - v).length2();                }
+      inline F    distance(const V& v)             const { return V::_sqrt(thiss()->distance2(v));         }
       inline V    yx()                             const { return V(y, x);                                 }
       inline void yx()                                   { std::swap(x, y);                                }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y); }
       inline V    minC(const V& v)                 const { return V(v.x < x ? v.x : x, v.y < y ? v.y : y); }
-      inline V    boundC(const V& mi, const V& ma) const { V t(minC(ma)); t.max(mi); return t;             }
+      inline V    boundC(const V& mi, const V& ma) const { V t(thiss()->minC(ma)); t.max(mi); return t;    }
       inline V    absC()                           const { return V(V::_abs(x), V::_abs(y));               }
       inline void max(const V& v)                        { if (v.x > x) x = v.x; if (v.y > y) y = v.y;     }
       inline void min(const V& v)                        { if (v.x < x) x = v.x; if (v.y < y) y = v.y;     }
-      inline void bound(const V& mi, const V& ma)        { min(ma); max(mi);                               }
+      inline void bound(const V& mi, const V& ma)        { thiss()->min(ma); thiss()->max(mi);             }
       inline void abs()                                  { x = V::_abs(x); y = V::_abs(y);                 }
       inline V    perp1()                          const { return V(y, -x);                                }
       inline V    perp2()                          const { return V(-y, x);                                }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline F    side(const V& s, const V& e)                  const { return (e - s).cross(*this - s);                 }
-      inline bool inside(const V& min, const V& max)            const { return *this >= min       && *this <= max;       }
-      inline bool inside(const V& min, const V& max, const F e) const { return *this >= (min - e) && *this <= (max + e); }
-      inline bool inside(const V& m, const F r2)                const { return distance2(m) <= r2;                       }
-      inline bool inside(const V& m, const F r2, const F e)     const { return distance2(m) <= (r2 + e);                 }
+      inline F    side(const V& s, const V& e)                  const { return (e - s).cross(*thiss() - s);                    }
+      inline bool inside(const V& min, const V& max)            const { return *thiss() >= min       && *thiss() <= max;       }
+      inline bool inside(const V& min, const V& max, const F e) const { return *thiss() >= (min - e) && *thiss() <= (max + e); }
+      inline bool inside(const V& m, const F r2)                const { return thiss()->distance2(m) <= r2;                    }
+      inline bool inside(const V& m, const F r2, const F e)     const { return thiss()->distance2(m) <= (r2 + e);              }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    random()                         { return V(std::rand(), std::rand());                    }
       static inline void random(V* v, const size_t size)  { for (size_t i = 0; i < size; i++) v[i] = V::random();  }
@@ -154,9 +157,9 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);    }
-      inline void  normalise()                                { *this /= length();                    }
-      inline V     normaliseC()                         const { V t(*this); t.normalise(); return t;  }
+      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);     }
+      inline void  normalise()                                { *thiss() /= thiss()->length();         }
+      inline V     normaliseC()                         const { V t(*thiss()); t.normalise(); return t; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V     roundC()                             const { return V(V::_round(x), V::_round(y)); }
       inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y)); }
@@ -165,14 +168,14 @@ namespace simd
       inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);   }
       inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);    }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline F angle()              const { return V::_acos(x / length());                                     }
-      inline F angleNoN()           const { return V::_acos(x);                                                }
-      inline F angleOri()           const { F t = angle();    if (y < (F)0.0) t = (F)TWOPI - t; return t;      }
-      inline F angleOriNoN()        const { F t = angleNoN(); if (y < (F)0.0) t = (F)TWOPI - t; return t;      }
-      inline F angle(const V& v)    const { F lp = length() * v.length(); return V::_acos(dot(v) / lp);        }
-      inline F angleOri(const V& v) const { F t = angle(v); if (cross(v) < (F)0.0) t = (F)TWOPI - t; return t; }
+      inline F angle()              const { return V::_acos(x / thiss()->length());                                       }
+      inline F angleNoN()           const { return V::_acos(x);                                                           }
+      inline F angleOri()           const { F t = thiss()->angle();    if (y < (F)0.0) t = (F)TWOPI - t; return t;        }
+      inline F angleOriNoN()        const { F t = thiss()->angleNoN(); if (y < (F)0.0) t = (F)TWOPI - t; return t;        }
+      inline F angle(const V& v)    const { F lp = thiss()->length() * v.length(); return V::_acos(thiss()->dot(v) / lp); }
+      inline F angleOri(const V& v) const { F t = thiss()->angle(v); if (thiss()->cross(v) < (F)0.0) t = (F)TWOPI - t; return t;   }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline F    area(const V& p, const V& q)                  const { return (F)0.5 * (p - (V&)*this).cross(q - (V&)*this); }
+      inline F    area(const V& p, const V& q)                  const { return (F)0.5 * (p - *thiss()).cross(q - *thiss()); }
       inline void rotate(F r)
       {
          F cs = V::_cos(r);
@@ -640,6 +643,9 @@ namespace simd
    template <typename V, typename F>
    class V3 abstract : public VB<V, F>
    {
+   protected:
+      inline V*   thiss() const { return ((V*)this); }
+
    public:
       union
       {
@@ -670,37 +676,37 @@ namespace simd
       inline V     operator /    (const V& v)     const { return V(x / v.x, y / v.y, z / v.z);            }
       inline V     operator *    (const F  s)     const { return V(x * s, y * s, z * s);                  }
       inline V     operator /    (const F  s)     const { return V(x / s, y / s, z / s);                  }
-      inline V&    operator =    (const V& v)           { x = v.x;  y = v.y;  z =  v.z; return (V&)*this; }
-      inline V&    operator +=   (const V& v)           { x += v.x; y += v.y; z += v.z; return (V&)*this; }
-      inline V&    operator -=   (const V& v)           { x -= v.x; y -= v.y; z -= v.z; return (V&)*this; }
-      inline V&    operator *=   (const V& v)           { x *= v.x; y *= v.y; z *= v.z; return (V&)*this; }
-      inline V&    operator /=   (const V& v)           { x /= v.x; y /= v.y; z /= v.z; return (V&)*this; }
-      inline V&    operator =    (const F  s)           { x =  s;   y =  s; z =  s;     return (V&)*this; }
-      inline V&    operator +=   (const F  s)           { x += s;   y += s; z += s;     return (V&)*this; }
-      inline V&    operator -=   (const F  s)           { x -= s;   y -= s; z -= S;     return (V&)*this; }
-      inline V&    operator *=   (const F  s)           { x *= s;   y *= s; z *= s;     return (V&)*this; }
-      inline V&    operator /=   (const F  s)           { x /= s;   y /= s; z /= s;     return (V&)*this; }
+      inline V&    operator =    (const V& v)           { x = v.x;  y = v.y;  z =  v.z; return *thiss();  }
+      inline V&    operator +=   (const V& v)           { x += v.x; y += v.y; z += v.z; return *thiss();  }
+      inline V&    operator -=   (const V& v)           { x -= v.x; y -= v.y; z -= v.z; return *thiss();  }
+      inline V&    operator *=   (const V& v)           { x *= v.x; y *= v.y; z *= v.z; return *thiss();  }
+      inline V&    operator /=   (const V& v)           { x /= v.x; y /= v.y; z /= v.z; return *thiss();  }
+      inline V&    operator =    (const F  s)           { x =  s;   y =  s; z =  s;     return *thiss();  }
+      inline V&    operator +=   (const F  s)           { x += s;   y += s; z += s;     return *thiss();  }
+      inline V&    operator -=   (const F  s)           { x -= s;   y -= s; z -= s;     return *thiss();  }
+      inline V&    operator *=   (const F  s)           { x *= s;   y *= s; z *= s;     return *thiss();  }
+      inline V&    operator /=   (const F  s)           { x /= s;   y /= s; z /= s;     return *thiss();  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       V  operator - ()               const { return V(-x, -y, -z); }
       inline const V& operator + ()               const { return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0 && z == (F)0.0;                  }
-      inline bool isZero(const F e2)               const { return length2() <= e2;                                            }
-      inline bool equals(const V& v, const F e2)   const { return (*this - v).length2() <= e2;                                }
+      inline bool isZero(const F e2)               const { return thiss()->length2() <= e2;                                   }
+      inline bool equals(const V& v, const F e2)   const { return (thiss() - v).length2() <= e2;                              }
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y); std::swap(z, v.z);           }
       inline V    cross(const V& v)                const { return V(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y + z * v.z;                                }
-      inline F    length2()                        const { return dot(*((V*)this));                                           }
-      inline F    length()                         const { return V::_sqrt(length2());                                        }
-      inline F    distance2(const V& v)            const { return (*this - v).length2();                                      }
-      inline F    distance(const V& v)             const { return V::_sqrt(distance2(v));                                     }
+      inline F    length2()                        const { return thiss()->dot(*((V*)this));                                       }
+      inline F    length()                         const { return V::_sqrt(thiss()->length2());                               }
+      inline F    distance2(const V& v)            const { return (thiss() - v).length2();                                    }
+      inline F    distance(const V& v)             const { return V::_sqrt(thiss()->distance2(v));                            }
       inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y, v.z > z ? v.z : z); }
       inline V    minC(const V& v)                 const { return V(v.x < x ? v.x : x, v.y < y ? v.y : y, v.z < z ? v.z : z); }
-      inline V    boundC(const V& mi, const V& ma) const { V t(minC(ma)); t.max(mi); return t;                                }
+      inline V    boundC(const V& mi, const V& ma) const { V t(thiss()->minC(ma)); t.max(mi); return t;                       }
       inline V    absC()                           const { return V(V::_abs(x), V::_abs(y), V::_abs(z));                      }
       inline void max(const V& v)                        { if (v.x > x) x = v.x; if (v.y > y) y = v.y; if (v.z > z) z = v.z;  }
       inline void min(const V& v)                        { if (v.x < x) x = v.x; if (v.y < y) y = v.y; if (v.z < z) z = v.z;  }
-      inline void bound(const V& mi, const V& ma)        { min(ma); max(mi);                                                  }
+      inline void bound(const V& mi, const V& ma)        { thiss()->min(ma); thiss()->max(mi);                                }
       inline void abs()                                  { x = V::_abs(x); y = V::_abs(y); z = V::_abs(z);                    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V    xzy()                            const { return V(x, z, y); }
@@ -731,9 +737,9 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; z *= t; return (V&)*this;  }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t, z * t);             }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y) || isnan<F>(z); }
-      inline void  normalise()                                { *this /= length();                                }
-      inline V     normaliseC()                         const { V t(*this); t.normalise(); return t;              }
+      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y) || isnan<F>(z);  }
+      inline void  normalise()                                { *thiss() /= thiss()->length();                      }
+      inline V     normaliseC()                         const { V t(*thiss()); t.normalise(); return t;             }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V     roundC()                             const { return V(V::_round(x), V::_round(y), V::_round(z));   }
       inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y), V::_floor(z));   }
@@ -891,7 +897,7 @@ namespace simd
 
    /// <summary>
    /// 64-Bit Integer 3D Vector (Generic, no SIMD) [L4]
-   /// </summary>
+   /// </summary>//------------------------------------------------------------------------------------------------------------------------//
    class V3lg : public V3lt<V3lg>
    {
    public:
@@ -901,5 +907,126 @@ namespace simd
       inline V3lg(const long long v[3])                                    : V3lt(v)       { }
       inline V3lg(long long* const v)                                      : V3lt(v)       { }
    };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                             SIMD CLASSES [L4]                                                          //
+   //------------------------------------------------------------------------------------------------------------------------//
+#if defined(SIMD_V2_FP_32_SSE2)
+   /// <summary>
+   /// Single Precision 3D Vector (unaligned SSE/SIMD)
+   /// </summary>
+   ALIGN16 class V3fs : public V3ft<V3fs>
+   {
+   public:
+      inline __m128 load()                  const { return _mm_load_ps(vals);             }
+      inline void   store(const __m128 v)   const { _mm_store_ps((float*)vals, v);        }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline static __m128i unsetMaskHi()           { return _mm_set_epi32(0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF); }
+      inline static __m128  unsetHi(const __m128 v) { return _mm_and_ps(v, _mm_castsi128_ps(unsetMaskHi()));                }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V3fs()                                               { }
+      inline V3fs(const float x, const float y, const float z)    { store(_mm_set_ps(0.0f, z, y, x));                      }
+      inline V3fs(const float s)                                  { store(_mm_set_ps1(s));                                 }
+      inline V3fs(const double x, const double y, const double z) { store(_mm_set_ps(0.0f, (float)z, (float)y, (float)x)); }
+      inline V3fs(const int x, const int y, const int z)          { store(_mm_set_ps(0.0f, (float)z, (float)y, (float)x)); }
+      inline V3fs(const float v[3])                               { store(unsetHi(_mm_loadu_ps(v)));                       }
+      inline V3fs(float* const v)                                 { store(unsetHi(_mm_loadu_ps(v)));                       }
+      inline V3fs(const int v[3])                                 { store(unsetHi(_mm_cvtepi32_ps(_mm_loadu_si128((__m128i*)v)))); }
+      inline V3fs(const __m128 v)                                 { store(v);                                             }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline       void* operator new  (size_t size)       { return _aligned_malloc(sizeof(V3fs), 16);                       }
+      inline       void* operator new[](size_t size)       { return _aligned_malloc(size * sizeof(V3fs), 16);                }
+      inline       bool  operator == (const V3fs& v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) == 0x0F; }
+      inline       bool  operator != (const V3fs& v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) != 0x00; }
+      inline       bool  operator <  (const V3fs& v) const { return _mm_movemask_ps(_mm_cmplt_ps(load(), v.load())) == 0x0F; }
+      inline       bool  operator <= (const V3fs& v) const { return _mm_movemask_ps(_mm_cmple_ps(load(), v.load())) == 0x0F; }
+      inline       bool  operator >  (const V3fs& v) const { return _mm_movemask_ps(_mm_cmpgt_ps(load(), v.load())) == 0x0F; }
+      inline       bool  operator >= (const V3fs& v) const { return _mm_movemask_ps(_mm_cmpge_ps(load(), v.load())) == 0x0F; }
+      inline       V3fs  operator +  (const V3fs& v) const { return V3fs(_mm_add_ps(load(), v.load()));                  }
+      inline       V3fs  operator -  (const V3fs& v) const { return V3fs(_mm_sub_ps(load(), v.load()));                  }
+      inline       V3fs  operator *  (const V3fs& v) const { return V3fs(_mm_mul_ps(load(), v.load()));                  }
+      inline       V3fs  operator /  (const V3fs& v) const { return V3fs(_mm_div_ps(load(), v.load()));                  }
+      inline       V3fs  operator *  (const float s) const { return V3fs(_mm_mul_ps(load(), _mm_set1_ps(s)));            }
+      inline       V3fs  operator /  (const float s) const { return V3fs(_mm_div_ps(load(), _mm_set1_ps(s)));            }
+      inline       V3fs  operator -  ()              const { return V3fs(_mm_sub_ps(_mm_setzero_ps(), load()));          }
+      inline const V3fs& operator +  ()              const { return *this;                                               }
+      inline       V3fs& operator =  (const V3fs& v)       { store(v.load());                           return *this;    }
+      inline       V3fs& operator += (const V3fs& v)       { store(_mm_add_ps(load(), v.load()));       return *this;    }
+      inline       V3fs& operator -= (const V3fs& v)       { store(_mm_sub_ps(load(), v.load()));       return *this;    }
+      inline       V3fs& operator *= (const V3fs& v)       { store(_mm_mul_ps(load(), v.load()));       return *this;    }
+      inline       V3fs& operator /= (const V3fs& v)       { store(_mm_div_ps(load(), v.load()));       return *this;    }
+      inline       V3fs& operator =  (const float s)       { store(_mm_set1_ps(s));                     return *this;    }
+      inline       V3fs& operator += (const float s)       { store(_mm_add_ps(load(), _mm_set1_ps(s))); return *this;    }
+      inline       V3fs& operator -= (const float s)       { store(_mm_sub_ps(load(), _mm_set1_ps(s))); return *this;    }
+      inline       V3fs& operator *= (const float s)       { store(_mm_mul_ps(load(), _mm_set1_ps(s))); return *this;    }
+      inline       V3fs& operator /= (const float s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this;    }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void swap(V3fs& v)                                { __m128 t(load()); store(v.load()); v.store(t);         }
+      inline V3fs absC()                                 const { return V3fs(_mm_andnot_ps(_mm_set1_ps(-0.f), load())); }
+      inline V3fs maxC(const V3fs& v)                    const { return V3fs(_mm_max_ps(load(), v.load()));             }
+      inline V3fs minC(const V3fs& v)                    const { return V3fs(_mm_min_ps(load(), v.load()));             }
+      inline V3fs boundC(const V3fs& mi, const V3fs& ma) const { V3fs t(minC(ma)); t.max(mi); return t;                 }
+      inline void abs()                                        { store(_mm_andnot_ps(_mm_set1_ps(-0.), load()));        }
+      inline void max(const V3fs& v)                           { store(_mm_max_ps(load(), v.load()));                   }
+      inline void min(const V3fs& v)                           { store(_mm_min_ps(load(), v.load()));                   }
+      inline void bound(const V3fs& mi, const V3fs& ma)        { min(ma); max(mi);                                      }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline float dot(const V3fs& v) const
+      {
+         __m128 a(_mm_mul_ps(load(), v.load()));
+         __m128 b(_mm_add_ps(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1))));
+         __m128 c(_mm_add_ss(b, _mm_shuffle_ps(b, b, _MM_SHUFFLE(0, 1, 2, 3))));
+         return c.m128_f32[0];
+      }
+      inline float length() const
+      {
+         __m128 t(load());
+         __m128 a(_mm_mul_ps(t, t));
+         __m128 b(_mm_add_ps(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1))));
+         __m128 c(_mm_add_ss(b, _mm_shuffle_ps(b, b, _MM_SHUFFLE(0, 1, 2, 3))));
+         __m128 e(_mm_sqrt_ss(c));
+         return e.m128_f32[0];
+      }
+      inline V3fs cross(const V3fs& v) const 
+      {
+         __m128 a(load());
+         __m128 b(v.load());
+         __m128 c(_mm_mul_ps(_mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 0, 2, 1)), _mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 1, 0, 2))));
+         __m128 d(_mm_mul_ps(_mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 1, 0, 2)), _mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 0, 2, 1))));
+         __m128 e(_mm_sub_ps(c, d));
+         return V3fs(e);
+      }
+      /*inline bool inside(const V2fs& min, const V2fs& max) const
+      {
+         __m128 a(load());
+         __m128 b(_mm_cmpge_ps(a, min.load()));
+         __m128 c(_mm_cmple_ps(a, max.load()));
+         __m128 d(_mm_and_ps(b, c));
+         return _mm_movemask_ps(d) == 0x0F;
+      }
+      inline bool inside(const V2fs& min, const V2fs& max, const float e) const
+      {
+         __m128 eps(_mm_set1_ps(e));
+         __m128 a(load());
+         __m128 b(_mm_cmpge_ps(a, _mm_sub_ps(min.load(), eps)));
+         __m128 c(_mm_cmple_ps(a, _mm_add_ps(max.load(), eps)));
+         __m128 d(_mm_and_ps(b, c));
+         return _mm_movemask_ps(d) == 0x0F;
+      }*/
+#if defined(SIMD_V2_FP_32_SSE41)
+      inline V3fs roundC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_NINT));  }
+      inline V3fs floorC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
+      inline V3fs ceilC()  const { return V3fs(_mm_round_ps(load(), _MM_FROUND_CEIL));  }
+      inline void round()        { store(_mm_round_ps(load(), _MM_FROUND_NINT));        }
+      inline void floor()        { store(_mm_round_ps(load(), _MM_FROUND_FLOOR));       }
+      inline void ceil()         { store(_mm_round_ps(load(), _MM_FROUND_CEIL));        }
+#endif
+      //------------------------------------------------------------------------------------------------------------------------//
+   };
+   typedef V3fs V3f;  // use SIMD as default
+#else
+   typedef V3fg V3f;  // use plain as default
+#endif
+
 #pragma endregion
 }
