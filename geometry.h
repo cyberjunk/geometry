@@ -13,6 +13,9 @@
 #if defined(SIMD_V2_FP_64_SSE41) && !defined(SIMD_V2_FP_64_SSE2)
 # define SIMD_V2_FP_64_SSE2
 #endif
+#if defined(SIMD_V3_FP_32_SSE41) && !defined(SIMD_V3_FP_32_SSE2)
+# define SIMD_V3_FP_32_SSE2
+#endif
 
 #if defined(SIMD_TYPES_SSE) || defined(SIMD_TYPES_AVX)
 #  define ALIGN8                          __declspec(align(8))
@@ -911,7 +914,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                             SIMD CLASSES [L4]                                                          //
    //------------------------------------------------------------------------------------------------------------------------//
-#if defined(SIMD_V2_FP_32_SSE2)
+#if defined(SIMD_V3_FP_32_SSE2)
    /// <summary>
    /// Single Precision 3D Vector (unaligned SSE/SIMD)
    /// </summary>
@@ -1013,7 +1016,7 @@ namespace simd
          __m128 d(_mm_and_ps(b, c));
          return _mm_movemask_ps(d) == 0x0F;
       }*/
-#if defined(SIMD_V2_FP_32_SSE41)
+#if defined(SIMD_V3_FP_32_SSE41)
       inline V3fs roundC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_NINT));  }
       inline V3fs floorC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
       inline V3fs ceilC()  const { return V3fs(_mm_round_ps(load(), _MM_FROUND_CEIL));  }
