@@ -220,23 +220,30 @@ void test()
 
 int main()
 {
+   V2is a1(V2is::random());
+   V2is b1(V2is::random());
+
+   V2is c = a1 + 5;
+
+   printf("%i %i", c.x, c.y);
+
    while (true)
    {
-      //benchRunInt<V2ig, V2ig, int>("V2ig", "V2ig");
+      benchRunV2Int<V2ig, V2is, int>("V2ig", "V2is");
 
-/*#if defined(SIMD_V2_FP_32_SSE2)
-      benchRunV2<V2dg, V2ds, double>("V2dg", "V2ds");
+#if defined(SIMD_V2_FP_32_SSE2)
+      benchRunV2<V2fg, V2fs, float>("V2fg", "V2fs");
 #else
-      benchRunV2<V2dg, V2dg, double>("V2dg", "V2dg");
-#endif*/
+      benchRunV2<V2fg, V2fg, float>("V2fg", "V2fg");
+#endif
 
-#if defined(SIMD_V2_FP_64_SSE2)
+/*#if defined(SIMD_V2_FP_64_SSE2)
       //benchRunV2<V2fg, V2fs, float>("V2fg", "V2fs");
       benchRunV3<V3fg, V3fs, float>("V3fg", "V3fs");
 #else
       //benchRunV2<V2fg, V2fg, float>("V2fg", "V2fg");
       benchRunV3<V3fg, V3fg, float>("V3fg", "V3fg");
-#endif
+#endif*/
       getchar();
    }
 

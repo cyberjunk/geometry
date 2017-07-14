@@ -25,7 +25,9 @@
 #    include <xmmintrin.h> // SSE
 #    include <emmintrin.h> // SSE 2
 #    include <pmmintrin.h> // SSE 3
+#    include <tmmintrin.h> // SSSE3
 #    include <smmintrin.h> // SSE 4.1
+#    include <nmmintrin.h> // SSE 4.2
 #  endif
 #  if defined(SIMD_TYPES_AVX)
 #    include <immintrin.h> // AVX
@@ -614,8 +616,78 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
 
-#if defined(SIMD_V2_INT_32_SSE2)
-   // TODO INT32 SSE
+#if defined(SIMD_V2_INT_32_SSE41)
+   /// <summary>
+   /// 32-Bit Integer 2D Vector (SSE/SIMD)
+   /// </summary>
+   ALIGN8 class V2is : public V2it<V2is>
+   {
+   public:
+      inline __m128i load()                 const { return _mm_loadl_epi64((__m128i*)vals); }
+      inline void    store(const __m128i v) const { _mm_storel_epi64((__m128i*)vals, v);    }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V2is()                         {                                                                              }
+      inline V2is(const int x, const int y) { store(_mm_set_epi32(0, 0, y, x));                                            }
+      inline V2is(const int s)              { store(_mm_set1_epi32(s));                                                    }
+      inline V2is(const int values[2])      { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values));         }
+      inline V2is(int* const values)        { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values));         }
+      inline V2is(const float values[2])    { store(_mm_cvtps_epi32(_mm_castsi128_ps(_mm_loadl_epi64((__m128i*)values)))); }
+      inline V2is(const __m128i values)     { store(values);                                                               }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2is), 8);                         }
+      inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2is), 8);                  }
+      inline       bool  operator == (const V2is&  v) const { return _mm_movemask_epi8(_mm_cmpeq_epi32(load(),v.load()))==0xFFFF;}
+      inline       bool  operator != (const V2is&  v) const { return _mm_movemask_epi8(_mm_cmpeq_epi32(load(),v.load()))!=0xFFFF;}
+      inline       bool  operator <  (const V2is&  v) const { return _mm_movemask_epi8(_mm_cmplt_epi32(load(),v.load()))==0xFF;  }
+      inline       bool  operator >  (const V2is&  v) const { return _mm_movemask_epi8(_mm_cmpgt_epi32(load(),v.load()))==0xFF;  }
+      inline       V2is  operator +  (const V2is&  v) const { return V2is(_mm_add_epi32(load(), v.load()));                    }
+      inline       V2is  operator -  (const V2is&  v) const { return V2is(_mm_sub_epi32(load(), v.load()));                    }
+      inline       V2is  operator *  (const V2is&  v) const { return V2is(_mm_mullo_epi32(load(), v.load()));                  }
+      //inline     V2is  operator /  (const V2is&  v) const { return V2is(_mm_div_epi32(load(), v.load()));                    }
+      inline       V2is  operator *  (const int  s)   const { return V2is(_mm_mullo_epi32(load(), _mm_set1_epi32(s)));         }
+      //inline     V2is  operator /  (const float  s) const { return V2is(_mm_div_epi32(load(), _mm_set1_epi32(s)));           }
+      inline       V2is  operator -  ()               const { return V2is(_mm_sub_epi32(_mm_setzero_si128(), load()));         }
+      inline const V2is& operator +  ()               const { return *this;                                                    }
+      inline       V2is& operator =  (const V2is&  v)       { store(v.load());                                   return *this; }
+      inline       V2is& operator += (const V2is&  v)       { store(_mm_add_epi32(load(), v.load()));            return *this; }
+      inline       V2is& operator -= (const V2is&  v)       { store(_mm_sub_epi32(load(), v.load()));            return *this; }
+      inline       V2is& operator *= (const V2is&  v)       { store(_mm_mullo_epi32(load(), v.load()));          return *this; }
+      //inline     V2is& operator /= (const V2is&  v)       { store(_mm_div_epi32(load(), v.load()));            return *this; }
+      inline       V2is& operator =  (const int  s)         { store(_mm_set1_epi32(s));                          return *this; }
+      inline       V2is& operator += (const int  s)         { store(_mm_add_epi32(load(), _mm_set1_epi32(s)));   return *this; }
+      inline       V2is& operator -= (const int  s)         { store(_mm_sub_epi32(load(), _mm_set1_epi32(s)));   return *this; }
+      inline       V2is& operator *= (const int  s)         { store(_mm_mullo_epi32(load(), _mm_set1_epi32(s))); return *this; }
+      //inline     V2is& operator /= (const float  s)       { store(_mm_div_epi32(load(), _mm_set1_epi32(s)));   return *this; }
+      inline       bool  operator <= (const V2is&  v) const 
+      {
+         __m128i a(load());
+         __m128i b(v.load());
+         __m128i lt(_mm_cmplt_epi32(a, b));
+         __m128i eq(_mm_cmpeq_epi32(a, b));
+         __m128i or(_mm_or_si128(lt, eq));
+         return _mm_movemask_epi8(or) == 0xFFFF;
+      }
+      inline       bool  operator >= (const V2is&  v) const
+      {
+         __m128i a(load());
+         __m128i b(v.load());
+         __m128i lt(_mm_cmpgt_epi32(a, b));
+         __m128i eq(_mm_cmpeq_epi32(a, b));
+         __m128i or (_mm_or_si128(lt, eq));
+         return _mm_movemask_epi8(or ) == 0xFFFF;
+      }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void swap(V2is& v)                                { __m128i t(load()); store(v.load()); v.store(t); }
+      inline V2is absC()                                 const { return V2is(_mm_abs_epi32(load()));             }
+      inline V2is maxC(const V2is& v)                    const { return V2is(_mm_max_epi32(load(), v.load()));   }
+      inline V2is minC(const V2is& v)                    const { return V2is(_mm_min_epi32(load(), v.load()));   }
+      inline V2is boundC(const V2is& mi, const V2is& ma) const { V2is t(minC(ma)); t.max(mi); return t;          }
+      inline void abs()                                        { store(_mm_abs_epi32(load()));                   }
+      inline void max(const V2is& v)                           { store(_mm_max_epi32(load(), v.load()));         }
+      inline void min(const V2is& v)                           { store(_mm_min_epi32(load(), v.load()));         }
+      inline void bound(const V2is& mi, const V2is& ma)        { min(ma); max(mi);                               }
+      //------------------------------------------------------------------------------------------------------------------------//
+   };
    typedef V2is V2i;  // use SIMD as default
 #else
    typedef V2ig V2i;  // use plain as default
