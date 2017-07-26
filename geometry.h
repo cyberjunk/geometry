@@ -360,8 +360,8 @@ namespace simd
    ALIGN8 class V2fs : public V2ft<V2fs>
    {
    public:
-      inline __m128 load()                const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
-      inline void   store(const __m128 v) const { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
+      inline __m128 load()                 const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
+      inline void   store(const __m128& v)       { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2fs()                                                          { }
       inline V2fs(const float x, const float y)   : V2ft(x, y)               { }
@@ -371,7 +371,7 @@ namespace simd
       inline V2fs(const float values[2])          { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(float* const values)            { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
-      inline V2fs(const __m128 values)            { store(values);                                                       }
+      inline V2fs(const __m128& values)           { store(values);                                                       }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2fs), 8);                        }
       inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2fs), 8);                 }
@@ -623,8 +623,8 @@ namespace simd
    ALIGN8 class V2is : public V2it<V2is>
    {
    public:
-      inline __m128i load()                 const { return _mm_loadl_epi64((__m128i*)vals); }
-      inline void    store(const __m128i v) const { _mm_storel_epi64((__m128i*)vals, v);    }
+      inline __m128i load()                  const { return _mm_loadl_epi64((__m128i*)vals); }
+      inline void    store(const __m128i& v)       { _mm_storel_epi64((__m128i*)vals, v);    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2is()                         {                                                                              }
       inline V2is(const int x, const int y) { store(_mm_set_epi32(0, 0, y, x));                                            }
@@ -632,7 +632,7 @@ namespace simd
       inline V2is(const int values[2])      { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values));         }
       inline V2is(int* const values)        { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values));         }
       inline V2is(const float values[2])    { store(_mm_cvtps_epi32(_mm_castsi128_ps(_mm_loadl_epi64((__m128i*)values)))); }
-      inline V2is(const __m128i values)     { store(values);                                                               }
+      inline V2is(const __m128i& values)    { store(values);                                                               }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2is), 8);                         }
       inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2is), 8);                  }
@@ -993,11 +993,11 @@ namespace simd
    ALIGN16 class V3fs : public V3ft<V3fs>
    {
    public:
-      inline __m128 load()                  const { return _mm_load_ps(vals);             }
-      inline void   store(const __m128 v)   const { _mm_store_ps((float*)vals, v);        }
+      inline __m128 load()                 const { return _mm_load_ps(vals);             }
+      inline void   store(const __m128& v)       { _mm_store_ps((float*)vals, v);        }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline static __m128i unsetMaskHi()           { return _mm_set_epi32(0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF); }
-      inline static __m128  unsetHi(const __m128 v) { return _mm_and_ps(v, _mm_castsi128_ps(unsetMaskHi()));                }
+      inline static __m128i unsetMaskHi()            { return _mm_set_epi32(0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF); }
+      inline static __m128  unsetHi(const __m128& v) { return _mm_and_ps(v, _mm_castsi128_ps(unsetMaskHi()));                }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V3fs()                                               { }
       inline V3fs(const float x, const float y, const float z)    { store(_mm_set_ps(0.0f, z, y, x));                      }
@@ -1007,7 +1007,7 @@ namespace simd
       inline V3fs(const float v[3])                               { store(unsetHi(_mm_loadu_ps(v)));                       }
       inline V3fs(float* const v)                                 { store(unsetHi(_mm_loadu_ps(v)));                       }
       inline V3fs(const int v[3])                                 { store(unsetHi(_mm_cvtepi32_ps(_mm_loadu_si128((__m128i*)v)))); }
-      inline V3fs(const __m128 v)                                 { store(v);                                             }
+      inline V3fs(const __m128& v)                                { store(v);                                             }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       void* operator new  (size_t size)       { return _aligned_malloc(sizeof(V3fs), 16);                       }
       inline       void* operator new[](size_t size)       { return _aligned_malloc(size * sizeof(V3fs), 16);                }
