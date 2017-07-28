@@ -151,11 +151,11 @@ namespace simd
    class V2fdt abstract : public V2<V, F>
    {
    public:
-      inline V2fdt() { }
-      inline V2fdt(const F x, const F y) : V2(x, y)                 { }
-      inline V2fdt(const F scalar)       : V2(scalar, scalar)       { }
-      inline V2fdt(const F values[2])    : V2(values[0], values[1]) { }
-      inline V2fdt(F* const values)      : V2(values[0], values[1]) { }
+      inline V2fdt()                                                      { }
+      inline V2fdt(const F x, const F y) : V2<V, F>(x, y)                 { }
+      inline V2fdt(const F scalar)       : V2<V, F>(scalar, scalar)       { }
+      inline V2fdt(const F values[2])    : V2<V, F>(values[0], values[1]) { }
+      inline V2fdt(F* const values)      : V2<V, F>(values[0], values[1]) { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V& operator /= (const V& v)       { x /= v.x; y /= v.y; return (V&)*this;               }
       inline V  operator /  (const V& v) const { return V(x / v.x, y / v.y);                         }
@@ -205,11 +205,11 @@ namespace simd
       static inline F _abs(const int s)  { return ::abs(s);         }
       static inline F _sqrt(const int s) { return (F)::sqrt<F>(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2ilt()                                { }
-      inline V2ilt(const F x, const F y) : V2(x, y) { }
-      inline V2ilt(const F s)            : V2(s, s) { }
-      inline V2ilt(const F v[2])         : V2(v)    { }
-      inline V2ilt(F* const v)           : V2(v)    { }
+      inline V2ilt()                                      { }
+      inline V2ilt(const F x, const F y) : V2<V, F>(x, y) { }
+      inline V2ilt(const F s)            : V2<V, F>(s, s) { }
+      inline V2ilt(const F v[2])         : V2<V, F>(v)    { }
+      inline V2ilt(F* const v)           : V2<V, F>(v)    { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -232,10 +232,10 @@ namespace simd
       static inline float _acos(const float s)  { return ::acosf(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2ft() { }
-      inline V2ft(const float x, const float y) : V2fdt(x, y) { }
-      inline V2ft(const float s)                : V2fdt(s, s) { }
-      inline V2ft(const float v[2])             : V2fdt(v)    { }
-      inline V2ft(float* const v)               : V2fdt(v)    { }
+      inline V2ft(const float x, const float y) : V2fdt<V, float>(x, y) { }
+      inline V2ft(const float s)                : V2fdt<V, float>(s, s) { }
+      inline V2ft(const float v[2])             : V2fdt<V, float>(v)    { }
+      inline V2ft(float* const v)               : V2fdt<V, float>(v)    { }
    };
 
    /// <summary>
@@ -254,11 +254,11 @@ namespace simd
       static inline double _sin(const double s)   { return ::sin(s);   }
       static inline double _acos(const double s)  { return ::acos(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2dt() { }
-      inline V2dt(const double x, const double y) : V2fdt(x, y) { }
-      inline V2dt(const double s)                 : V2fdt(s, s) { }
-      inline V2dt(const double v[2])              : V2fdt(v)    { }
-      inline V2dt(double* const v)                : V2fdt(v)    { }
+      inline V2dt()                                                        { }
+      inline V2dt(const double x, const double y) : V2fdt<V, double>(x, y) { }
+      inline V2dt(const double s)                 : V2fdt<V, double>(s, s) { }
+      inline V2dt(const double v[2])              : V2fdt<V, double>(v)    { }
+      inline V2dt(double* const v)                : V2fdt<V, double>(v)    { }
    };
 
    /// <summary>
@@ -268,11 +268,11 @@ namespace simd
    class V2it abstract : public V2ilt<V, int>
    {
    public:
-      inline V2it()                                       { }
-      inline V2it(const int x, const int y) : V2ilt(x, y) { }
-      inline V2it(const int s)              : V2ilt(s, s) { }
-      inline V2it(const int v[2])           : V2ilt(v)    { }
-      inline V2it(int* const v)             : V2ilt(v)    { }
+      inline V2it()                                               { }
+      inline V2it(const int x, const int y) : V2ilt<V, int>(x, y) { }
+      inline V2it(const int s)              : V2ilt<V, int>(s, s) { }
+      inline V2it(const int v[2])           : V2ilt<V, int>(v)    { }
+      inline V2it(int* const v)             : V2ilt<V, int>(v)    { }
    };
 
    /// <summary>
@@ -282,11 +282,11 @@ namespace simd
    class V2lt abstract : public V2ilt<V, long long>
    {
    public:
-      inline V2lt() { }
-      inline V2lt(const long long x, const long long y) : V2ilt(x, y) { }
-      inline V2lt(const long long s)                    : V2ilt(s, s) { }
-      inline V2lt(const long long v[2])                 : V2ilt(v)    { }
-      inline V2lt(long long* const v)                   : V2ilt(v)    { }
+      inline V2lt()                                                                 { }
+      inline V2lt(const long long x, const long long y) : V2ilt<V, long long>(x, y) { }
+      inline V2lt(const long long s)                    : V2ilt<V, long long>(s, s) { }
+      inline V2lt(const long long v[2])                 : V2ilt<V, long long>(v)    { }
+      inline V2lt(long long* const v)                   : V2ilt<V, long long>(v)    { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -298,14 +298,14 @@ namespace simd
    class V2fg : public V2ft<V2fg>
    {
    public:
-      inline V2fg()                                                                { }
-      inline V2fg(const float x, const float y)   : V2ft(x, y)                     { }
-      inline V2fg(const float s)                  : V2ft(s, s)                     { }
-      inline V2fg(const float v[2])               : V2ft(v)                        { }
-      inline V2fg(float* const v)                 : V2ft(v)                        { }
-      inline V2fg(const int v[2])                 : V2ft((float)v[0], (float)v[1]) { }
-      inline V2fg(const double x, const double y) : V2ft((float)x,    (float)y)    { }
-      inline V2fg(const int x, const int y)       : V2ft((float)x,    (float)y)    { }
+      inline V2fg()                                                                      { }
+      inline V2fg(const float x, const float y)   : V2ft<V2fg>(x, y)                     { }
+      inline V2fg(const float s)                  : V2ft<V2fg>(s, s)                     { }
+      inline V2fg(const float v[2])               : V2ft<V2fg>(v)                        { }
+      inline V2fg(float* const v)                 : V2ft<V2fg>(v)                        { }
+      inline V2fg(const int v[2])                 : V2ft<V2fg>((float)v[0], (float)v[1]) { }
+      inline V2fg(const double x, const double y) : V2ft<V2fg>((float)x,    (float)y)    { }
+      inline V2fg(const int x, const int y)       : V2ft<V2fg>((float)x,    (float)y)    { }
    };
 
    /// <summary>
@@ -314,14 +314,14 @@ namespace simd
    class V2dg : public V2dt<V2dg>
    {
    public:
-      inline V2dg()                                                                  { }
-      inline V2dg(const double x, const double y) : V2dt(x, y)                       { }
-      inline V2dg(const double s)                 : V2dt(s, s)                       { }
-      inline V2dg(const double v[2])              : V2dt(v)                          { }
-      inline V2dg(double* const v)                : V2dt(v)                          { }
-      inline V2dg(const int v[2])                 : V2dt((double)v[0], (double)v[1]) { }
-      inline V2dg(const float x, const float y)   : V2dt((double)x,    (double)y)    { }
-      inline V2dg(const int x, const int y)       : V2dt((double)x,    (double)y)    { }
+      inline V2dg()                                                                        { }
+      inline V2dg(const double x, const double y) : V2dt<V2dg>(x, y)                       { }
+      inline V2dg(const double s)                 : V2dt<V2dg>(s, s)                       { }
+      inline V2dg(const double v[2])              : V2dt<V2dg>(v)                          { }
+      inline V2dg(double* const v)                : V2dt<V2dg>(v)                          { }
+      inline V2dg(const int v[2])                 : V2dt<V2dg>((double)v[0], (double)v[1]) { }
+      inline V2dg(const float x, const float y)   : V2dt<V2dg>((double)x,    (double)y)    { }
+      inline V2dg(const int x, const int y)       : V2dt<V2dg>((double)x,    (double)y)    { }
    };
 
    /// <summary>
@@ -330,11 +330,11 @@ namespace simd
    class V2ig : public V2it<V2ig>
    {
    public:
-      inline V2ig() { }
-      inline V2ig(const int x, const int y) : V2it(x, y) { }
-      inline V2ig(const int s)              : V2it(s, s) { }
-      inline V2ig(const int v[2])           : V2it(v)    { }
-      inline V2ig(int* const v)             : V2it(v)    { }
+      inline V2ig()                                            { }
+      inline V2ig(const int x, const int y) : V2it<V2ig>(x, y) { }
+      inline V2ig(const int s)              : V2it<V2ig>(s, s) { }
+      inline V2ig(const int v[2])           : V2it<V2ig>(v)    { }
+      inline V2ig(int* const v)             : V2it<V2ig>(v)    { }
    };
 
    /// <summary>
@@ -343,11 +343,11 @@ namespace simd
    class V2lg : public V2lt<V2lg>
    {
    public:
-      inline V2lg() { }
-      inline V2lg(const long long x, const long long y) : V2lt(x, y) { }
-      inline V2lg(const long long s)                    : V2lt(s, s) { }
-      inline V2lg(const long long v[2])                 : V2lt(v)    { }
-      inline V2lg(long long* const v)                   : V2lt(v)    { }
+      inline V2lg()                                                        { }
+      inline V2lg(const long long x, const long long y) : V2lt<V2lg>(x, y) { }
+      inline V2lg(const long long s)                    : V2lt<V2lg>(s, s) { }
+      inline V2lg(const long long v[2])                 : V2lt<V2lg>(v)    { }
+      inline V2lg(long long* const v)                   : V2lt<V2lg>(v)    { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -363,11 +363,11 @@ namespace simd
       inline __m128 load()                 const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
       inline void   store(const __m128& v)       { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V2fs()                                                          { }
-      inline V2fs(const float x, const float y)   : V2ft(x, y)               { }
-      inline V2fs(const float s)                  : V2ft(s, s)               { }
-      inline V2fs(const double x, const double y) : V2ft((float)x, (float)y) { }
-      inline V2fs(const int x, const int y)       : V2ft((float)x, (float)y) { }
+      inline V2fs()                                                                { }
+      inline V2fs(const float x, const float y)   : V2ft<V2fs>(x, y)               { }
+      inline V2fs(const float s)                  : V2ft<V2fs>(s, s)               { }
+      inline V2fs(const double x, const double y) : V2ft<V2fs>((float)x, (float)y) { }
+      inline V2fs(const int x, const int y)       : V2ft<V2fs>((float)x, (float)y) { }
       inline V2fs(const float values[2])          { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(float* const values)            { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
@@ -801,11 +801,11 @@ namespace simd
    class V3fdt abstract : public V3<V, F>
    {
    public:
-      inline V3fdt()                                              { }
-      inline V3fdt(const F x, const F y, const F z) : V3(x, y, z) { }
-      inline V3fdt(const F s)                       : V3(s, s, s) { }
-      inline V3fdt(const F v[3])                    : V3(v)       { }
-      inline V3fdt(F* const v)                      : V3(v)       { }
+      inline V3fdt()                                                    { }
+      inline V3fdt(const F x, const F y, const F z) : V3<V, F>(x, y, z) { }
+      inline V3fdt(const F s)                       : V3<V, F>(s, s, s) { }
+      inline V3fdt(const F v[3])                    : V3<V, F>(v)       { }
+      inline V3fdt(F* const v)                      : V3<V, F>(v)       { }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V& operator /= (const V& v)       { x /= v.x; y /= v.y; z /= v.z; return (V&)*this;              }
       inline V  operator /  (const V& v) const { return V(x / v.x, y / v.y, z / v.z);                         }
@@ -838,11 +838,11 @@ namespace simd
       static inline F _abs(const int s)  { return ::abs(s);        }
       static inline F _sqrt(const int s) { return (F)::sqrt<F>(s); }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V3ilt()                                              { }
-      inline V3ilt(const F x, const F y, const F z) : V3(x, y, z) { }
-      inline V3ilt(const F s)                       : V3(s, s, s) { }
-      inline V3ilt(const F v[3])                    : V3(v)       { }
-      inline V3ilt(F* const v)                      : V3(v)       { }
+      inline V3ilt()                                                    { }
+      inline V3ilt(const F x, const F y, const F z) : V3<V, F>(x, y, z) { }
+      inline V3ilt(const F s)                       : V3<V, F>(s, s, s) { }
+      inline V3ilt(const F v[3])                    : V3<V, F>(v)       { }
+      inline V3ilt(F* const v)                      : V3<V, F>(v)       { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -864,11 +864,11 @@ namespace simd
       static inline float _sin(const float s)   { return ::sinf(s);   }
       static inline float _acos(const float s)  { return ::acosf(s);  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V3ft() { }
-      inline V3ft(const float x, const float y, const float z) : V3fdt(x, y, z) { }
-      inline V3ft(const float s)                               : V3fdt(s, s, s) { }
-      inline V3ft(const float v[3])                            : V3fdt(v)       { }
-      inline V3ft(float* const v)                              : V3fdt(v)       { }
+      inline V3ft()                                                                       { }
+      inline V3ft(const float x, const float y, const float z) : V3fdt<V, float>(x, y, z) { }
+      inline V3ft(const float s)                               : V3fdt<V, float>(s, s, s) { }
+      inline V3ft(const float v[3])                            : V3fdt<V, float>(v)       { }
+      inline V3ft(float* const v)                              : V3fdt<V, float>(v)       { }
    };
 
    /// <summary>
@@ -887,11 +887,11 @@ namespace simd
       static inline double _sin(const double s)   { return ::sin(s); }
       static inline double _acos(const double s)  { return ::acos(s); }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V3dt() { }
-      inline V3dt(const double x, const double y, const double z) : V3fdt(x, y, z) { }
-      inline V3dt(const double s)                                 : V3fdt(s, s, s) { }
-      inline V3dt(const double v[3])                              : V3fdt(v)       { }
-      inline V3dt(double* const v)                                : V3fdt(v)       { }
+      inline V3dt()                                                                           { }
+      inline V3dt(const double x, const double y, const double z) : V3fdt<V, double>(x, y, z) { }
+      inline V3dt(const double s)                                 : V3fdt<V, double>(s, s, s) { }
+      inline V3dt(const double v[3])                              : V3fdt<V, double>(v)       { }
+      inline V3dt(double* const v)                                : V3fdt<V, double>(v)       { }
    };
 
    /// <summary>
@@ -901,11 +901,11 @@ namespace simd
    class V3it abstract : public V3ilt<V, int>
    {
    public:
-      inline V3it() { }
-      inline V3it(const int x, const int y, const int z) : V3ilt(x, y, z) { }
-      inline V3it(const int s)                           : V3ilt(s, s, s) { }
-      inline V3it(const int v[3])                        : V3ilt(v)       { }
-      inline V3it(int* const v)                          : V3ilt(v)       { }
+      inline V3it()                                                               { }
+      inline V3it(const int x, const int y, const int z) : V3ilt<V, int>(x, y, z) { }
+      inline V3it(const int s)                           : V3ilt<V, int>(s, s, s) { }
+      inline V3it(const int v[3])                        : V3ilt<V, int>(v)       { }
+      inline V3it(int* const v)                          : V3ilt<V, int>(v)       { }
    };
 
    /// <summary>
@@ -915,11 +915,11 @@ namespace simd
    class V3lt abstract : public V3ilt<V, long long>
    {
    public:
-      inline V3lt() { }
-      inline V3lt(const long long x, const long long y, const long long z) : V3ilt(x, y, z) { }
-      inline V3lt(const long long s)                                       : V3ilt(s, s, s) { }
-      inline V3lt(const long long v[3])                                    : V3ilt(v)       { }
-      inline V3lt(long long* const v)                                      : V3ilt(v)       { }
+      inline V3lt()                                                                                       { }
+      inline V3lt(const long long x, const long long y, const long long z) : V3ilt<V, long long>(x, y, z) { }
+      inline V3lt(const long long s)                                       : V3ilt<V, long long>(s, s, s) { }
+      inline V3lt(const long long v[3])                                    : V3ilt<V, long long>(v)       { }
+      inline V3lt(long long* const v)                                      : V3ilt<V, long long>(v)       { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
@@ -931,14 +931,14 @@ namespace simd
    class V3fg : public V3ft<V3fg>
    {
    public:
-      inline V3fg() { }
-      inline V3fg(const float x, const float y, const float z)    : V3ft(x, y, z)                                 { }
-      inline V3fg(const float s)                                  : V3ft(s, s, s)                                 { }
-      inline V3fg(const float v[3])                               : V3ft(v)                                       { }
-      inline V3fg(float* const v)                                 : V3ft(v)                                       { }
-      inline V3fg(const int v[3])                                 : V3ft((float)v[0], (float)v[1], (float)v[2])   { }
-      inline V3fg(const double x, const double y, const double z) : V3ft((float)x,    (float)y,    (float)z)      { }
-      inline V3fg(const int x, const int y, const int z)          : V3ft((float)x,    (float)y,    (float)z)      { }
+      inline V3fg()                                                                                                     { }
+      inline V3fg(const float x, const float y, const float z)    : V3ft<V3fg>(x, y, z)                                 { }
+      inline V3fg(const float s)                                  : V3ft<V3fg>(s, s, s)                                 { }
+      inline V3fg(const float v[3])                               : V3ft<V3fg>(v)                                       { }
+      inline V3fg(float* const v)                                 : V3ft<V3fg>(v)                                       { }
+      inline V3fg(const int v[3])                                 : V3ft<V3fg>((float)v[0], (float)v[1], (float)v[2])   { }
+      inline V3fg(const double x, const double y, const double z) : V3ft<V3fg>((float)x,    (float)y,    (float)z)      { }
+      inline V3fg(const int x, const int y, const int z)          : V3ft<V3fg>((float)x,    (float)y,    (float)z)      { }
    };
 
    /// <summary>
@@ -947,14 +947,14 @@ namespace simd
    class V3dg : public V3dt<V3dg>
    {
    public:
-      inline V3dg()                                                                                                   { }
-      inline V3dg(const double x, const double y, const double z) : V3dt(x, y, z)                                     { }
-      inline V3dg(const double s)                                 : V3dt(s, s, s)                                     { }
-      inline V3dg(const double v[3])                              : V3dt(v)                                           { }
-      inline V3dg(double* const v)                                : V3dt(v)                                           { }
-      inline V3dg(const int v[3])                                 : V3dt((double)v[0], (double)v[1], (double)v[2])    { }
-      inline V3dg(const float x, const float y, const float z)    : V3dt((double)x,    (double)y,    (double)z)       { }
-      inline V3dg(const int x, const int y, const int z)          : V3dt((double)x,    (double)y,    (double)z)       { }
+      inline V3dg()                                                                                                      { }
+      inline V3dg(const double x, const double y, const double z) : V3dt<V3dg>(x, y, z)                                  { }
+      inline V3dg(const double s)                                 : V3dt<V3dg>(s, s, s)                                  { }
+      inline V3dg(const double v[3])                              : V3dt<V3dg>(v)                                        { }
+      inline V3dg(double* const v)                                : V3dt<V3dg>(v)                                        { }
+      inline V3dg(const int v[3])                                 : V3dt<V3dg>((double)v[0], (double)v[1], (double)v[2]) { }
+      inline V3dg(const float x, const float y, const float z)    : V3dt<V3dg>((double)x,    (double)y,    (double)z)    { }
+      inline V3dg(const int x, const int y, const int z)          : V3dt<V3dg>((double)x,    (double)y,    (double)z)    { }
    };
 
    /// <summary>
@@ -963,11 +963,11 @@ namespace simd
    class V3ig : public V3it<V3ig>
    {
    public:
-      inline V3ig() { }
-      inline V3ig(const int x, const int y, const int z) : V3it(x, y, z) { }
-      inline V3ig(const int s)                           : V3it(s, s, s) { }
-      inline V3ig(const int v[3])                        : V3it(v)       { }
-      inline V3ig(int* const v)                          : V3it(v)       { }
+      inline V3ig()                                                            { }
+      inline V3ig(const int x, const int y, const int z) : V3it<V3ig>(x, y, z) { }
+      inline V3ig(const int s)                           : V3it<V3ig>(s, s, s) { }
+      inline V3ig(const int v[3])                        : V3it<V3ig>(v)       { }
+      inline V3ig(int* const v)                          : V3it<V3ig>(v)       { }
    };
 
    /// <summary>
@@ -976,11 +976,11 @@ namespace simd
    class V3lg : public V3lt<V3lg>
    {
    public:
-      inline V3lg() { }
-      inline V3lg(const long long x, const long long y, const long long z) : V3lt(x, y, z) { }
-      inline V3lg(const long long s)                                       : V3lt(s, s, s) { }
-      inline V3lg(const long long v[3])                                    : V3lt(v)       { }
-      inline V3lg(long long* const v)                                      : V3lt(v)       { }
+      inline V3lg()                                                                              { }
+      inline V3lg(const long long x, const long long y, const long long z) : V3lt<V3lg>(x, y, z) { }
+      inline V3lg(const long long s)                                       : V3lt<V3lg>(s, s, s) { }
+      inline V3lg(const long long v[3])                                    : V3lt<V3lg>(v)       { }
+      inline V3lg(long long* const v)                                      : V3lt<V3lg>(v)       { }
    };
 
    //------------------------------------------------------------------------------------------------------------------------//
