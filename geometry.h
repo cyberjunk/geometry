@@ -43,7 +43,7 @@ namespace simd
    /// Abstract Vector Base Template without dimension
    /// </summary>
    template <typename V, typename F>
-   class VB abstract
+   class VB
    {
    public:
       inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
@@ -60,7 +60,7 @@ namespace simd
    /// Abstract 2D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
-   class V2 abstract : public VB<V, F>
+   class V2 : public VB<V, F>
    {
    protected:
       inline V*   thiss() const { return (V*)this; }
@@ -148,7 +148,7 @@ namespace simd
    /// Abstract 2D Vector Template for Floating Point (32/64) [L2]
    /// </summary>
    template <typename V, typename F>
-   class V2fdt abstract : public V2<V, F>
+   class V2fdt : public V2<V, F>
    {
    public:
       inline V2fdt()                                                      { }
@@ -199,7 +199,7 @@ namespace simd
    /// Abstract 2D Vector for Integer (32/64) [L2]
    /// </summary>
    template <typename V, typename F>
-   class V2ilt abstract : public V2<V, F>
+   class V2ilt : public V2<V, F>
    {
    public:
       static inline F _abs(const int s)  { return ::abs(s);         }
@@ -219,7 +219,7 @@ namespace simd
    /// Abstract 2D Vector Template for Single Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V2ft abstract : public V2fdt<V, float>
+   class V2ft : public V2fdt<V, float>
    {
    public:
       static inline float _abs(const float s)   { return ::fabsf(s);  }
@@ -242,7 +242,7 @@ namespace simd
    /// Abstract 2D Vector Template for Double Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V2dt abstract : public V2fdt<V, double>
+   class V2dt : public V2fdt<V, double>
    {
    public:
       static inline double _abs(const double s)   { return ::abs(s);   }
@@ -265,7 +265,7 @@ namespace simd
    /// Abstract 2D Vector Template for Integer (32) [L3]
    /// </summary>
    template <typename V>
-   class V2it abstract : public V2ilt<V, int>
+   class V2it : public V2ilt<V, int>
    {
    public:
       inline V2it()                                               { }
@@ -279,7 +279,7 @@ namespace simd
    /// Abstract 2D Vector Template for Integer (64) [L3]
    /// </summary>
    template <typename V>
-   class V2lt abstract : public V2ilt<V, long long>
+   class V2lt : public V2ilt<V, long long>
    {
    public:
       inline V2lt()                                                                 { }
@@ -716,7 +716,7 @@ namespace simd
    /// Abstract 3D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
-   class V3 abstract : public VB<V, F>
+   class V3 : public VB<V, F>
    {
    protected:
       inline V*   thiss() const { return ((V*)this); }
@@ -798,7 +798,7 @@ namespace simd
    /// Abstract 3D Vector Template for Floating Point (32/64) [L2]
    /// </summary>
    template <typename V, typename F>
-   class V3fdt abstract : public V3<V, F>
+   class V3fdt : public V3<V, F>
    {
    public:
       inline V3fdt()                                                    { }
@@ -832,7 +832,7 @@ namespace simd
    /// Abstract 3D Vector for Integer (32/64) [L2]
    /// </summary>
    template <typename V, typename F>
-   class V3ilt abstract : public V3<V, F>
+   class V3ilt : public V3<V, F>
    {
    public:
       static inline F _abs(const int s)  { return ::abs(s);        }
@@ -852,7 +852,7 @@ namespace simd
    /// Abstract 3D Vector Template for Single Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V3ft abstract : public V3fdt<V, float>
+   class V3ft : public V3fdt<V, float>
    {
    public:
       static inline float _abs(const float s)   { return ::fabsf(s);  }
@@ -875,7 +875,7 @@ namespace simd
    /// Abstract 3D Vector Template for Double Precision FP [L3]
    /// </summary>
    template <typename V>
-   class V3dt abstract : public V3fdt<V, double>
+   class V3dt : public V3fdt<V, double>
    {
    public:
       static inline double _abs(const double s)   { return ::abs(s); }
@@ -898,7 +898,7 @@ namespace simd
    /// Abstract 3D Vector Template for Integer (32) [L3]
    /// </summary>
    template <typename V>
-   class V3it abstract : public V3ilt<V, int>
+   class V3it : public V3ilt<V, int>
    {
    public:
       inline V3it()                                                               { }
@@ -912,7 +912,7 @@ namespace simd
    /// Abstract 3D Vector Template for Integer (64) [L3]
    /// </summary>
    template <typename V>
-   class V3lt abstract : public V3ilt<V, long long>
+   class V3lt : public V3ilt<V, long long>
    {
    public:
       inline V3lt()                                                                                       { }
