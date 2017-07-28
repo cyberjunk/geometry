@@ -36,22 +36,6 @@
 //------------------------------------------------------------------------------------------------------------------------//
 namespace simd
 {
-   //------------------------------------------------------------------------------------------------------------------------//
-   //                                     ROOT TEMPLATE ALL VECTORS [L0, ABSTRACT]                                           //
-   //------------------------------------------------------------------------------------------------------------------------//
-   /// <summary>
-   /// Abstract Vector Base Template without dimension
-   /// </summary>
-   template <typename V, typename F>
-   class VB
-   {
-   public:
-      inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
-      inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
-      inline V     operator []   (const size_t i) const { return vals[i];                  }
-      inline V&    operator []   (const size_t i)       { return vals[i];                  }
-   };
-
 #pragma region V2
    //------------------------------------------------------------------------------------------------------------------------//
    //                                          ROOT TEMPLATE V2 [L1, ABSTRACT]                                               //
@@ -60,7 +44,7 @@ namespace simd
    /// Abstract 2D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
-   class V2 : public VB<V, F>
+   class V2
    {
    protected:
       inline V*   thiss() const { return (V*)this; }
@@ -81,6 +65,11 @@ namespace simd
       static inline V ZERO()  { return V((F)0.0, (F)0.0); }
       static inline V UNITX() { return V((F)1.0, (F)0.0); }
       static inline V UNITY() { return V((F)0.0, (F)1.0); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
+      inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
+      inline V     operator []   (const size_t i) const { return vals[i];                  }
+      inline V&    operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  operator ==   (const V& v)     const { return (x == v.x && y == v.y);        }
       inline bool  operator !=   (const V& v)     const { return (x != v.x || y != v.y);        }
@@ -716,7 +705,7 @@ namespace simd
    /// Abstract 3D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
    /// </summary>
    template <typename V, typename F>
-   class V3 : public VB<V, F>
+   class V3
    {
    protected:
       inline V*   thiss() const { return ((V*)this); }
@@ -738,6 +727,11 @@ namespace simd
       static inline V UNITX() { return V((F)1.0, (F)0.0, (F)0.0); }
       static inline V UNITY() { return V((F)0.0, (F)1.0, (F)0.0); }
       static inline V UNITZ() { return V((F)0.0, (F)0.0, (F)1.0); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
+      inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
+      inline V     operator []   (const size_t i) const { return vals[i];                  }
+      inline V&    operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  operator ==   (const V& v)     const { return (x == v.x && y == v.y && z == v.z);      }
       inline bool  operator !=   (const V& v)     const { return (x != v.x || y != v.y || z != v.z);      }
