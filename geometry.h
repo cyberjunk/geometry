@@ -146,13 +146,16 @@ namespace simd
       inline void  normalise()                                { *thiss() /= thiss()->length();          }
       inline V     normaliseC()                         const { V t(*thiss()); t.normalise(); return t; }
       inline void  scaleTo(const F l)                         { *thiss() *= (l / thiss()->length());    }
+      // scaleToC
       //------------------------------------------------------------------------------------------------------------------------//
-      inline V     roundC()                             const { return V(V::_round(x), V::_round(y)); }
-      inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y)); }
-      inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y));  }
-      inline void  round()                                    { x = V::_round(x); y = V::_round(y);   }
-      inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);   }
-      inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);    }
+      inline V     roundC()                             const { return V(V::_round(x), V::_round(y));           }
+      inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y));           }
+      inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y));            }
+      inline V     roundByC(const F n)                  const { V c(*thiss()); c.roundBy(n); return c;          }
+      inline void  round()                                    { x = V::_round(x); y = V::_round(y);             }
+      inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y);             }
+      inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);              }
+      inline void  roundBy(const F n)                         { *thiss() /= n; thiss()->round(); *thiss() *= n; }
       //------------------------------------------------------------------------------------------------------------------------//
       inline F angle()              const { return V::_acos(x / thiss()->length());                                       }
       inline F angleNoN()           const { return V::_acos(x);                                                           }
@@ -462,12 +465,13 @@ namespace simd
          return 0.5f * f.m128_f32[0];
       }
 #if defined(SIMD_V2_FP_32_SSE41)
-      inline V2fs  roundC() const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_NINT)); }
-      inline V2fs  floorC() const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
-      inline V2fs  ceilC()  const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_CEIL)); }
-      inline void  round()        { store(_mm_round_ps(load2(), _MM_FROUND_NINT)); }
-      inline void  floor()        { store(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
-      inline void  ceil()         { store(_mm_round_ps(load2(), _MM_FROUND_CEIL)); }
+      inline V2fs  roundC()                const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_NINT));  }
+      inline V2fs  floorC()                const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
+      inline V2fs  ceilC()                 const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_CEIL));  }
+      inline void  round()                       { store(_mm_round_ps(load2(), _MM_FROUND_NINT));        }
+      inline void  floor()                       { store(_mm_round_ps(load2(), _MM_FROUND_FLOOR));       }
+      inline void  ceil()                        { store(_mm_round_ps(load2(), _MM_FROUND_CEIL));        }
+      inline void  roundBy(const float n)        { store(_mm_mul_ps(_mm_round_ps(_mm_mul_ps(load2(), _mm_set1_ps(1.0f / n)), _MM_FROUND_NINT), _mm_set1_ps(n))); }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
    };
@@ -573,6 +577,7 @@ namespace simd
       inline V2ds   floorC()           const { return V2ds(_mm_round_pd(load(), _MM_FROUND_FLOOR));                              }
       inline V2ds   ceilC()            const { return V2ds(_mm_round_pd(load(), _MM_FROUND_CEIL));                               }
       inline void   round()                  { store(_mm_round_pd(load(), _MM_FROUND_NINT));                                     }
+      inline void   roundBy(const double n)  { store(_mm_mul_pd(_mm_round_pd(_mm_mul_pd(load(), _mm_set1_pd(1.0 / n)), _MM_FROUND_NINT), _mm_set1_pd(n))); }
       inline void   floor()                  { store(_mm_round_pd(load(), _MM_FROUND_FLOOR));                                    }
       inline void   ceil()                   { store(_mm_round_pd(load(), _MM_FROUND_CEIL));                                     }
       inline void   normalise()              { __m128d t(load()); store(_mm_div_pd(load(), _mm_sqrt_pd(_mm_dp_pd(t, t, 0x33)))); }
@@ -822,9 +827,11 @@ namespace simd
       inline V     roundC()                             const { return V(V::_round(x), V::_round(y), V::_round(z));   }
       inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y), V::_floor(z));   }
       inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y),  V::_ceil(z));    }
+      inline V     roundByC(const F n)                  const { V c(*thiss()); c.roundBy(n); return c;               }
       inline void  round()                                    { x = V::_round(x); y = V::_round(y); z = V::_round(z); }
       inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y); z = V::_floor(z); }
       inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);  z = V::_ceil(z);  }
+      inline void  roundBy(const F n)                         { *thiss() /= n; thiss()->round(); *thiss() *= n;       }
       //------------------------------------------------------------------------------------------------------------------------//
       static inline V    randomN()                            { V t(V::random()); t.normalise(); return t;             }
       static inline void randomN(V* v, const size_t size)     { for (size_t i = 0; i < size; i++) v[i] = V::randomN(); }
@@ -1102,6 +1109,7 @@ namespace simd
       inline void round()        { store(_mm_round_ps(load(), _MM_FROUND_NINT));        }
       inline void floor()        { store(_mm_round_ps(load(), _MM_FROUND_FLOOR));       }
       inline void ceil()         { store(_mm_round_ps(load(), _MM_FROUND_CEIL));        }
+      inline void roundBy(const float n) { store(_mm_mul_ps(_mm_round_ps(_mm_mul_ps(load(), _mm_set1_ps(1.0f / n)), _MM_FROUND_NINT), _mm_set1_ps(n))); }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
    };
