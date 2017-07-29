@@ -4,8 +4,9 @@
 #include <cmath>
 #include <algorithm>
 #include <random>
-#define TWOPI (2.0*M_PI)
+#include <intrin.h>
 //------------------------------------------------------------------------------------------------------------------------//
+#define TWOPI (2.0*M_PI)
 
 #if defined(SIMD_V2_FP_32_SSE41) && !defined(SIMD_V2_FP_32_SSE2)
 # define SIMD_V2_FP_32_SSE2
@@ -21,17 +22,6 @@
 #  define ALIGN8                          __declspec(align(8))
 #  define ALIGN16 __declspec(intrin_type) __declspec(align(16))
 #  define ALIGN32 __declspec(intrin_type) __declspec(align(32))
-#  if defined(SIMD_TYPES_SSE)
-#    include <xmmintrin.h> // SSE
-#    include <emmintrin.h> // SSE 2
-#    include <pmmintrin.h> // SSE 3
-#    include <tmmintrin.h> // SSSE3
-#    include <smmintrin.h> // SSE 4.1
-#    include <nmmintrin.h> // SSE 4.2
-#  endif
-#  if defined(SIMD_TYPES_AVX)
-#    include <immintrin.h> // AVX
-#  endif
 #endif
 //------------------------------------------------------------------------------------------------------------------------//
 namespace simd
@@ -349,8 +339,10 @@ namespace simd
    ALIGN8 class V2fs : public V2ft<V2fs>
    {
    public:
-      inline __m128 load()                 const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
-      inline void   store(const __m128& v)       { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v));    }
+      inline __m128 load()                  const { return _mm_castpd_ps(_mm_load_sd((double*)vals)); }
+      inline __m128 load2()                 const { return _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals)); }
+      inline void   store(const __m128& v)        { _mm_store_sd((double*)vals, _mm_castps_pd(v));    }
+      inline void   store2(const __m128& v)       { _mm_storel_epi64((__m128i*)vals, _mm_castps_si128(v)); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2fs()                                                                { }
       inline V2fs(const float x, const float y)   : V2ft<V2fs>(x, y)               { }
@@ -362,53 +354,53 @@ namespace simd
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
       inline V2fs(const __m128& values)           { store(values);                                                       }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2fs), 8);                        }
-      inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2fs), 8);                 }
-      inline       bool  operator == (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) == 0x0F; }
-      inline       bool  operator != (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load(), v.load())) != 0x00; }
-      inline       bool  operator <  (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmplt_ps(load(), v.load())) == 0x0F; }
-      inline       bool  operator <= (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmple_ps(load(), v.load())) == 0x0F; }
-      inline       bool  operator >  (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpgt_ps(load(), v.load())) == 0x0F; }
-      inline       bool  operator >= (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpge_ps(load(), v.load())) == 0x0F; }
-      inline       V2fs  operator +  (const V2fs&  v) const { return V2fs(_mm_add_ps(load(), v.load()));                      }
-      inline       V2fs  operator -  (const V2fs&  v) const { return V2fs(_mm_sub_ps(load(), v.load()));                      }
-      inline       V2fs  operator *  (const V2fs&  v) const { return V2fs(_mm_mul_ps(load(), v.load()));                      }
-      inline       V2fs  operator /  (const V2fs&  v) const { return V2fs(_mm_div_ps(load(), v.load()));                      }
-      inline       V2fs  operator *  (const float  s) const { return V2fs(_mm_mul_ps(load(), _mm_set1_ps(s)));                }
-      inline       V2fs  operator /  (const float  s) const { return V2fs(_mm_div_ps(load(), _mm_set1_ps(s)));                }
-      inline       V2fs  operator -  ()               const { return V2fs(_mm_sub_ps(_mm_setzero_ps(), load()));              }
-      inline const V2fs& operator +  ()               const { return *this;                                                   }
-      inline       V2fs& operator =  (const V2fs&  v)       { store(v.load());                           return *this;        }
-      inline       V2fs& operator += (const V2fs&  v)       { store(_mm_add_ps(load(), v.load()));       return *this;        }
-      inline       V2fs& operator -= (const V2fs&  v)       { store(_mm_sub_ps(load(), v.load()));       return *this;        }
-      inline       V2fs& operator *= (const V2fs&  v)       { store(_mm_mul_ps(load(), v.load()));       return *this;        }
-      inline       V2fs& operator /= (const V2fs&  v)       { store(_mm_div_ps(load(), v.load()));       return *this;        }
-      inline       V2fs& operator =  (const float  s)       { store(_mm_set1_ps(s));                     return *this;        }
-      inline       V2fs& operator += (const float  s)       { store(_mm_add_ps(load(), _mm_set1_ps(s))); return *this;        }
-      inline       V2fs& operator -= (const float  s)       { store(_mm_sub_ps(load(), _mm_set1_ps(s))); return *this;        }
-      inline       V2fs& operator *= (const float  s)       { store(_mm_mul_ps(load(), _mm_set1_ps(s))); return *this;        }
-      inline       V2fs& operator /= (const float  s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this;        }
+      inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2fs), 8);                          }
+      inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2fs), 8);                   }
+      inline       bool  operator == (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load2(), v.load2())) == 0x0F; }
+      inline       bool  operator != (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpeq_ps(load2(), v.load2())) != 0x00; }
+      inline       bool  operator <  (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmplt_ps(load2(), v.load2())) == 0x0F; }
+      inline       bool  operator <= (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmple_ps(load2(), v.load2())) == 0x0F; }
+      inline       bool  operator >  (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpgt_ps(load2(), v.load2())) == 0x0F; }
+      inline       bool  operator >= (const V2fs&  v) const { return _mm_movemask_ps(_mm_cmpge_ps(load2(), v.load2())) == 0x0F; }
+      inline       V2fs  operator +  (const V2fs&  v) const { return V2fs(_mm_add_ps(load2(), v.load2()));                      }
+      inline       V2fs  operator -  (const V2fs&  v) const { return V2fs(_mm_sub_ps(load2(), v.load2()));                      }
+      inline       V2fs  operator *  (const V2fs&  v) const { return V2fs(_mm_mul_ps(load2(), v.load2()));                      }
+      inline       V2fs  operator /  (const V2fs&  v) const { return V2fs(_mm_div_ps(load2(), v.load2()));                      }
+      inline       V2fs  operator *  (const float  s) const { return V2fs(_mm_mul_ps(load2(), _mm_set1_ps(s)));                 }
+      inline       V2fs  operator /  (const float  s) const { return V2fs(_mm_div_ps(load2(), _mm_set1_ps(s)));                 }
+      inline       V2fs  operator -  ()               const { return V2fs(_mm_sub_ps(_mm_setzero_ps(), load2()));               }
+      inline const V2fs& operator +  ()               const { return *this;                                                     }
+      inline       V2fs& operator =  (const V2fs&  v)       { store(v.load());                            return *this;         }
+      inline       V2fs& operator += (const V2fs&  v)       { store(_mm_add_ps(load2(), v.load2()));      return *this;         }
+      inline       V2fs& operator -= (const V2fs&  v)       { store(_mm_sub_ps(load2(), v.load2()));      return *this;         }
+      inline       V2fs& operator *= (const V2fs&  v)       { store(_mm_mul_ps(load2(), v.load2()));      return *this;         }
+      inline       V2fs& operator /= (const V2fs&  v)       { store(_mm_div_ps(load2(), v.load2()));      return *this;         }
+      inline       V2fs& operator =  (const float  s)       { store(_mm_set1_ps(s));                      return *this;         }
+      inline       V2fs& operator += (const float  s)       { store(_mm_add_ps(load2(), _mm_set1_ps(s))); return *this;         }
+      inline       V2fs& operator -= (const float  s)       { store(_mm_sub_ps(load2(), _mm_set1_ps(s))); return *this;         }
+      inline       V2fs& operator *= (const float  s)       { store(_mm_mul_ps(load2(), _mm_set1_ps(s))); return *this;         }
+      inline       V2fs& operator /= (const float  s)       { store(_mm_div_ps(load2(), _mm_set1_ps(s))); return *this;         }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void swap(V2fs& v)                                { __m128 t(load()); store(v.load()); v.store(t);         }
-      inline V2fs absC()                                 const { return V2fs(_mm_andnot_ps(_mm_set1_ps(-0.f), load())); }
-      inline V2fs maxC(const V2fs& v)                    const { return V2fs(_mm_max_ps(load(), v.load()));             }
-      inline V2fs minC(const V2fs& v)                    const { return V2fs(_mm_min_ps(load(), v.load()));             }
-      inline V2fs boundC(const V2fs& mi, const V2fs& ma) const { V2fs t(minC(ma)); t.max(mi); return t;                 }
-      inline void abs()                                        { store(_mm_andnot_ps(_mm_set1_ps(-0.), load()));        }
-      inline void max(const V2fs& v)                           { store(_mm_max_ps(load(), v.load()));                   }
-      inline void min(const V2fs& v)                           { store(_mm_min_ps(load(), v.load()));                   }
-      inline void bound(const V2fs& mi, const V2fs& ma)        { min(ma); max(mi);                                      }
+      inline void swap(V2fs& v)                                { __m128 t(load2()); store(v.load2()); v.store(t);                }
+      inline V2fs absC()                                 const { return V2fs(_mm_andnot_ps(_mm_set1_ps(-0.f), load2()));         }
+      inline V2fs maxC(const V2fs& v)                    const { return V2fs(_mm_max_ps(load2(), v.load2()));                    }
+      inline V2fs minC(const V2fs& v)                    const { return V2fs(_mm_min_ps(load2(), v.load2()));                    }
+      inline V2fs boundC(const V2fs& mi, const V2fs& ma) const { return V2fs(_mm_max_ps(_mm_min_ps(load2(), ma.load2()), mi.load2())); }
+      inline void abs()                                        { store(_mm_andnot_ps(_mm_set1_ps(-0.), load2()));                }
+      inline void max(const V2fs& v)                           { store(_mm_max_ps(load2(), v.load2()));                          }
+      inline void min(const V2fs& v)                           { store(_mm_min_ps(load2(), v.load2()));                          }
+      inline void bound(const V2fs& mi, const V2fs& ma)        { store(_mm_max_ps(_mm_min_ps(load2(), ma.load2()), mi.load2())); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float dot(const V2fs& v) const
       {
-         __m128 a(_mm_mul_ps(load(), v.load()));
+         __m128 a(_mm_mul_ps(load2(), v.load2()));
          __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 c(_mm_add_ss(a, b));
          return c.m128_f32[0];
       }
       inline float length() const
       {
-         __m128 t(load());
+         __m128 t(load2());
          __m128 a(_mm_mul_ps(t, t));
          __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 c(_mm_add_ss(a, b));
@@ -417,9 +409,9 @@ namespace simd
       }
       inline float side(const V2fs& s, const V2fs& e) const
       {
-         __m128 t(s.load());
-         __m128 a(_mm_sub_ps(e.load(), t));
-         __m128 b(_mm_sub_ps(load(), t));
+         __m128 t(s.load2());
+         __m128 a(_mm_sub_ps(e.load2(), t));
+         __m128 b(_mm_sub_ps(load2(), t));
          __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 d(_mm_mul_ps(a, c));
          __m128 f(_mm_shuffle_ps(d, d, _MM_SHUFFLE(2, 3, 0, 1)));
@@ -428,26 +420,42 @@ namespace simd
       }
       inline bool inside(const V2fs& min, const V2fs& max) const
       {
-         __m128 a(load());
-         __m128 b(_mm_cmpge_ps(a, min.load()));
-         __m128 c(_mm_cmple_ps(a, max.load()));
+         __m128 a(load2());
+         __m128 b(_mm_cmpge_ps(a, min.load2()));
+         __m128 c(_mm_cmple_ps(a, max.load2()));
          __m128 d(_mm_and_ps(b, c));
          return _mm_movemask_ps(d) == 0x0F;
       }
       inline bool inside(const V2fs& min, const V2fs& max, const float e) const
       {
          __m128 eps(_mm_set1_ps(e));
-         __m128 a(load());
-         __m128 b(_mm_cmpge_ps(a, _mm_sub_ps(min.load(), eps)));
-         __m128 c(_mm_cmple_ps(a, _mm_add_ps(max.load(), eps)));
+         __m128 a(load2());
+         __m128 b(_mm_cmpge_ps(a, _mm_sub_ps(min.load2(), eps)));
+         __m128 c(_mm_cmple_ps(a, _mm_add_ps(max.load2(), eps)));
          __m128 d(_mm_and_ps(b, c));
          return _mm_movemask_ps(d) == 0x0F;
       }
+      inline bool inside(const V2fs& m, const float r2) const
+      {
+         __m128 t(_mm_sub_ps(load2(), m.load2()));
+         __m128 a(_mm_mul_ps(t, t));
+         __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 c(_mm_add_ss(a, b));
+         return c.m128_f32[0] <= r2;
+      }
+      inline bool inside(const V2fs& m, const float r2, const float e) const
+      {
+         __m128 t(_mm_sub_ps(load2(), m.load2()));
+         __m128 a(_mm_mul_ps(t, t));
+         __m128 b(_mm_shuffle_ps(a, a, _MM_SHUFFLE(2, 3, 0, 1)));
+         __m128 c(_mm_add_ss(a, b));
+         return c.m128_f32[0] <= (r2+e); 
+      }
       inline float area(const V2fs& p, const V2fs& q) const
       {
-         __m128 t(load());
-         __m128 a(_mm_sub_ps(p.load(), t));
-         __m128 b(_mm_sub_ps(q.load(), t));
+         __m128 t(load2());
+         __m128 a(_mm_sub_ps(p.load2(), t));
+         __m128 b(_mm_sub_ps(q.load2(), t));
          __m128 c(_mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1)));
          __m128 d(_mm_mul_ps(a, c));
          __m128 e(_mm_shuffle_ps(d, d, _MM_SHUFFLE(2, 3, 0, 1)));
@@ -455,12 +463,12 @@ namespace simd
          return 0.5f * f.m128_f32[0];
       }
 #if defined(SIMD_V2_FP_32_SSE41)
-      inline V2fs  roundC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_NINT)); }
-      inline V2fs  floorC() const { return V2fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
-      inline V2fs  ceilC()  const { return V2fs(_mm_round_ps(load(), _MM_FROUND_CEIL)); }
-      inline void  round()        { store(_mm_round_ps(load(), _MM_FROUND_NINT)); }
-      inline void  floor()        { store(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
-      inline void  ceil()         { store(_mm_round_ps(load(), _MM_FROUND_CEIL)); }
+      inline V2fs  roundC() const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_NINT)); }
+      inline V2fs  floorC() const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
+      inline V2fs  ceilC()  const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_CEIL)); }
+      inline void  round()        { store(_mm_round_ps(load2(), _MM_FROUND_NINT)); }
+      inline void  floor()        { store(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
+      inline void  ceil()         { store(_mm_round_ps(load2(), _MM_FROUND_CEIL)); }
 #endif
       //------------------------------------------------------------------------------------------------------------------------//
    };
@@ -519,15 +527,16 @@ namespace simd
       inline       V2ds& operator *= (const double s)       { store(_mm_mul_pd(load(), _mm_set1_pd(s))); return *this;        }
       inline       V2ds& operator /= (const double s)       { store(_mm_div_pd(load(), _mm_set1_pd(s))); return *this;        }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void swap(V2ds& v)                                { __m128d t(load()); store(v.load()); v.store(t);       }
-      inline V2ds absC()                                 const { return V2ds(_mm_andnot_pd(_mm_set1_pd(-0.), load())); }
-      inline V2ds maxC(const V2ds& v)                    const { return V2ds(_mm_max_pd(load(), v.load()));            }
-      inline V2ds minC(const V2ds& v)                    const { return V2ds(_mm_min_pd(load(), v.load()));            }
-      inline V2ds boundC(const V2ds& mi, const V2ds& ma) const { V2ds t(minC(ma)); t.max(mi); return t;                }
-      inline void abs()                                        { store(_mm_andnot_pd(_mm_set1_pd(-0.), load()));       }
-      inline void max(const V2ds& v)                           { store(_mm_max_pd(load(), v.load()));                  }
-      inline void min(const V2ds& v)                           { store(_mm_min_pd(load(), v.load()));                  }
-      inline void bound(const V2ds& mi, const V2ds& ma)        { min(ma); max(mi);                                     }
+      inline void swap(V2ds& v)                                { __m128d t(load()); store(v.load()); v.store(t);              }
+      inline V2ds absC()                                 const { return V2ds(_mm_andnot_pd(_mm_set1_pd(-0.), load()));        }
+      inline V2ds maxC(const V2ds& v)                    const { return V2ds(_mm_max_pd(load(), v.load()));                   }
+      inline V2ds minC(const V2ds& v)                    const { return V2ds(_mm_min_pd(load(), v.load()));                   }
+      inline V2ds boundC(const V2ds& mi, const V2ds& ma) const { return V2ds(_mm_max_pd(_mm_min_pd(load(), ma.load()), mi.load())); }
+      inline void abs()                                        { store(_mm_andnot_pd(_mm_set1_pd(-0.), load()));              }
+      inline void max(const V2ds& v)                           { store(_mm_max_pd(load(), v.load()));                         }
+      inline void min(const V2ds& v)                           { store(_mm_min_pd(load(), v.load()));                         }
+      inline void bound(const V2ds& mi, const V2ds& ma)        { store(_mm_max_pd(_mm_min_pd(load(), ma.load()), mi.load())); }
+      //------------------------------------------------------------------------------------------------------------------------//
       inline void rotate(double r)
       {
          __m128d cs(_mm_set1_pd(_cos(r)));
@@ -1030,15 +1039,15 @@ namespace simd
       inline       V3fs& operator *= (const float s)       { store(_mm_mul_ps(load(), _mm_set1_ps(s))); return *this;    }
       inline       V3fs& operator /= (const float s)       { store(_mm_div_ps(load(), _mm_set1_ps(s))); return *this;    }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline void swap(V3fs& v)                                { __m128 t(load()); store(v.load()); v.store(t);         }
-      inline V3fs absC()                                 const { return V3fs(_mm_andnot_ps(_mm_set1_ps(-0.f), load())); }
-      inline V3fs maxC(const V3fs& v)                    const { return V3fs(_mm_max_ps(load(), v.load()));             }
-      inline V3fs minC(const V3fs& v)                    const { return V3fs(_mm_min_ps(load(), v.load()));             }
-      inline V3fs boundC(const V3fs& mi, const V3fs& ma) const { V3fs t(minC(ma)); t.max(mi); return t;                 }
-      inline void abs()                                        { store(_mm_andnot_ps(_mm_set1_ps(-0.), load()));        }
-      inline void max(const V3fs& v)                           { store(_mm_max_ps(load(), v.load()));                   }
-      inline void min(const V3fs& v)                           { store(_mm_min_ps(load(), v.load()));                   }
-      inline void bound(const V3fs& mi, const V3fs& ma)        { min(ma); max(mi);                                      }
+      inline void swap(V3fs& v)                                { __m128 t(load()); store(v.load()); v.store(t);               }
+      inline V3fs absC()                                 const { return V3fs(_mm_andnot_ps(_mm_set1_ps(-0.f), load()));       }
+      inline V3fs maxC(const V3fs& v)                    const { return V3fs(_mm_max_ps(load(), v.load()));                   }
+      inline V3fs minC(const V3fs& v)                    const { return V3fs(_mm_min_ps(load(), v.load()));                   }
+      inline V3fs boundC(const V3fs& mi, const V3fs& ma) const { return V3fs(_mm_max_ps(_mm_min_ps(load(), ma.load()), mi.load())); }
+      inline void abs()                                        { store(_mm_andnot_ps(_mm_set1_ps(-0.), load()));              }
+      inline void max(const V3fs& v)                           { store(_mm_max_ps(load(), v.load()));                         }
+      inline void min(const V3fs& v)                           { store(_mm_min_ps(load(), v.load()));                         }
+      inline void bound(const V3fs& mi, const V3fs& ma)        { store(_mm_max_ps(_mm_min_ps(load(), ma.load()), mi.load())); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline float dot(const V3fs& v) const
       {
