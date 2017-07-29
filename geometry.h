@@ -420,20 +420,17 @@ namespace simd
       }
       inline bool inside(const V2fs& min, const V2fs& max) const
       {
-         __m128 a(load2());
-         __m128 b(_mm_cmpge_ps(a, min.load2()));
-         __m128 c(_mm_cmple_ps(a, max.load2()));
-         __m128 d(_mm_and_ps(b, c));
-         return _mm_movemask_ps(d) == 0x0F;
+         return _mm_movemask_ps(_mm_and_ps(
+            _mm_cmpge_ps(load2(), min.load2()), 
+            _mm_cmple_ps(load2(), max.load2()))) == 0x0F;
       }
       inline bool inside(const V2fs& min, const V2fs& max, const float e) const
       {
-         __m128 eps(_mm_set1_ps(e));
-         __m128 a(load2());
-         __m128 b(_mm_cmpge_ps(a, _mm_sub_ps(min.load2(), eps)));
-         __m128 c(_mm_cmple_ps(a, _mm_add_ps(max.load2(), eps)));
-         __m128 d(_mm_and_ps(b, c));
-         return _mm_movemask_ps(d) == 0x0F;
+         const __m128 eps(_mm_set1_ps(e));
+         const __m128 a(_mm_and_ps(
+            _mm_cmpge_ps(load2(), _mm_sub_ps(min.load2(), eps)), 
+            _mm_cmple_ps(load2(), _mm_add_ps(max.load2(), eps))));
+         return _mm_movemask_ps(a) == 0x0F;
       }
       inline bool inside(const V2fs& m, const float r2) const
       {
@@ -1049,6 +1046,10 @@ namespace simd
       inline void min(const V3fs& v)                           { store(_mm_min_ps(load(), v.load()));                         }
       inline void bound(const V3fs& mi, const V3fs& ma)        { store(_mm_max_ps(_mm_min_ps(load(), ma.load()), mi.load())); }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline bool isZero()                         const { return *this == ZERO(); }
+      
+      inline bool isZero(const float e2)               const { return thiss()->length2() <= e2; }
+
       inline float dot(const V3fs& v) const
       {
          __m128 a(_mm_mul_ps(load(), v.load()));
