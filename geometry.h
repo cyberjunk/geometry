@@ -58,8 +58,8 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
       inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
-      inline V     operator []   (const size_t i) const { return vals[i];                  }
-      inline V&    operator []   (const size_t i)       { return vals[i];                  }
+      inline F     operator []   (const size_t i) const { return vals[i];                  }
+      inline F     operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  operator ==   (const V& v)     const { return ((x == v.x) & (y == v.y));     }
       inline bool  operator !=   (const V& v)     const { return ((x != v.x) | (y != v.y));     }
@@ -87,6 +87,7 @@ namespace simd
       inline       V  operator - ()               const { return V(-x, -y);      }
       inline const V& operator + ()               const { return *this;          }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline void madd(const V& m, const V& a)           { *thiss() = (*thiss() * m) + a;                  }
       inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0;              }
       inline bool isZero(const F e2)               const { return thiss()->length2() <= e2;                }
       inline bool equals(const V& v, const F e2)   const { return (*thiss() - v).length2() <= e2;          }
@@ -737,8 +738,8 @@ namespace simd
       //------------------------------------------------------------------------------------------------------------------------//
       inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
       inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
-      inline V     operator []   (const size_t i) const { return vals[i];                  }
-      inline V&    operator []   (const size_t i)       { return vals[i];                  }
+      inline F     operator []   (const size_t i) const { return vals[i];                  }
+      inline F     operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
       inline bool  operator ==   (const V& v)     const { return ((x == v.x) & (y == v.y) & (z == v.z));  }
       inline bool  operator !=   (const V& v)     const { return ((x != v.x) | (y != v.y) | (z != v.z));  }
@@ -766,13 +767,14 @@ namespace simd
       inline       V  operator - ()               const { return V(-x, -y, -z); }
       inline const V& operator + ()               const { return *this; }
       //------------------------------------------------------------------------------------------------------------------------//
+      inline void madd(const V& m, const V& a)           { *thiss() = (*thiss() * m) + a;                                     }
       inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0 && z == (F)0.0;                  }
       inline bool isZero(const F e2)               const { return thiss()->length2() <= e2;                                   }
       inline bool equals(const V& v, const F e2)   const { return (thiss() - v).length2() <= e2;                              }
       inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y); std::swap(z, v.z);           }
       inline V    cross(const V& v)                const { return V(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
       inline F    dot(const V& v)                  const { return x * v.x + y * v.y + z * v.z;                                }
-      inline F    length2()                        const { return thiss()->dot(*((V*)this));                                       }
+      inline F    length2()                        const { return thiss()->dot(*((V*)this));                                  }
       inline F    length()                         const { return V::_sqrt(thiss()->length2());                               }
       inline F    distance2(const V& v)            const { return (thiss() - v).length2();                                    }
       inline F    distance(const V& v)             const { return V::_sqrt(thiss()->distance2(v));                            }
