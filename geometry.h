@@ -61,12 +61,12 @@ namespace simd
       inline V     operator []   (const size_t i) const { return vals[i];                  }
       inline V&    operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  operator ==   (const V& v)     const { return (x == v.x && y == v.y);        }
-      inline bool  operator !=   (const V& v)     const { return (x != v.x || y != v.y);        }
-      inline bool  operator <    (const V& v)     const { return (x <  v.x && y <  v.y);        }
-      inline bool  operator <=   (const V& v)     const { return (x <= v.x && y <= v.y);        }
-      inline bool  operator >    (const V& v)     const { return (x >  v.x && y >  v.y);        }
-      inline bool  operator >=   (const V& v)     const { return (x >= v.x && y >= v.y);        }
+      inline bool  operator ==   (const V& v)     const { return ((x == v.x) & (y == v.y));     }
+      inline bool  operator !=   (const V& v)     const { return ((x != v.x) | (y != v.y));     }
+      inline bool  operator <    (const V& v)     const { return ((x <  v.x) & (y <  v.y));     }
+      inline bool  operator <=   (const V& v)     const { return ((x <= v.x) & (y <= v.y));     }
+      inline bool  operator >    (const V& v)     const { return ((x >  v.x) & (y >  v.y));     }
+      inline bool  operator >=   (const V& v)     const { return ((x >= v.x) & (y >= v.y));     }
       inline V     operator +    (const V& v)     const { return V(x + v.x, y + v.y);           }
       inline V     operator -    (const V& v)     const { return V(x - v.x, y - v.y);           }
       inline V     operator *    (const V& v)     const { return V(x * v.x, y * v.y);           }
@@ -742,12 +742,12 @@ namespace simd
       inline V     operator []   (const size_t i) const { return vals[i];                  }
       inline V&    operator []   (const size_t i)       { return vals[i];                  }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  operator ==   (const V& v)     const { return (x == v.x && y == v.y && z == v.z);      }
-      inline bool  operator !=   (const V& v)     const { return (x != v.x || y != v.y || z != v.z);      }
-      inline bool  operator <    (const V& v)     const { return (x <  v.x && y <  v.y && z <  v.z);      }
-      inline bool  operator <=   (const V& v)     const { return (x <= v.x && y <= v.y && z <= v.z);      }
-      inline bool  operator >    (const V& v)     const { return (x >  v.x && y >  v.y && z >  v.z);      }
-      inline bool  operator >=   (const V& v)     const { return (x >= v.x && y >= v.y && z >= v.z);      }
+      inline bool  operator ==   (const V& v)     const { return ((x == v.x) & (y == v.y) & (z == v.z));  }
+      inline bool  operator !=   (const V& v)     const { return ((x != v.x) | (y != v.y) | (z != v.z));  }
+      inline bool  operator <    (const V& v)     const { return ((x <  v.x) & (y <  v.y) & (z <  v.z));  }
+      inline bool  operator <=   (const V& v)     const { return ((x <= v.x) & (y <= v.y) & (z <= v.z));  }
+      inline bool  operator >    (const V& v)     const { return ((x >  v.x) & (y >  v.y) & (z >  v.z));  }
+      inline bool  operator >=   (const V& v)     const { return ((x >= v.x) & (y >= v.y) & (z >= v.z));  }
       inline V     operator +    (const V& v)     const { return V(x + v.x, y + v.y, z + v.z);            }
       inline V     operator -    (const V& v)     const { return V(x - v.x, y - v.y, z - v.z);            }
       inline V     operator *    (const V& v)     const { return V(x * v.x, y * v.y, z * v.z);            }
