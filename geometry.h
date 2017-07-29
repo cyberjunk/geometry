@@ -141,9 +141,10 @@ namespace simd
       inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; return (V&)*this; }
       inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t);           }
       //------------------------------------------------------------------------------------------------------------------------//
-      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);     }
-      inline void  normalise()                                { *thiss() /= thiss()->length();         }
+      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y);      }
+      inline void  normalise()                                { *thiss() /= thiss()->length();          }
       inline V     normaliseC()                         const { V t(*thiss()); t.normalise(); return t; }
+      inline void  scaleTo(const F l)                         { *thiss() *= (l / thiss()->length());    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V     roundC()                             const { return V(V::_round(x), V::_round(y)); }
       inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y)); }
