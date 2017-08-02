@@ -276,6 +276,9 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                     GENERIC/NON-SIMD CLASSES [L4]                                                      //
    //------------------------------------------------------------------------------------------------------------------------//
+   class V2fg;
+   class V2dg;
+
    /// <summary>
    /// Single Precision 2D Vector (Generic, no SIMD) [L4]
    /// </summary>
@@ -290,6 +293,7 @@ namespace simd
       inline V2fg(const int v[2])                 : V2ft<V2fg>((float)v[0], (float)v[1]) { }
       inline V2fg(const double x, const double y) : V2ft<V2fg>((float)x,    (float)y)    { }
       inline V2fg(const int x, const int y)       : V2ft<V2fg>((float)x,    (float)y)    { }
+      inline V2fg(const V2dt<V2dg>& v)            : V2ft<V2fg>((float)v.x,  (float)v.y)  { }
    };
 
    /// <summary>
@@ -306,6 +310,7 @@ namespace simd
       inline V2dg(const int v[2])                 : V2dt<V2dg>((double)v[0], (double)v[1]) { }
       inline V2dg(const float x, const float y)   : V2dt<V2dg>((double)x,    (double)y)    { }
       inline V2dg(const int x, const int y)       : V2dt<V2dg>((double)x,    (double)y)    { }
+      inline V2dg(const V2ft<V2fg>& v)            : V2dt<V2dg>((double)v.x,  (double)v.y)  { }
    };
 
    /// <summary>
@@ -338,6 +343,9 @@ namespace simd
    //                                             SIMD CLASSES [L4]                                                          //
    //------------------------------------------------------------------------------------------------------------------------//
 #if defined(SIMD_V2_FP_32_SSE2)
+   class V2fs;
+   class V2ds;
+
    /// <summary>
    /// Single Precision 2D Vector (SSE/SIMD)
    /// </summary>
@@ -358,6 +366,7 @@ namespace simd
       inline V2fs(float* const values)            { _mm_storel_epi64((__m128i*)vals, _mm_loadl_epi64((__m128i*)values)); }
       inline V2fs(const int values[2])            { store(_mm_cvtepi32_ps(_mm_loadl_epi64((__m128i*)values)));           }
       inline V2fs(const __m128& values)           { store(values);                                                       }
+      inline V2fs(const V2dt<V2ds>& v)            { store(_mm_cvtpd_ps(_mm_load_pd(v.vals)));                            }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2fs), 8);                          }
       inline       void* operator new[](size_t size)        { return _aligned_malloc(size * sizeof(V2fs), 8);                   }
@@ -494,14 +503,15 @@ namespace simd
       inline void    store(const __m128d v)       { _mm_store_pd(vals, v);    }
       //------------------------------------------------------------------------------------------------------------------------//
       inline V2ds() { }
-      inline V2ds(const double fX, const double fY) { store(_mm_set_pd(fY, fX));                                 }
-      inline V2ds(const float fX, const float fY)   { store(_mm_set_pd((double)fY, (double)fX));                 }
-      inline V2ds(const int fX, const int fY)       { store(_mm_set_pd((double)fY, (double)fX));                 }
-      inline V2ds(const double scalar)              { store(_mm_set1_pd(scalar));                                }
-      inline V2ds(const double values[2])           { store(_mm_loadu_pd(values));                               }
-      inline V2ds(double* const values)             { store(_mm_loadu_pd(values));                               }
-      inline V2ds(const int values[2])              { store(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values))); }
-      inline V2ds(const __m128d values)             { store(values);                                             }
+      inline V2ds(const double fX, const double fY) { store(_mm_set_pd(fY, fX));                                                }
+      inline V2ds(const float fX, const float fY)   { store(_mm_set_pd((double)fY, (double)fX));                                }
+      inline V2ds(const int fX, const int fY)       { store(_mm_set_pd((double)fY, (double)fX));                                }
+      inline V2ds(const double scalar)              { store(_mm_set1_pd(scalar));                                               }
+      inline V2ds(const double values[2])           { store(_mm_loadu_pd(values));                                              }
+      inline V2ds(double* const values)             { store(_mm_loadu_pd(values));                                              }
+      inline V2ds(const int values[2])              { store(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)values)));                }
+      inline V2ds(const __m128d values)             { store(values);                                                            }
+      inline V2ds(const V2ft<V2fs>& v)              { store(_mm_cvtps_pd(_mm_castsi128_ps(_mm_loadl_epi64((__m128i*)v.vals)))); }
       //------------------------------------------------------------------------------------------------------------------------//
       inline       void* operator new  (size_t size)        { return _aligned_malloc(sizeof(V2ds), 16);                       }
       inline       void* operator new[](size_t size)        { return _aligned_malloc(size* sizeof(V2ds), 16);                 }
