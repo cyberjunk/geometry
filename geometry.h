@@ -1129,4 +1129,306 @@ namespace simd
 #endif
 
 #pragma endregion
+
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+   //------------------------------------------------------------------------------------------------------------------------//
+
+#pragma region V4
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                          ROOT TEMPLATE [L1, ABSTRACT]                                                  //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Abstract 4D Vector Template for Floating Point (32/64) AND Integer (32/64). [L1]
+   /// </summary>
+   template <typename V, typename F>
+   class V4
+   {
+   protected:
+      inline V*   thiss() const { return ((V*)this); }
+
+   public:
+      union
+      {
+         struct { F x, y, z, w; };
+         F vals[4];
+      };
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V4()                                                                                { }
+      inline V4(const F x, const F y, const F z, const F w) : x(x), y(y), z(z), w(w)             { }
+      inline V4(const F s)                                  : x(s), y(s), z(s), w(s)             { }
+      inline V4(const F v[4])                               : x(v[0]), y(v[1]), z(v[2]), w(v[3]) { }
+      inline V4(F* const v)                                 : x(v[0]), y(v[1]), z(v[2]), w(v[3]) { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V ZERO()  { return V((F)0.0, (F)0.0, (F)0.0, (F)0.0); }
+      static inline V UNITX() { return V((F)1.0, (F)0.0, (F)0.0, (F)0.0); }
+      static inline V UNITY() { return V((F)0.0, (F)1.0, (F)0.0, (F)0.0); }
+      static inline V UNITZ() { return V((F)0.0, (F)0.0, (F)1.0, (F)0.0); }
+      static inline V UNITW() { return V((F)0.0, (F)0.0, (F)0.0, (F)1.0); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void* operator new  (size_t size)          { return malloc(sizeof(V));        }
+      inline void* operator new[](size_t size)          { return malloc(size * sizeof(V)); }
+      inline F     operator []   (const size_t i) const { return vals[i];                  }
+      inline F     operator []   (const size_t i)       { return vals[i];                  }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline bool  operator ==   (const V& v)     const { return ((x == v.x) & (y == v.y) & (z == v.z) & (w == v.w)); }
+      inline bool  operator !=   (const V& v)     const { return ((x != v.x) | (y != v.y) | (z != v.z) | (w != v.w)); }
+      inline bool  operator <    (const V& v)     const { return ((x <  v.x) & (y <  v.y) & (z <  v.z) & (w <  v.w)); }
+      inline bool  operator <=   (const V& v)     const { return ((x <= v.x) & (y <= v.y) & (z <= v.z) & (w <= v.w)); }
+      inline bool  operator >    (const V& v)     const { return ((x >  v.x) & (y >  v.y) & (z >  v.z) & (w >  v.w)); }
+      inline bool  operator >=   (const V& v)     const { return ((x >= v.x) & (y >= v.y) & (z >= v.z) & (w >= v.w)); }
+      inline V     operator +    (const V& v)     const { return V(x + v.x, y + v.y, z + v.z, w + v.w);               }
+      inline V     operator -    (const V& v)     const { return V(x - v.x, y - v.y, z - v.z, w - v.w);               }
+      inline V     operator *    (const V& v)     const { return V(x * v.x, y * v.y, z * v.z, w * v.w);               }
+      inline V     operator /    (const V& v)     const { return V(x / v.x, y / v.y, z / v.z, w / v.w);               }
+      inline V     operator *    (const F  s)     const { return V(x * s,   y * s,   z * s,   w * s);                 }
+      inline V     operator /    (const F  s)     const { return V(x / s,   y / s,   z / s,   w / s);                 }
+      inline V&    operator =    (const V& v)           { x  = v.x; y  = v.y; z  = v.z; w  = v.w; return *thiss();    }
+      inline V&    operator +=   (const V& v)           { x += v.x; y += v.y; z += v.z; w += v.w; return *thiss();    }
+      inline V&    operator -=   (const V& v)           { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *thiss();    }
+      inline V&    operator *=   (const V& v)           { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *thiss();    }
+      inline V&    operator /=   (const V& v)           { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *thiss();    }
+      inline V&    operator =    (const F  s)           { x  = s;   y  = s;   z  = s;   w  = s;   return *thiss();    }
+      inline V&    operator +=   (const F  s)           { x += s;   y += s;   z += s;   w += s;   return *thiss();    }
+      inline V&    operator -=   (const F  s)           { x -= s;   y -= s;   z -= s;   w -= s;   return *thiss();    }
+      inline V&    operator *=   (const F  s)           { x *= s;   y *= s;   z *= s;   w *= s;   return *thiss();    }
+      inline V&    operator /=   (const F  s)           { x /= s;   y /= s;   z /= s;   w /= s;   return *thiss();    }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline       V  operator - ()               const { return V(-x, -y, -z, -w); }
+      inline const V& operator + ()               const { return *this;             }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline void madd(const V& m, const V& a)           { *thiss() = (*thiss() * m) + a;                                    }
+      inline bool isZero()                         const { return x == (F)0.0 && y == (F)0.0 && z == (F)0.0 && w == (F)0.0;  }
+      inline bool isZero(const F e2)               const { return thiss()->length2() <= e2;                                  }
+      inline bool equals(const V& v, const F e2)   const { return (thiss() - v).length2() <= e2;                             }
+      inline void swap(V& v)                             { std::swap(x, v.x); std::swap(y, v.y); std::swap(z, v.z); std::swap(w, v.w); }
+      inline F    dot(const V& v)                  const { return x * v.x + y * v.y + z * v.z + w * v.w;                     }
+      inline F    length2()                        const { return thiss()->dot(*((V*)this));                                 }
+      inline F    length()                         const { return V::_sqrt(thiss()->length2());                              }
+      inline F    distance2(const V& v)            const { return (thiss() - v).length2();                                   }
+      inline F    distance(const V& v)             const { return V::_sqrt(thiss()->distance2(v));                           }
+      inline V    maxC(const V& v)                 const { return V(v.x > x ? v.x : x, v.y > y ? v.y : y, v.z > z ? v.z : z, v.w > w ? v.w : w); }
+      inline V    minC(const V& v)                 const { return V(v.x < x ? v.x : x, v.y < y ? v.y : y, v.z < z ? v.z : z, v.w < w ? v.w : w); }
+      inline V    boundC(const V& mi, const V& ma) const { V t(thiss()->minC(ma)); t.max(mi); return t;                      }
+      inline V    absC()                           const { return V(V::_abs(x), V::_abs(y), V::_abs(z), V::_abs(w));         }
+      inline void max(const V& v)                        { if (v.x > x) x = v.x; if (v.y > y) y = v.y; if (v.z > z) z = v.z; if (v.w > w) w = v.w; }
+      inline void min(const V& v)                        { if (v.x < x) x = v.x; if (v.y < y) y = v.y; if (v.z < z) z = v.z; if (v.w < w) w = v.w; }
+      inline void bound(const V& mi, const V& ma)        { thiss()->min(ma); thiss()->max(mi);                               }
+      inline void abs()                                  { x = V::_abs(x); y = V::_abs(y); z = V::_abs(z); w = V::_abs(w);   }
+      //------------------------------------------------------------------------------------------------------------------------//
+      //inline V    xzy()                            const { return V(x, z, y); }
+      //inline void xzy() { std::swap(y, z); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V    random()                        { return V(std::rand(), std::rand(), std::rand(), std::rand()); }
+      static inline void random(V* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V::random();         }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                 FLOATING POINT & INTEGER TEMPLATES V3 [L2, ABSTRACT]                                   //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Abstract 4D Vector Template for Floating Point (32/64) [L2]
+   /// </summary>
+   template <typename V, typename F>
+   class V4fdt : public V4<V, F>
+   {
+   public:
+      inline V4fdt()                                                                  { }
+      inline V4fdt(const F x, const F y, const F z, const F w) : V4<V, F>(x, y, z, w) { }
+      inline V4fdt(const F s)                                  : V4<V, F>(s, s, s, s) { }
+      inline V4fdt(const F v[4])                               : V4<V, F>(v)          { }
+      inline V4fdt(F* const v)                                 : V4<V, F>(v)          { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V& operator /= (const V& v)       { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return (V&)*this;           }
+      inline V  operator /  (const V& v) const { return V(x / v.x, y / v.y, z / v.z, w / v.w);                       }
+      inline V& operator /= (const F  s)       { F t = (F)1.0 / s; x *= t; y *= t; z *= t; w *= t; return (V&)*this; }
+      inline V  operator /  (const F  s) const { F t = (F)1.0 / s; return V(x * t, y * t, z * t, w * t);             }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline bool  isNaN()                              const { return isnan<F>(x) || isnan<F>(y) || isnan<F>(z) || isnan<F>(w); }
+      inline void  normalise()                                { *thiss() /= thiss()->length();                                   }
+      inline V     normaliseC()                         const { V t(*thiss()); t.normalise(); return t;                          }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V     roundC()                             const { return V(V::_round(x), V::_round(y), V::_round(z), V::_round(w)); }
+      inline V     floorC()                             const { return V(V::_floor(x), V::_floor(y), V::_floor(z), V::_floor(w)); }
+      inline V     ceilC()                              const { return V(V::_ceil(x),  V::_ceil(y),  V::_ceil(z),  V::_ceil(w));  }
+      inline V     roundByC(const F n)                  const { V c(*thiss()); c.roundBy(n); return c;                            }
+      inline void  round()                                    { x = V::_round(x); y = V::_round(y); z = V::_round(z); w = V::_round(w); }
+      inline void  floor()                                    { x = V::_floor(x); y = V::_floor(y); z = V::_floor(z); w = V::_floor(w); }
+      inline void  ceil()                                     { x = V::_ceil(x);  y = V::_ceil(y);  z = V::_ceil(z);  w = V::_ceil(w);  }
+      inline void  roundBy(const F n)                         { *thiss() /= n; thiss()->round(); *thiss() *= n;                   }
+      //------------------------------------------------------------------------------------------------------------------------//
+      static inline V    randomN() { V t(V::random()); t.normalise(); return t; }
+      static inline void randomN(V* v, const size_t size) { for (size_t i = 0; i < size; i++) v[i] = V::randomN(); }
+      //------------------------------------------------------------------------------------------------------------------------//
+   };
+
+   /// <summary>
+   /// Abstract 4D Vector for Integer (32/64) [L2]
+   /// </summary>
+   template <typename V, typename F>
+   class V4ilt : public V4<V, F>
+   {
+   public:
+      static inline F _abs(const int s) { return ::abs(s); }
+      static inline F _sqrt(const int s) { return (F)::sqrt<F>(s); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V4ilt()                                                                  { }
+      inline V4ilt(const F x, const F y, const F z, const F w) : V4<V, F>(x, y, z, w) { }
+      inline V4ilt(const F s)                                  : V4<V, F>(s, s, s, s) { }
+      inline V4ilt(const F v[4])                               : V4<V, F>(v)          { }
+      inline V4ilt(F* const v)                                 : V4<V, F>(v)          { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                       32-BIT & 64-BIT TEMPLATES [L3, ABSTRACT]                                         //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Abstract 4D Vector Template for Single Precision FP [L3]
+   /// </summary>
+   template <typename V>
+   class V4ft : public V4fdt<V, float>
+   {
+   public:
+      static inline float _abs(const float s) { return ::fabsf(s); }
+      static inline float _round(const float s) { return ::roundf(s); }
+      static inline float _floor(const float s) { return ::floorf(s); }
+      static inline float _ceil(const float s) { return ::ceilf(s); }
+      static inline float _sqrt(const float s) { return ::sqrtf(s); }
+      static inline float _cos(const float s) { return ::cosf(s); }
+      static inline float _sin(const float s) { return ::sinf(s); }
+      static inline float _acos(const float s) { return ::acosf(s); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V4ft()                                                                                         { }
+      inline V4ft(const float x, const float y, const float z, const float w) : V4fdt<V, float>(x, y, z, w) { }
+      inline V4ft(const float s)                                              : V4fdt<V, float>(s, s, s, s) { }
+      inline V4ft(const float v[4])                                           : V4fdt<V, float>(v) { }
+      inline V4ft(float* const v)                                             : V4fdt<V, float>(v) { }
+   };
+
+   /// <summary>
+   /// Abstract 4D Vector Template for Double Precision FP [L3]
+   /// </summary>
+   template <typename V>
+   class V4dt : public V4fdt<V, double>
+   {
+   public:
+      static inline double _abs(const double s) { return ::abs(s); }
+      static inline double _round(const double s) { return ::round(s); }
+      static inline double _floor(const double s) { return ::floor(s); }
+      static inline double _ceil(const double s) { return ::ceil(s); }
+      static inline double _sqrt(const double s) { return ::sqrt(s); }
+      static inline double _cos(const double s) { return ::cos(s); }
+      static inline double _sin(const double s) { return ::sin(s); }
+      static inline double _acos(const double s) { return ::acos(s); }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline V4dt() { }
+      inline V4dt(const double x, const double y, const double z, const double w) : V4fdt<V, double>(x, y, z, w) { }
+      inline V4dt(const double s)                                                 : V4fdt<V, double>(s, s, s, s) { }
+      inline V4dt(const double v[4])                                              : V4fdt<V, double>(v)          { }
+      inline V4dt(double* const v)                                                : V4fdt<V, double>(v)          { }
+   };
+
+   /// <summary>
+   /// Abstract 4D Vector Template for Integer (32) [L3]
+   /// </summary>
+   template <typename V>
+   class V4it : public V4ilt<V, int>
+   {
+   public:
+      inline V4it() { }
+      inline V4it(const int x, const int y, const int z, const int w) : V4ilt<V, int>(x, y, z, w) { }
+      inline V4it(const int s)                                        : V4ilt<V, int>(s, s, s, s) { }
+      inline V4it(const int v[4])                                     : V4ilt<V, int>(v)          { }
+      inline V4it(int* const v)                                       : V4ilt<V, int>(v)          { }
+   };
+
+   /// <summary>
+   /// Abstract 4D Vector Template for Integer (64) [L3]
+   /// </summary>
+   template <typename V>
+   class V4lt : public V4ilt<V, long long>
+   {
+   public:
+      inline V4lt() { }
+      inline V4lt(const long long x, const long long y, const long long z, const long long w) : V4ilt<V, long long>(x, y, z, w) { }
+      inline V4lt(const long long s)                                                          : V4ilt<V, long long>(s, s, s, s) { }
+      inline V4lt(const long long v[4])                                                       : V4ilt<V, long long>(v)          { }
+      inline V4lt(long long* const v)                                                         : V4ilt<V, long long>(v)          { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                     GENERIC/NON-SIMD CLASSES [L4]                                                      //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Single Precision 4D Vector (Generic, no SIMD) [L4]
+   /// </summary>
+   class V4fg : public V4ft<V4fg>
+   {
+   public:
+      inline V4fg()                                                                                        { }
+      inline V4fg(const float x, const float y, const float z, const float w)     : V4ft<V4fg>(x, y, z, w) { }
+      inline V4fg(const float s)                                                  : V4ft<V4fg>(s, s, s, s) { }
+      inline V4fg(const float v[4])                                               : V4ft<V4fg>(v)          { }
+      inline V4fg(float* const v)                                                 : V4ft<V4fg>(v)          { }
+      inline V4fg(const int v[4])                                                 : V4ft<V4fg>((float)v[0], (float)v[1], (float)v[2], (float)v[3]) { }
+      inline V4fg(const double x, const double y, const double z, const double w) : V4ft<V4fg>((float)x, (float)y, (float)z, (float)w)             { }
+      inline V4fg(const int x, const int y, const int z, const int w)             : V4ft<V4fg>((float)x, (float)y, (float)z, (float)w)             { }
+   };
+
+   /// <summary>
+   /// Double Precision 4D Vector (Generic, no SIMD) [L4]
+   /// </summary>
+   class V4dg : public V4dt<V4dg>
+   {
+   public:
+      inline V4dg()                                                                                        { }
+      inline V4dg(const double x, const double y, const double z, const double w) : V4dt<V4dg>(x, y, z, w) { }
+      inline V4dg(const double s)                                                 : V4dt<V4dg>(s, s, s, s) { }
+      inline V4dg(const double v[4])                                              : V4dt<V4dg>(v)          { }
+      inline V4dg(double* const v)                                                : V4dt<V4dg>(v)          { }
+      inline V4dg(const int v[4])                                                 : V4dt<V4dg>((double)v[0], (double)v[1], (double)v[2], (double)v[3]) { }
+      inline V4dg(const float x, const float y, const float z, const float w)     : V4dt<V4dg>((double)x, (double)y, (double)z, (double)w)             { }
+      inline V4dg(const int x, const int y, const int z, const int w)             : V4dt<V4dg>((double)x, (double)y, (double)z, (double)w)             { }
+   };
+
+   /// <summary>
+   /// 32-Bit Integer 4D Vector (Generic, no SIMD) [L4]
+   /// </summary>
+   class V4ig : public V4it<V4ig>
+   {
+   public:
+      inline V4ig()                                                                            { }
+      inline V4ig(const int x, const int y, const int z, const int w) : V4it<V4ig>(x, y, z, w) { }
+      inline V4ig(const int s)                                        : V4it<V4ig>(s, s, s, s) { }
+      inline V4ig(const int v[4])                                     : V4it<V4ig>(v)          { }
+      inline V4ig(int* const v)                                       : V4it<V4ig>(v)          { }
+   };
+
+   /// <summary>
+   /// 64-Bit Integer 4D Vector (Generic, no SIMD) [L4]
+   /// </summary>//------------------------------------------------------------------------------------------------------------------------//
+   class V4lg : public V4lt<V4lg>
+   {
+   public:
+      inline V4lg()                                                                                                    { }
+      inline V4lg(const long long x, const long long y, const long long z, const long long w) : V4lt<V4lg>(x, y, z, w) { }
+      inline V4lg(const long long s)                                                          : V4lt<V4lg>(s, s, s, s) { }
+      inline V4lg(const long long v[4])                                                       : V4lt<V4lg>(v)          { }
+      inline V4lg(long long* const v)                                                         : V4lt<V4lg>(v)          { }
+   };
+
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                             SIMD CLASSES [L4]                                                          //
+   //------------------------------------------------------------------------------------------------------------------------//
+
+   typedef V4fg V4f;  // use plain as default
+   typedef V4dg V4d;  // use plain as default
+   typedef V4ig V4i;  // use plain as default
+   typedef V4lg V4l;  // use plain as default
+
+#pragma endregion
+
 }
