@@ -6,7 +6,8 @@
 #include <random>
 #include <intrin.h>
 //------------------------------------------------------------------------------------------------------------------------//
-#define TWOPI (2.0*M_PI)
+#define TWOPI         (2.0*M_PI)
+#define ISZERO(a, e)  (((a) > -e) & ((a) < e))
 
 #if defined(SIMD_V2_FP_32_SSE41) && !defined(SIMD_V2_FP_32_SSE2)
 # define SIMD_V2_FP_32_SSE2
@@ -1431,4 +1432,98 @@ namespace simd
 
 #pragma endregion
 
+#pragma region Line
+   /// <summary>
+   /// 
+   /// </summary>
+   template <typename L, typename V, typename F>
+   class Line
+   {
+   protected:
+      inline L*   thiss() const { return (L*)this; }
+
+   public:
+      V s;
+      V e;
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline Line()                                    { }
+      inline Line(const V& s, const V& e) : s(s), e(e) { }
+      //------------------------------------------------------------------------------------------------------------------------//
+      inline L&    operator +=   (const F tr) { s += tr; e += tr; return *thiss(); }
+      inline L&    operator -=   (const F tr) { s -= tr; e -= tr; return *thiss(); }
+      inline L&    operator *=   (const F sc) { s *= sc; e *= sc; return *thiss(); }
+      inline L&    operator /=   (const F sc) { s /= sc; e /= sc; return *thiss(); }
+   };
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                 FLOATING POINT & INTEGER TEMPLATES                                                     //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Abstract 2D Line Template for Floating Point (32/64)
+   /// </summary>
+   template <typename L, typename V, typename F>
+   class LineV2fdt : public Line<L, V, F>
+   {
+   public:
+      inline bool intersectCircle(const V& m, const F r, const F eps) { return intersectCircle(s, e, m, r, eps); }
+      static inline bool intersectCircle(const V& s, const V& e, const V& m, const F r, const F eps)
+      {
+         V d = e - s;
+         V f = s - m;
+
+         const F a = d.length2();
+         const F b = (F)2.0 * f.dot(d);
+         const F c = f.length2() - (r*r);
+         const F div = (F)2.0 * a;
+         const F discriminant = b * b - (F)4.0 * a * c;
+
+         if (discriminant < (F)0.0 || ISZERO(div, eps))
+            return false;
+         
+         const F sqrt = V::_sqrt(discriminant);
+         const F t1 = (-b - sqrt) / div;
+         const F t2 = (-b + sqrt) / div;
+
+         return
+            (t1 >= (F)0.0 && t1 <= (F)1.0) ||
+            (t2 >= (F)0.0 && t2 <= (F)1.0);
+      }
+   };
+   /// <summary>
+   /// Abstract 2D Line Template for Integer (32/64)
+   /// </summary>
+   template <typename L, typename V, typename F>
+   class LineV2ilt : public Line<L, V, F>
+   {
+   };
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                     GENERIC/NON-SIMD CLASSES                                                           //
+   //------------------------------------------------------------------------------------------------------------------------//
+   /// <summary>
+   /// Single Precision 2D Line (Generic, no SIMD)
+   /// </summary>
+   class LineV2fg : public LineV2fdt<LineV2fg, V2fg, float> { };
+
+   /// <summary>
+   /// Double Precision 2D Line (Generic, no SIMD)
+   /// </summary>
+   class LineV2dg : public LineV2fdt<LineV2dg, V2dg, double> { };
+
+   /// <summary>
+   /// 32-Bit Integer 2D Line (Generic, no SIMD)
+   /// </summary>
+   class LineV2ig : public LineV2ilt<LineV2ig, V2ig, int> { };
+
+   /// <summary>
+   /// 64-Bit Integer 2D Line (Generic, no SIMD)
+   /// </summary>
+   class LineV2lg : public LineV2ilt<LineV2lg, V2lg, long long> { };
+   //------------------------------------------------------------------------------------------------------------------------//
+   //                                             SIMD CLASSES                                                               //
+   //------------------------------------------------------------------------------------------------------------------------//
+   typedef LineV2fg LineV2f;  // use plain as default
+   typedef LineV2dg LineV2d;  // use plain as default
+   typedef LineV2ig LineV2i;  // use plain as default
+   typedef LineV2lg LineV2l;  // use plain as default
+
+#pragma endregion
 }
