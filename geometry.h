@@ -9,17 +9,11 @@
 #define TWOPI         (2.0*M_PI)
 #define ISZERO(a, e)  (((a) > -e) & ((a) < e))
 
-#if defined(SIMD_V2_FP_32_SSE41) && !defined(SIMD_V2_FP_32_SSE2)
-# define SIMD_V2_FP_32_SSE2
-#endif
-#if defined(SIMD_V2_FP_64_SSE41) && !defined(SIMD_V2_FP_64_SSE2)
-# define SIMD_V2_FP_64_SSE2
-#endif
-#if defined(SIMD_V3_FP_32_SSE41) && !defined(SIMD_V3_FP_32_SSE2)
-# define SIMD_V3_FP_32_SSE2
+#if defined(SIMD_SSE41) && !defined(SIMD_SSE2)
+# define SIMD_SSE2
 #endif
 
-#if defined(SIMD_TYPES_SSE) || defined(SIMD_TYPES_AVX)
+#if defined(SIMD_SSE2) || defined(SIMD_AVX)
 #  define ALIGN8                          __declspec(align(8))
 #  define ALIGN16 __declspec(intrin_type) __declspec(align(16))
 #  define ALIGN32 __declspec(intrin_type) __declspec(align(32))
@@ -343,7 +337,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                             SIMD CLASSES [L4]                                                          //
    //------------------------------------------------------------------------------------------------------------------------//
-#if defined(SIMD_V2_FP_32_SSE2)
+#if defined(SIMD_SSE2)
    class V2fs;
    class V2ds;
 
@@ -474,7 +468,7 @@ namespace simd
          __m128 f(_mm_sub_ss(d, e));
          return 0.5f * f.m128_f32[0];
       }
-#if defined(SIMD_V2_FP_32_SSE41)
+#if defined(SIMD_SSE41)
       inline V2fs  roundC()                const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_NINT));  }
       inline V2fs  floorC()                const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_FLOOR)); }
       inline V2fs  ceilC()                 const { return V2fs(_mm_round_ps(load2(), _MM_FROUND_CEIL));  }
@@ -493,7 +487,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
 
-#if defined(SIMD_V2_FP_64_SSE2)
+#if defined(SIMD_SSE2)
    /// <summary>
    /// Double Precision 2D Vector
    /// </summary>
@@ -581,7 +575,7 @@ namespace simd
          __m128d c(_mm_and_pd(a, b));
          return _mm_movemask_pd(c) == 0x03;
       }
-#if defined(SIMD_V2_FP_64_SSE41)
+#if defined(SIMD_SSE41)
       inline double dot(const V2ds& v) const { return _mm_dp_pd(load(), v.load(), 0x31).m128d_f64[0];                            }
       inline double length()           const { __m128d t(load()); return _mm_sqrt_pd(_mm_dp_pd(t, t, 0x31)).m128d_f64[0];        }
       inline V2ds   roundC()           const { return V2ds(_mm_round_pd(load(), _MM_FROUND_NINT));                               }
@@ -629,7 +623,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //------------------------------------------------------------------------------------------------------------------------//
 
-#if defined(SIMD_V2_INT_32_SSE41)
+#if defined(SIMD_SSE41)
    /// <summary>
    /// 32-Bit Integer 2D Vector (SSE/SIMD)
    /// </summary>
@@ -706,12 +700,7 @@ namespace simd
    typedef V2ig V2i;  // use plain as default
 #endif
 
-#if defined(SIMD_V2_INT_64_SSE2)
-   // TODO INT64 SSE
-   typedef V2ls V2l;  // use SIMD as default
-#else
    typedef V2lg V2l;  // use plain as default
-#endif
 
 #pragma endregion
 
@@ -1007,7 +996,7 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                             SIMD CLASSES [L4]                                                          //
    //------------------------------------------------------------------------------------------------------------------------//
-#if defined(SIMD_V3_FP_32_SSE2)
+#if defined(SIMD_SSE2)
    /// <summary>
    /// Single Precision 3D Vector (unaligned SSE/SIMD)
    /// </summary>
@@ -1113,7 +1102,7 @@ namespace simd
          __m128 d(_mm_and_ps(b, c));
          return _mm_movemask_ps(d) == 0x0F;
       }*/
-#if defined(SIMD_V3_FP_32_SSE41)
+#if defined(SIMD_SSE41)
       inline V3fs roundC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_NINT));  }
       inline V3fs floorC() const { return V3fs(_mm_round_ps(load(), _MM_FROUND_FLOOR)); }
       inline V3fs ceilC()  const { return V3fs(_mm_round_ps(load(), _MM_FROUND_CEIL));  }
@@ -1520,7 +1509,48 @@ namespace simd
    //------------------------------------------------------------------------------------------------------------------------//
    //                                             SIMD CLASSES                                                               //
    //------------------------------------------------------------------------------------------------------------------------//
+#if defined(SIMD_V2_FP_32_SSE2)
+   /// <summary>
+   /// Single Precision 2D Line (SIMD)
+   /// </summary>
+   class LineV2fs : public LineV2fdt<LineV2fs, V2fs, float>
+   {
+   public:
+      inline bool intersectCircle(const V2fs& m, const float r, const float eps) { return intersectCircle(s, e, m, r, eps); }
+      static inline bool intersectCircle(const V2fs& s, const V2fs& e, const V2fs& m, const float r, const float eps)
+      {
+         V2fs d = e - s;
+         V2fs f = s - m;
+
+         const float a = d.length2();
+         const float b = 2.0f * f.dot(d);
+         const float c = f.length2() - (r*r);
+         const float div = 2.0f * a;
+         const float discriminant = b * b - 4.0f * a * c;
+
+         if (discriminant < 0.0f || ISZERO(div, eps))
+            return false;
+
+         const __m128  sqrt = _mm_sqrt_ps(_mm_set1_ps(discriminant));  // sq. root
+         const __m128  nmsk = _mm_set_ps(-0.0f, 0.0f, 0.0f, 0.0f);     // load negate mask
+         const __m128  xor  = _mm_xor_ps(sqrt, nmsk);                  // xor to flip X of sqrt to -
+         const __m128  add  = _mm_add_ps(_mm_set1_ps(-b), xor);        // -b + prepared sqrt
+         const __m128  divi = _mm_div_ps(add, _mm_set1_ps(div));       // / div
+         const __m128  cge  = _mm_cmpge_ps(divi, _mm_set1_ps(0.0f));   // >= 0
+         const __m128  cle  = _mm_cmple_ps(divi, _mm_set1_ps(1.0f));   // <= 0
+         const __m128  comb = _mm_and_ps(cge, cle);                    // >= 0 && <= 0
+         const __m128i cast = _mm_castps_si128(comb);                  // cast from float to int (no-op) [SSE2]
+         const int     mask = _mm_movemask_epi8(cast);                 // combine some bits from all registers [SSE2]
+         return (mask & 0x00FF) == 0x00FF;                             // filter for 2D
+      }
+   };
+
+   typedef LineV2fs LineV2f;  // use simd
+#else
    typedef LineV2fg LineV2f;  // use plain as default
+#endif
+
+
    typedef LineV2dg LineV2d;  // use plain as default
    typedef LineV2ig LineV2i;  // use plain as default
    typedef LineV2lg LineV2l;  // use plain as default
